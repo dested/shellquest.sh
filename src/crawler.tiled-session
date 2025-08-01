@@ -1,0 +1,24 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "",
+    "expandedProjectPaths": [
+    ],
+    "fileStates": {
+    },
+    "last.imagePath": "G:/code/opentui-crawler-game/src/examples/crawler/assets",
+    "map.tileHeight": 4,
+    "map.tileWidth": 4,
+    "openFiles": [
+    ],
+    "project": "crawler.tiled-project",
+    "recentFiles": [
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 4,
+        "width": 4
+    }
+}
