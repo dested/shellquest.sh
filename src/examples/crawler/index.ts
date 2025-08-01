@@ -349,10 +349,10 @@ debugger;
     this.layeredRenderer.renderBottomLayer(this.level.getBottomLayerTiles(), this.camera.x, this.camera.y)
 
     // Render sprite layer (entities including player)
-    // this.layeredRenderer.renderSpriteLayer(this.level.getEntities(), this.camera.x, this.camera.y)
+    this.layeredRenderer.renderSpriteLayer(this.level.getEntities(), this.camera.x, this.camera.y)
 
     // Render top layer (overlays)
-    // this.layeredRenderer.renderTopLayer(this.level.getTopLayerTiles(), this.camera.x, this.camera.y)
+    this.layeredRenderer.renderTopLayer(this.level.getTopLayerTiles(), this.camera.x, this.camera.y)
 
     this.renderer.renderOnce()
   }

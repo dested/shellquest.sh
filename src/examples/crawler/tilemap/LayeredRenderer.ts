@@ -27,15 +27,18 @@ export class LayeredRenderer {
     y: number = 0,
   ) {
     // Create container for all layers
-    this.container = new GroupRenderable("layered-renderer", { x: 0, y: 0, zIndex:2, visible: true })
-    this.container.x = x
-    this.container.y = y
+    this.container = new GroupRenderable("layered-renderer", { x: x, y: y, zIndex: 2, visible: true })
 
     const pixelWidth = viewportWidth * TILE_SIZE
     const pixelHeight = viewportHeight * TILE_SIZE
 
-    // Create bottom layer (always full, no transparency)
-    this.bottomLayer = renderer.createFrameBuffer("bottom-layer", {
+    // Create OptimizedBuffers using the renderer's lib
+    const bottomBuffer = (renderer as any).lib.createOptimizedBuffer(pixelWidth, pixelHeight, false)
+    const spriteBuffer = (renderer as any).lib.createOptimizedBuffer(pixelWidth, pixelHeight, true)
+    const topBuffer = (renderer as any).lib.createOptimizedBuffer(pixelWidth, pixelHeight, true)
+
+    // Create FrameBufferRenderables from the buffers
+    this.bottomLayer = new FrameBufferRenderable("bottom-layer", bottomBuffer, {
       x: 0,
       y: 0,
       width: pixelWidth,
@@ -43,8 +46,7 @@ export class LayeredRenderer {
       zIndex: 0,
     })
 
-    // Create sprite layer (transparent background for entities)
-    this.spriteLayer = renderer.createFrameBuffer("sprite-layer", {
+    this.spriteLayer = new FrameBufferRenderable("sprite-layer", spriteBuffer, {
       x: 0,
       y: 0,
       width: pixelWidth,
@@ -52,8 +54,7 @@ export class LayeredRenderer {
       zIndex: 1,
     })
 
-    // Create top layer (overlay effects, UI elements)
-    this.topLayer = renderer.createFrameBuffer("top-layer", {
+    this.topLayer = new FrameBufferRenderable("top-layer", topBuffer, {
       x: 0,
       y: 0,
       width: pixelWidth,
@@ -93,7 +94,8 @@ export class LayeredRenderer {
 
         // Only draw if not fully transparent
         if (color.buffer[3] > 0) {
-          layer.frameBuffer.setCell(pixelX + px, pixelY + py,' ', color,color)
+          // Use a solid block character to show the color
+          layer.frameBuffer.setCell(pixelX + px, pixelY + py, '█', color, RGBA.fromValues(0, 0, 0, 0))
         }
       }
     }
@@ -103,17 +105,23 @@ export class LayeredRenderer {
    * Clear all layers
    */
   clear(): void {
-    this.bottomLayer.frameBuffer.clear(RGBA.fromHex("#000000"))
+    // Clear with a dark background for bottom layer
+    this.bottomLayer.frameBuffer.clear(RGBA.fromHex("#0a0a0a"))
     this.spriteLayer.frameBuffer.clear(RGBA.fromValues(0, 0, 0, 0)) // Transparent
     this.topLayer.frameBuffer.clear(RGBA.fromValues(0, 0, 0, 0)) // Transparent
+    
+    // Debug: Draw a test message to verify rendering
+    this.bottomLayer.frameBuffer.drawText("GAME WORLD", 2, 2, RGBA.fromHex("#ffffff"), RGBA.fromHex("#000000"))
   }
 
   /**
    * Render the bottom layer (full grid of tiles)
    */
   renderBottomLayer(tiles: string[][], cameraX: number = 0, cameraY: number = 0): void {
-    this.bottomLayer.frameBuffer.clear(RGBA.fromHex("#000000"))
+    // Clear with a dark background
+    this.bottomLayer.frameBuffer.clear(RGBA.fromHex("#0a0a0a"))
 
+    // Draw tiles
     for (let y = 0; y < this.viewportHeight; y++) {
       for (let x = 0; x < this.viewportWidth; x++) {
         const worldX = x + cameraX
@@ -127,6 +135,9 @@ export class LayeredRenderer {
         }
       }
     }
+    
+    // Force a refresh of the framebuffer
+    this.bottomLayer.needsUpdate = true
   }
 
   /**
@@ -157,6 +168,9 @@ export class LayeredRenderer {
         }
       }
     }
+    
+    // Force a refresh
+    this.spriteLayer.needsUpdate = true
   }
 
   /**
@@ -198,9 +212,12 @@ export class LayeredRenderer {
    * Destroy and cleanup
    */
   destroy(): void {
-    this.renderer.remove(this.bottomLayer.id)
-    this.renderer.remove(this.spriteLayer.id)
-    this.renderer.remove(this.topLayer.id)
+    // Destroy the framebuffers
+    this.bottomLayer.frameBuffer.destroy()
+    this.spriteLayer.frameBuffer.destroy()
+    this.topLayer.frameBuffer.destroy()
+    
+    // Remove the container from the renderer
     this.renderer.remove(this.container.id)
   }
 }
