@@ -40,10 +40,12 @@ class Camera {
   y: number = 0
 
   get viewportWidth(): number {
-    return this.game.renderer.terminalWidth / 4 - 1
+    // Each tile is 4 characters wide
+    return Math.floor(this.game.renderer.terminalWidth / 4) - 1
   }
   get viewportHeight(): number {
-    return this.game.renderer.terminalHeight / 4 - 2 // 3px for each UI bar + 1px gap
+    // Each tile is 2 characters tall with half-block rendering
+    return Math.floor((this.game.renderer.terminalHeight - 6) / 2) // Subtract UI space, then divide by 2 chars per tile
   }
 
   update(playerX: number, playerY: number): void {
@@ -74,7 +76,7 @@ class DungeonCrawlerGame {
   // Movement state
   private moveDirection = { x: 0, y: 0 }
   private moveInterval: NodeJS.Timeout | null = null
-  private moveSpeed = 20 // ms between moves when holding key
+  private moveSpeed = 50 // ms between moves when holding key
 
   constructor(renderer: CliRenderer) {
     this.renderer = renderer
@@ -105,7 +107,6 @@ class DungeonCrawlerGame {
       this.update()
     }
     renderer.on("resize", () => {
-      debugger;
       this.gameContainer.clear()
       this.setupUI()
       this.update()
@@ -116,6 +117,7 @@ class DungeonCrawlerGame {
     const width = this.renderer.terminalWidth
     const height = this.renderer.terminalHeight
     const gameAreaY = 6
+    // Each tile is 4 chars wide
     const gameAreaX = Math.floor((width - (this.camera.viewportWidth * TILE_SIZE + 4)) / 2)
 
     this.layeredRenderer = new LayeredRenderer(

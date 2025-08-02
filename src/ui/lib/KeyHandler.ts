@@ -19,9 +19,7 @@ export class KeyHandler extends EventEmitter {
   }
 
   private setupIOHook(): void {
-    debugger;
     uIOhook.on("keydown", (e) => {
-      debugger;
       const keyEvent = this.convertIOHookEvent(e)
       const keyId = this.getKeyId(keyEvent)
       
@@ -34,7 +32,6 @@ export class KeyHandler extends EventEmitter {
     })
 
     uIOhook.on("keyup", (e) => {
-      debugger;
       const keyEvent = this.convertIOHookEvent(e)
       const keyId = this.getKeyId(keyEvent)
       

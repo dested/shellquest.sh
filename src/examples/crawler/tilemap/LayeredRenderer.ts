@@ -29,8 +29,10 @@ export class LayeredRenderer {
     // Create container for all layers
     this.container = new GroupRenderable("layered-renderer", { x: x, y: y, zIndex: 2, visible: true })
 
+    // Adjust dimensions for half-block rendering
+    // Each tile is 4 chars wide and 2 chars tall
     const pixelWidth = viewportWidth * TILE_SIZE
-    const pixelHeight = viewportHeight * TILE_SIZE
+    const pixelHeight = viewportHeight * 2 // Now tiles are 2 chars tall
 
     // Create OptimizedBuffers using the renderer's lib
     const bottomBuffer = renderer.lib.createOptimizedBuffer(pixelWidth, pixelHeight, false)
@@ -69,7 +71,9 @@ export class LayeredRenderer {
   }
 
   /**
-   * Render a tile at a specific grid position
+   * Render a tile at a specific grid position using half-block characters
+   * Each tile is 4x4 pixels, rendered as 4x2 characters
+   * Each character represents 2 pixels vertically using ▀ (upper) and ▄ (lower) blocks
    */
   private renderTile(
     layer: FrameBufferRenderable,
@@ -82,21 +86,39 @@ export class LayeredRenderer {
     const pixels = this.tileMap.getTilePixels(tileName)
     if (!pixels) return
 
-    // Calculate pixel position
-    const pixelX = gridX * TILE_SIZE + offsetX
-    const pixelY = gridY * TILE_SIZE + offsetY
+    // Calculate character position (4x2 chars per tile)
+    const charX = gridX * TILE_SIZE + offsetX
+    const charY = gridY * 2 + Math.floor(offsetY / 2) // Now tiles are 2 chars tall
 
-    // Draw each pixel of the tile
-    for (let py = 0; py < TILE_SIZE; py++) {
-      for (let px = 0; px < TILE_SIZE; px++) {
-        const pixelIndex = py * TILE_SIZE + px
-        const color = pixels[pixelIndex]
-
-        // Only draw if not fully transparent
-        if (color.buffer[3] > 0) {
-          // Use a solid block character to show the color
-          layer.frameBuffer.setCell(pixelX + px, pixelY + py, '█', color, RGBA.fromValues(0, 0, 0, 0))
+    // Process the 4x4 pixel tile as 4x2 characters
+    // Each character combines 2 vertical pixels
+    for (let cy = 0; cy < 2; cy++) { // 2 character rows
+      for (let cx = 0; cx < TILE_SIZE; cx++) { // 4 character columns
+        // Get the two pixels that this character represents
+        const topPixelY = cy * 2 // Top pixel row (0 or 2)
+        const bottomPixelY = cy * 2 + 1 // Bottom pixel row (1 or 3)
+        
+        const topPixelIndex = topPixelY * TILE_SIZE + cx
+        const bottomPixelIndex = bottomPixelY * TILE_SIZE + cx
+        
+        const topColor = pixels[topPixelIndex]
+        const bottomColor = pixels[bottomPixelIndex]
+        
+        const topAlpha = topColor.buffer[3]
+        const bottomAlpha = bottomColor.buffer[3]
+        
+        // Determine which character to use based on transparency
+        if (topAlpha > 0 && bottomAlpha > 0) {
+          // Both pixels visible - use upper half block with top as foreground, bottom as background
+          layer.frameBuffer.setCell(charX + cx, charY + cy, '▀', topColor, bottomColor)
+        } else if (topAlpha > 0 && bottomAlpha === 0) {
+          // Only top pixel visible - use upper half block
+          layer.frameBuffer.setCell(charX + cx, charY + cy, '▀', topColor, RGBA.fromValues(0, 0, 0, 0))
+        } else if (topAlpha === 0 && bottomAlpha > 0) {
+          // Only bottom pixel visible - use lower half block
+          layer.frameBuffer.setCell(charX + cx, charY + cy, '▄', bottomColor, RGBA.fromValues(0, 0, 0, 0))
         }
+        // If both are transparent, don't draw anything
       }
     }
   }
