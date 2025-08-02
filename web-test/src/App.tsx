@@ -13,7 +13,7 @@ function App() {
 
   useEffect(() => {
     const tm = new TileMap();
-    const lvl = new Level(40, 40);
+    const lvl = new Level(100, 100);
 
     lvl.setupTileDefinitions(tm);
     setTileMap(tm);
@@ -53,6 +53,13 @@ function App() {
         const tileDef = tileMap.getTileDefinition(tile.bottomTile);
         if (tileDef) {
           drawTile(ctx, tileMap, tileDef, x, y);
+        }
+
+        if (tile.shadowTile) {
+          const shadowTileDef = tileMap.getTileDefinition(tile.shadowTile);
+          if (shadowTileDef) {
+            drawTile(ctx, tileMap, shadowTileDef, x, y);
+          }
         }
 
         if (tile.topTile) {
