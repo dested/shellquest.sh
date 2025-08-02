@@ -1,6 +1,6 @@
-import { FrameBufferRenderable, GroupRenderable } from "../../../objects"
-import { CliRenderer } from "../../../index"
-import { RGBA } from "../../../types"
+import { FrameBufferRenderable, GroupRenderable } from "../../objects"
+import { CliRenderer } from "../../index"
+import { RGBA } from "../../types"
 import { TileMap, TILE_SIZE } from "./TileMap"
 
 // Additional block characters for more rendering options

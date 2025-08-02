@@ -1,22 +1,20 @@
 {
-  "name": "@opentui/core",
+  "name": "tui-crawler",
   "module": "src/index.ts",
   "main": "src/index.js",
   "version": "0.1.0",
   "type": "module",
   "scripts": {
     "build": "cd src/zig && zig build",
-    "crawl": "bun run src/examples/crawler/index.ts",
-    "d-crawl": "bun --inspect-brk run src/examples/crawler/index.ts",
+    "crawl": "bun run src/crawler/index.ts",
+    "d-crawl": "bun --inspect-brk run src/crawler/index.ts",
     "build:dev": "cd src/zig && zig build -Doptimize=Debug",
     "build:prod": "cd src/zig && zig build -Doptimize=ReleaseFast",
     "test": "bun test"
   },
   "license": "UNLICENSED",
   "devDependencies": {
-    "@dimforge/rapier2d-simd-compat": "^0.17.3",
     "@types/bun": "latest",
-    "@types/three": "^0.177.0",
     "commander": "^13.1.0",
     "planck": "^1.4.2",
     "prettier": "3.6.2"
@@ -25,11 +23,10 @@
     "typescript": "^5"
   },
   "prettier": {
-    "semi": false,
+    "semi": true,
     "printWidth": 120
   },
   "dependencies": {
-    "bun-webgpu": "0.1.0",
     "uiohook-napi": "1.5.4",
     "jimp": "1.6.0",
     "sharp": "^0.33.5",

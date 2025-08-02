@@ -289,7 +289,7 @@ export class Level {
   
 
   setupTileDefinitions(tileMap: TileMap): void {
-    tileMap.loadFromFile("./src/examples/crawler/assets/tilemap_packed.png")
+    tileMap.loadFromFile("./src/crawler/assets/tilemap_packed.png")
 
     tileMap.defineTile(`grass-flat`, 0, 0 , { layer: "bottom" })
     tileMap.defineTile(`grass-long`, 1, 0 , { layer: "bottom" })

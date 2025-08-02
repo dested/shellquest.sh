@@ -10,12 +10,12 @@ import {
   RGBA,
   type ParsedKey,
   type MouseEvent,
-} from "../../index.ts"
-import { getKeyHandler } from "../../ui/lib/KeyHandler.ts"
+} from "../index.ts"
+import { getKeyHandler } from "../ui/lib/KeyHandler.ts"
 import { TileMap, TILE_SIZE } from "./tilemap/TileMap.ts"
 import { LayeredRenderer, type Entity } from "./tilemap/LayeredRenderer.ts"
 import { Level } from "./Level.ts"
-import { renderFontToFrameBuffer, measureText } from "../../ui/ascii.font.ts"
+import { renderFontToFrameBuffer, measureText } from "../ui/ascii.font.ts"
 
 // Game constants
 const MAP_WIDTH = 200

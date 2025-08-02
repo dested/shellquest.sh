@@ -1,4 +1,4 @@
-import { RGBA } from "../../../types"
+import { RGBA } from "../../types"
 import sharp from "sharp"
 
 // Constants for tile sizing
