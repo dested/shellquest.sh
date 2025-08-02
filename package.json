@@ -1,11 +1,27 @@
 {
   "name": "tui-crawler",
   "module": "src/index.ts",
-  "main": "src/index.js",
-  "version": "0.1.0",
+  "main": "dist/index.js",
+  "version": "0.1.9",
   "type": "module",
+  "bin": {
+    "tui-crawler": "./dist/crawler/launcher.js"
+  },
+  "files": [
+    "dist/**/*",
+    "src/zig/**/*",
+    "scripts/postinstall.js"
+  ],
+  "engines": {
+    "bun": ">=1.0.0"
+  },
   "scripts": {
-    "build": "cd src/zig && zig build",
+    "postinstall": "node scripts/postinstall.js",
+    "build": "bun build:ts && bun build:prod && bun build:assets",
+    "build:ts": "bun build src/crawler/index.ts --outdir dist/crawler --target bun && bun build src/index.ts --outdir dist --target bun",
+    "build:assets": "bun scripts/copy-assets.js",
+    "build:zig": "cd src/zig && zig build",
+    "prepublishOnly": "bun run build",
     "crawl": "bun run src/crawler/index.ts",
     "d-crawl": "bun --inspect-brk run src/crawler/index.ts",
     "build:dev": "cd src/zig && zig build -Doptimize=Debug",
@@ -15,10 +31,27 @@
   "license": "UNLICENSED",
   "devDependencies": {
     "@types/bun": "latest",
-    "commander": "^13.1.0",
     "planck": "^1.4.2",
     "prettier": "3.6.2"
   },
+  "description": "A terminal-based dungeon crawler game with ASCII graphics",
+  "keywords": [
+    "game",
+    "terminal",
+    "cli",
+    "dungeon-crawler",
+    "ascii",
+    "tui"
+  ],
+  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dested/tui-crawler.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dested/tui-crawler/issues"
+  },
+  "homepage": "https://github.com/dested/tui-crawler#readme",
   "peerDependencies": {
     "typescript": "^5"
   },
@@ -27,12 +60,15 @@
     "printWidth": 120
   },
   "dependencies": {
+    "commander": "^13.1.0"
+  },
+  "optionalDependencies": {
     "uiohook-napi": "1.5.4",
     "jimp": "1.6.0",
     "sharp": "^0.33.5",
-    "three": "0.177.0",
     "yoga-layout": "3.2.1"
   },
-  "trustedDependencies": ["uiohook-napi"]
-
+  "trustedDependencies": [
+    "uiohook-napi"
+  ]
 }

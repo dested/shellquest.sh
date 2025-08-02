@@ -1,39 +1,56 @@
-# OpenTUI
+# TUI Crawler
 
-OpenTUI is a TypeScript library for building terminal user interfaces (TUIs). It is currently in
-development and is not ready for production use. It will be the foundational TUI framework for both
-[opencode](https://opencode.ai) and [terminaldotshop](https://terminal.shop).
+A terminal-based dungeon crawler game with ASCII graphics built with OpenTUI.
 
-## Build
+## Quick Start
 
 ```bash
-bun build:prod
+bunx tui-crawler
 ```
 
-This creates platform-specific libraries in `src/zig/lib/` that are automatically loaded by the TypeScript layer.
-
-## Examples
+Or install globally:
 
 ```bash
-bun run src/examples/index.ts
+npm install -g tui-crawler
+tui-crawler
 ```
 
-## CLI Renderer
+## Controls
 
-### Renderables
+- **WASD** or **Arrow Keys**: Move player
+- **Ctrl+C**: Exit game
 
-Renderables are hierarchical objects that can be positioned and rendered to buffers:
+## Requirements
 
-```typescript
-import { Renderable } from "@opentui/core"
+- Node.js 18+ or Bun runtime
+- Terminal with true color support
+- Minimum terminal size: 80x24
 
-class MyRenderable extends Renderable {
-  protected renderSelf(buffer: OptimizedBuffer): void {
-    buffer.drawText("Custom content", this.x, this.y, RGBA.fromValues(1, 1, 1, 1))
-  }
-}
+## Features
 
-const obj = new MyRenderable("my-obj", { x: 10, y: 5, zIndex: 1 })
+- Procedurally generated dungeon levels
+- Smooth sub-tile movement
+- ASCII art graphics
+- Health and mana system
+- Real-time gameplay
 
-renderer.add(obj)
+## Development
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/tui-crawler.git
+cd tui-crawler
+
+# Install dependencies
+bun install
+
+# Build the project
+bun run build
+
+# Run locally
+bun run crawl
 ```
+
+## License
+
+UNLICENSED

@@ -29,15 +29,29 @@ function getPlatformTarget(): string {
 
 function findLibrary(): string {
   const target = getPlatformTarget()
-  const libDir = join(__dirname, "zig/lib")
+  
+  // Try multiple possible locations for the library
+  const possiblePaths = [
+    // In dist folder (npm package)
+    join(process.cwd(), "dist", "zig", "lib", target),
+    join(process.cwd(), "node_modules", "tui-crawler", "dist", "zig", "lib", target),
+    // In src folder (development)
+    join(process.cwd(), "src", "zig", "lib", target),
+    // Relative to current file location (fallback)
+    join(__dirname, "zig", "lib", target),
+    join(__dirname, "..", "zig", "lib", target),
+    join(__dirname, "..", "..", "zig", "lib", target),
+  ]
 
-  // First try target-specific directory
   const [arch, os] = target.split("-")
   const isWindows = os === "windows"
   const libraryName = isWindows ? "opentui" : "libopentui"
-  const targetLibPath = join(libDir, target, `${libraryName}.${suffix}`)
-  if (existsSync(targetLibPath)) {
-    return targetLibPath
+  
+  for (const basePath of possiblePaths) {
+    const targetLibPath = join(basePath, `${libraryName}.${suffix}`)
+    if (existsSync(targetLibPath)) {
+      return targetLibPath
+    }
   }
 
   throw new Error(`Could not find opentui library for platform: ${target}`)

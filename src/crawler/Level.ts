@@ -1,5 +1,6 @@
 import { Entity } from "./tilemap/LayeredRenderer"
 import type { TileMap } from "./tilemap/TileMap.ts"
+import { getAssetPath } from "./utils/assetPath.ts"
 
 export interface LevelTile {
   bottomTile: string // Tile name for bottom layer
@@ -289,7 +290,7 @@ export class Level {
   
 
   setupTileDefinitions(tileMap: TileMap): void {
-    tileMap.loadFromFile("./src/crawler/assets/tilemap_packed.png")
+    tileMap.loadFromFile(getAssetPath("tilemap_packed.png"))
 
     tileMap.defineTile(`grass-flat`, 0, 0 , { layer: "bottom" })
     tileMap.defineTile(`grass-long`, 1, 0 , { layer: "bottom" })
