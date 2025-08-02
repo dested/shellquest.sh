@@ -288,8 +288,8 @@ export class Level {
   
   
 
-  setupTileDefinitions(tileMap: TileMap): void {
-    tileMap.loadFromFile("tilemap_packed.png")
+  async setupTileDefinitions(tileMap: TileMap): Promise<void> {
+    await tileMap.loadFromFile("tilemap_packed.png")
 
     tileMap.defineTile(`grass-flat`, 0, 0 , { layer: "bottom" })
     tileMap.defineTile(`grass-long`, 1, 0 , { layer: "bottom" })

@@ -3,7 +3,7 @@ import { RGBA } from "../types";
 import type { ParsedKey } from "../parse.keypress";
 import { getKeyHandler } from "../ui/lib/KeyHandler";
 import { TileMap, TILE_SIZE } from "./tilemap/TileMap";
-import { LayeredRenderer, type Entity } from "./tilemap/LayeredRenderer";
+import { BrowserLayeredRenderer, type Entity } from "./tilemap/BrowserLayeredRenderer";
 import { Level } from "./Level";
 import { renderFontToFrameBuffer, measureText } from "../ui/ascii.font";
 
@@ -104,12 +104,12 @@ class Camera {
 }
 
 class DungeonCrawlerGame {
-  renderer: BrowserRenderer;
+  renderer: any;
   private player: Player;
   private level: Level;
   private camera: Camera;
   private tileMap: TileMap;
-  private layeredRenderer: LayeredRenderer;
+  private layeredRenderer: BrowserLayeredRenderer;
 
   private gameContainer: GroupRenderable;
   private mapBorder: BoxRenderable;
@@ -121,18 +121,32 @@ class DungeonCrawlerGame {
   private moveSpeed = 30;
   private subTileSpeed = 1;
 
-  constructor(renderer: BrowserRenderer) {
+  constructor(renderer: any) {
     this.renderer = renderer;
     this.player = new Player();
     this.level = new Level(MAP_WIDTH, MAP_HEIGHT);
     this.camera = new Camera(this);
 
     this.tileMap = new TileMap();
-    this.level.setupTileDefinitions(this.tileMap);
-
+    
     this.gameContainer = new GroupRenderable("game-container", { x: 0, y: 0, zIndex: 0, visible: true });
     this.renderer.add(this.gameContainer);
 
+    // Initialize the game asynchronously
+    this.initialize();
+
+    renderer.on("resize", () => {
+      this.gameContainer.clear();
+      this.setupUI();
+      this.update();
+    });
+  }
+
+  private async initialize(): Promise<void> {
+    // Load tilemap data first (this is async!)
+    await this.level.setupTileDefinitions(this.tileMap);
+    
+    // Now that tiles are loaded, setup everything else
     this.setupUI();
     this.setupLayeredRenderer();
     this.setupInput();
@@ -142,16 +156,8 @@ class DungeonCrawlerGame {
 
     this.camera.update(this.player.preciseX, this.player.preciseY);
 
+    // Initial render
     this.update();
-    this.tileMap.onReady = () => {
-      this.update();
-    };
-
-    renderer.on("resize", () => {
-      this.gameContainer.clear();
-      this.setupUI();
-      this.update();
-    });
   }
 
   private setupLayeredRenderer(): void {
@@ -160,8 +166,8 @@ class DungeonCrawlerGame {
     const gameAreaY = 16;
     const gameAreaX = Math.floor((width - (this.camera.viewportWidth * TILE_SIZE + 4)) / 2);
 
-    this.layeredRenderer = new LayeredRenderer(
-      this.renderer as any,
+    this.layeredRenderer = new BrowserLayeredRenderer(
+      this.renderer,
       this.tileMap,
       this.camera.viewportWidth,
       this.camera.viewportHeight,
