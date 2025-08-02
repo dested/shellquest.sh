@@ -9,23 +9,23 @@
 ## Phase 1: Core Infrastructure
 
 ### 1.1 Project Structure Setup
-- [ ] 🔴 Create new directory structure under `game/src/game/`
-- [ ] 🔴 Move existing crawler demo to `game/src/examples/crawler-demo/` for reference
-- [ ] 🔴 Create main game entry point `game/src/game/main.ts`
-- [ ] 🔴 Set up TypeScript paths for clean imports
-- [ ] 🔴 Create constants file for game configuration
+- [x] 🔴 Create new directory structure under `game/src/game/`
+- [x] 🔴 Move existing crawler demo to `game/src/examples/crawler-demo/` for reference
+- [x] 🔴 Create main game entry point `game/src/game/main.ts`
+- [x] 🔴 Set up TypeScript paths for clean imports
+- [x] 🔴 Create constants file for game configuration
 
 ### 1.2 State Management
-- [ ] 🔴 Implement `StateManager` class with state stack
-- [ ] 🔴 Create `BaseState` abstract class
-- [ ] 🔴 Implement `SplashState` with logo animation
-- [ ] 🔴 Implement `AuthState` with login/register forms
-- [ ] 🔴 Implement `MainMenuState` with navigation
-- [ ] 🔴 Implement `CharacterSelectState` with list UI
-- [ ] 🔴 Implement `CharacterCreateState` with form
-- [ ] 🔴 Implement `GameplayState` skeleton
-- [ ] 🔴 Implement `GameOverState` with results
-- [ ] 🔴 Implement `LeaderboardState` with pagination
+- [x] 🔴 Implement `StateManager` class with state stack
+- [x] 🔴 Create `BaseState` abstract class
+- [x] 🔴 Implement `SplashState` with logo animation (OpenTUI components)
+- [x] 🔴 Implement `AuthState` with login/register forms (OpenTUI components)
+- [x] 🔴 Implement `MainMenuState` with navigation
+- [x] 🔴 Implement `CharacterSelectState` with list UI
+- [x] 🔴 Implement `CharacterCreateState` with form
+- [x] 🔴 Implement `GameplayState` skeleton
+- [x] 🔴 Implement `GameOverState` with results
+- [x] 🔴 Implement `LeaderboardState` with pagination
 - [ ] 🟡 Add state transition animations
 
 ### 1.3 Database Setup
