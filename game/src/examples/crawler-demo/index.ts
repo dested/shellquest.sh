@@ -25,8 +25,8 @@ const MAP_WIDTH = 200;
 const MAP_HEIGHT = 200;
 
 class Player implements Entity {
-  gridX: number = 10;
-  gridY: number = 10;
+  gridX: number = 50;
+  gridY: number = 50;
   // Sub-tile positions for smooth movement (0-3 within each tile)
   subX: number = 0;
   subY: number = 0;
