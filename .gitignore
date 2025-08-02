@@ -37,6 +37,6 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # Zig build cache
 .zig-cache
 zig-out
-src/zig/lib
+game/src/zig/lib
 
 screenshot-*.png
