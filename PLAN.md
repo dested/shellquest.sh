@@ -498,25 +498,6 @@ social.shareReplay({ sessionId })
 - Active community (Discord 500+ members)
 - Regular content updates (monthly)
 
-## Resource Requirements
-
-### Development Team
-- 1-2 Full-stack developers
-- 1 Game designer
-- 1 QA tester
-- 1 Community manager (post-launch)
-
-### Infrastructure
-- PostgreSQL database (Supabase/Railway)
-- Node.js hosting (Railway/Fly.io)
-- CDN for assets (Cloudflare)
-- Monitoring (Sentry/LogRocket)
-
-### Timeline
-- **Total development**: 6-7 weeks
-- **Beta testing**: 1 week
-- **Launch preparation**: 1 week
-- **Total to launch**: 8-9 weeks
 
 ## Conclusion
 

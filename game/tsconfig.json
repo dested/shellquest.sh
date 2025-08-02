@@ -22,6 +22,19 @@
     // Some stricter flags (disabled by default)
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "noPropertyAccessFromIndexSignature": false
+    "noPropertyAccessFromIndexSignature": false,
+
+    // Path mappings
+    "baseUrl": "./src",
+    "paths": {
+      "@core/*": ["core/*"],
+      "@game/*": ["game/*"],
+      "@entities/*": ["game/entities/*"],
+      "@systems/*": ["game/systems/*"],
+      "@states/*": ["game/states/*"],
+      "@ui/*": ["game/ui/*"],
+      "@network/*": ["game/network/*"],
+      "@utils/*": ["game/utils/*"]
+    }
   }
 }

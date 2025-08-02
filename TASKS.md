@@ -10,7 +10,7 @@
 
 ### 1.1 Project Structure Setup
 - [ ] 🔴 Create new directory structure under `game/src/game/`
-- [ ] 🔴 Move existing crawler demo to `game/src/examples/crawler-demo/`
+- [ ] 🔴 Move existing crawler demo to `game/src/examples/crawler-demo/` for reference
 - [ ] 🔴 Create main game entry point `game/src/game/main.ts`
 - [ ] 🔴 Set up TypeScript paths for clean imports
 - [ ] 🔴 Create constants file for game configuration
@@ -36,11 +36,10 @@
 - [ ] 🔴 Add database indexes for performance
 
 ### 1.4 Input Management Enhancement
-- [ ] 🔴 Create `InputManager` singleton
+- [ ] 🔴 Create `InputManager` singleton (check the existing KeyHandler.ts)
 - [ ] 🔴 Implement input recording system
 - [ ] 🔴 Add input replay functionality
 - [ ] 🔴 Create input configuration system
-- [ ] 🟡 Add gamepad support (future)
 
 ## Phase 2: Game Systems Implementation
 
