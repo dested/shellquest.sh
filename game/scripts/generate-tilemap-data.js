@@ -1,13 +1,13 @@
 #!/usr/bin/env node
-import sharp from 'sharp';
-import { readdir, writeFile } from 'fs/promises';
-import { join, basename, extname } from 'path';
-import { existsSync, mkdirSync } from 'fs';
+import sharp from "sharp";
+import { readdir, writeFile } from "fs/promises";
+import { join, basename, extname } from "path";
+import { existsSync, mkdirSync } from "fs";
 
 async function generateTilemapData() {
-  const assetsDir = join(process.cwd(), 'src', 'crawler', 'assets');
-  const outputDir = join(process.cwd(), 'src', 'crawler', 'generated');
-  
+  const assetsDir = join(process.cwd(), "src", "examples", "crawler-demo", "assets");
+  const outputDir = join(process.cwd(), "src", "examples", "crawler-demo", "generated");
+
   // Ensure output directory exists
   if (!existsSync(outputDir)) {
     mkdirSync(outputDir, { recursive: true });
@@ -15,52 +15,50 @@ async function generateTilemapData() {
 
   // Find all PNG files in assets directory
   const files = await readdir(assetsDir);
-  const pngFiles = files.filter(f => extname(f).toLowerCase() === '.png');
-  
+  const pngFiles = files.filter((f) => extname(f).toLowerCase() === ".png");
+
   const tilemapData = {};
 
   for (const file of pngFiles) {
     const filePath = join(assetsDir, file);
-    const name = basename(file, '.png');
-    
+    const name = basename(file, ".png");
+
     console.log(`Processing ${file}...`);
-    
+
     // Load image data using sharp
-    const { data, info } = await sharp(filePath)
-      .raw()
-      .toBuffer({ resolveWithObject: true });
-    
+    const { data, info } = await sharp(filePath).raw().toBuffer({ resolveWithObject: true });
+
     // Build palette from unique colors
     const colorMap = new Map();
     const pixels = [];
-    
+
     for (let i = 0; i < data.length; i += 4) {
       const r = data[i];
       const g = data[i + 1];
       const b = data[i + 2];
       const a = data[i + 3];
-      
+
       // Create color key
       const colorKey = `${r},${g},${b},${a}`;
-      
+
       if (!colorMap.has(colorKey)) {
         colorMap.set(colorKey, colorMap.size);
       }
-      
+
       pixels.push(colorMap.get(colorKey));
     }
-    
+
     // Convert Map to array for palette
-    const palette = Array.from(colorMap.keys()).map(key => {
-      const [r, g, b, a] = key.split(',').map(Number);
+    const palette = Array.from(colorMap.keys()).map((key) => {
+      const [r, g, b, a] = key.split(",").map(Number);
       return [r, g, b, a];
     });
-    
+
     // Encode pixels as base64
     // If palette has <= 256 colors, use Uint8Array, otherwise use Uint16Array
     let pixelData;
     let bytesPerPixel;
-    
+
     if (palette.length <= 256) {
       // Use 1 byte per pixel
       pixelData = Buffer.from(new Uint8Array(pixels));
@@ -71,23 +69,23 @@ async function generateTilemapData() {
       pixelData = Buffer.from(uint16Array.buffer);
       bytesPerPixel = 2;
     }
-    
-    const base64Pixels = pixelData.toString('base64');
-    
+
+    const base64Pixels = pixelData.toString("base64");
+
     console.log(`  Dimensions: ${info.width}x${info.height}`);
     console.log(`  Palette size: ${palette.length} colors`);
     console.log(`  Pixel data: ${base64Pixels.length} chars (base64), ${bytesPerPixel} byte(s) per pixel`);
-    
+
     // Store tilemap data
     tilemapData[name] = {
       width: info.width,
       height: info.height,
       palette,
       pixelsBase64: base64Pixels,
-      bytesPerPixel
+      bytesPerPixel,
     };
   }
-  
+
   // Generate TypeScript module
   const tsContent = `// Auto-generated tilemap data - DO NOT EDIT
 // Generated at ${new Date().toISOString()}
@@ -176,20 +174,22 @@ export function getNormalizedPixelAt(tilemap: TilemapData, x: number, y: number)
   };
 }
 `;
-  
+
   // Write generated TypeScript file
-  const outputPath = join(outputDir, 'tilemapData.ts');
+  const outputPath = join(outputDir, "tilemapData.ts");
   await writeFile(outputPath, tsContent);
-  
+
   console.log(`\nGenerated tilemap data at: ${outputPath}`);
   console.log(`Total tilemaps processed: ${pngFiles.length}`);
-  
+
   // Print statistics
   for (const [name, data] of Object.entries(tilemapData)) {
     const pixelBytes = (data.pixelsBase64.length * 3) / 4; // Approximate decoded size
     const paletteBytes = data.palette.length * 4;
     const totalBytes = pixelBytes + paletteBytes;
-    console.log(`  ${name}: ${data.width}x${data.height}, ${data.palette.length} colors, ~${(totalBytes / 1024).toFixed(1)}KB (base64: ${(data.pixelsBase64.length / 1024).toFixed(1)}KB)`);
+    console.log(
+      `  ${name}: ${data.width}x${data.height}, ${data.palette.length} colors, ~${(totalBytes / 1024).toFixed(1)}KB (base64: ${(data.pixelsBase64.length / 1024).toFixed(1)}KB)`,
+    );
   }
 }
 

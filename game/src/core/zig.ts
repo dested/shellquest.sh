@@ -34,6 +34,8 @@ function findLibrary(): string {
   const possiblePaths = [
     // In dist folder (npm package)
     join(process.cwd(), "dist", "zig", "lib", target),
+    join(process.cwd(), "node_modules", "shellquest.sh", "dist", "zig", "lib", target),
+    join(process.cwd(), "node_modules", "shellquest", "dist", "zig", "lib", target),
     join(process.cwd(), "node_modules", "tui-crawler", "dist", "zig", "lib", target),
     // In src folder (development)
     join(process.cwd(), "src", "zig", "lib", target),

@@ -441,7 +441,7 @@ export class CliRenderer extends Renderable {
 
       this.emit("key", data)
     })
-  
+
     this.stdout.write(ANSI.switchToAlternateScreen)
     this.setCursorPosition(0, 0, false)
   }

@@ -1,11 +1,11 @@
 {
-  "name": "tui-crawler",
+  "name": "shellquest",
   "module": "src/core/index.ts",
   "main": "dist/index.js",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "type": "module",
   "bin": {
-    "tui-crawler": "./dist/crawler/launcher.js"
+    "shellquest": "./dist/crawler/launcher.js"
   },
   "files": [
     "dist/**/*",
@@ -19,15 +19,19 @@
     "postinstall": "node scripts/postinstall.js",
     "build": "bun build:tilemap && bun build:ts && bun build:prod && bun build:assets",
     "build:tilemap": "node scripts/generate-tilemap-data.js",
-    "build:ts": "bun build src/crawler/index.ts --outdir dist/crawler --target bun && bun build src/core/index.ts --outdir dist --target bun",
     "build:assets": "bun scripts/copy-assets.js",
+    "build:ts": "bun build src/examples/crawler-demo/index.ts --outdir dist/crawler --target bun && bun build src/core/index.ts --outdir dist --target bun",
     "build:zig": "cd src/zig && zig build",
     "prepublishOnly": "bun run build",
-    "crawl": "bun run src/crawler/index.ts",
+    "crawl": "bun run src/examples/crawler-demo/index.ts",
+    "game-test": "bun --inspect-brk run src/game/main.ts",
+    "game": "bun run src/game/main.ts",
+    "test-game": "bun run test-states.ts",
     "d-crawl": "bun --inspect-brk run src/crawler/index.ts",
     "build:dev": "cd src/zig && zig build -Doptimize=Debug",
     "build:prod": "cd src/zig && zig build -Doptimize=ReleaseFast",
     "test": "bun test",
+    "prettier": "prettier --write \"src/**/*.{ts,tsx}\"",
     "dev": "vite",
     "build:browser": "vite build"
   },
@@ -51,12 +55,12 @@
   "author": "",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dested/tui-crawler.git"
+    "url": "https://github.com/dested/shellquest.sh.git"
   },
   "bugs": {
-    "url": "https://github.com/dested/tui-crawler/issues"
+    "url": "https://github.com/dested/shellquest.sh/issues"
   },
-  "homepage": "https://github.com/dested/tui-crawler#readme",
+  "homepage": "https://github.com/dested/shellquest.sh#readme",
   "peerDependencies": {
     "typescript": "^5"
   },

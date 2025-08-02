@@ -1,12 +1,12 @@
 export const GAME_CONFIG = {
-    TITLE: 'TUI Crawler',
+    TITLE: 'shellquest.sh',
     VERSION: '1.0.0',
     
     SCREEN_WIDTH: 120,
     SCREEN_HEIGHT: 80,
     
-    MIN_TERMINAL_WIDTH: 120,
-    MIN_TERMINAL_HEIGHT: 80,
+    MIN_TERMINAL_WIDTH: 80,
+    MIN_TERMINAL_HEIGHT: 24,
     
     RENDER_FPS: 30,
     GAME_TICK_RATE: 1 / 10,

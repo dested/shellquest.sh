@@ -1,7 +1,7 @@
-# TUI Crawler - Production Implementation Plan
+# shellquest.sh - Production Implementation Plan
 
 ## Executive Summary
-TUI Crawler is a terminal-based dungeon crawler game designed for engineers to play during idle time (compilation, AI waiting, etc.). The game features procedurally generated dungeons, real-time combat, character progression, and competitive ladders. It runs directly in the terminal using `bunx tui-crawler` and includes server-side verification, user accounts, and social features.
+shellquest.sh is a terminal-based dungeon crawler game designed for engineers to play during idle time (compilation, AI waiting, etc.). The game features procedurally generated dungeons, real-time combat, character progression, and competitive ladders. It runs directly in the terminal using `bunx shellquest` and includes server-side verification, user accounts, and social features.
 
 ## Architecture Overview
 
@@ -233,7 +233,7 @@ enum LeaderboardPeriod {
 ##### Login/Register Screen
 ```
 ╔══════════════════════════════════════════════════════╗
-║                   TUI CRAWLER                         ║
+║                   shellquest.sh                         ║
 ║                 ▓▓▓▓▓▓▓▓▓▓▓▓▓▓                       ║
 ║                ▓▓░░░░░░░░░░░░▓▓                      ║
 ║                ▓▓░░██░░░░██░░▓▓                      ║
@@ -501,4 +501,4 @@ social.shareReplay({ sessionId })
 
 ## Conclusion
 
-TUI Crawler represents a unique opportunity to create a viral terminal-based game that appeals to the developer community. With careful attention to performance, user experience, and competitive features, it can become the go-to entertainment during compilation and deployment waits. The modular architecture allows for continuous improvement and community contribution post-launch.
+shellquest.sh represents a unique opportunity to create a viral terminal-based game that appeals to the developer community. With careful attention to performance, user experience, and competitive features, it can become the go-to entertainment during compilation and deployment waits. The modular architecture allows for continuous improvement and community contribution post-launch.

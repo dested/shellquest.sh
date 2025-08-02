@@ -4,22 +4,8 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// Copy assets
-const srcAssetsDir = join(__dirname, '..', 'src', 'crawler', 'assets');
-const destAssetsDir = join(__dirname, '..', 'dist', 'crawler', 'assets');
-
-mkdirSync(destAssetsDir, { recursive: true });
-
-const assetFiles = readdirSync(srcAssetsDir);
-for (const file of assetFiles) {
-  const srcPath = join(srcAssetsDir, file);
-  const destPath = join(destAssetsDir, file);
-  copyFileSync(srcPath, destPath);
-  console.log(`Copied asset: ${file}`);
-}
-
 // Copy launcher script
-const launcherSrc = join(__dirname, '..', 'src', 'crawler', 'launcher.js');
+const launcherSrc = join(__dirname, '..', 'src', 'examples','crawler-demo', 'launcher.js');
 const launcherDest = join(__dirname, '..', 'dist', 'crawler', 'launcher.js');
 copyFileSync(launcherSrc, launcherDest);
 console.log(`Copied launcher.js`);

@@ -1,18 +1,18 @@
-# TUI Crawler
+# shellquest.sh
 
 A terminal-based dungeon crawler game with ASCII graphics built with OpenTUI.
 
 ## Quick Start
 
 ```bash
-bunx tui-crawler
+bunx shellquest
 ```
 
 Or install globally:
 
 ```bash
-npm install -g tui-crawler
-tui-crawler
+npm install -g shellquest
+shellquest
 ```
 
 ## Controls

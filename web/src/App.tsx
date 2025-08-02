@@ -11,7 +11,7 @@ function App(props: any) {
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
         <Helmet>
-          <title>TUI Crawler</title>
+          <title>shellquest.sh</title>
         </Helmet>
 
         <HelmetProvider>{props.children}</HelmetProvider>

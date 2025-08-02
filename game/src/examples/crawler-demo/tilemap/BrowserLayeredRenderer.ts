@@ -1,7 +1,7 @@
-import { FrameBufferRenderable, GroupRenderable } from "../../core/objects.ts"
-import { RGBA } from "../../core/types.ts"
+import { FrameBufferRenderable, GroupRenderable } from "../../../core/objects.ts"
+import { RGBA } from "../../../core/types.ts"
 import { TileMap, TILE_SIZE } from "./TileMap"
-import { OptimizedBuffer } from "../../core-browser/browser-buffer"
+import { OptimizedBuffer } from "../../../core-browser/browser-buffer"
 
 // Additional block characters for more rendering options
 const BLOCK_CHARS = {

@@ -10,8 +10,8 @@ export default defineConfig({
       jsxRuntime: 'automatic',
     }),
   ],
-  // base: isSSRBuild ? 'https://static.tui-crawler.com/' : '/',
-  base: isSSRBuild ? 'https://tui-crawler-web-static.onrender.com/' : '/',
+  // base: isSSRBuild ? 'https://static.shellquest.sh/' : '/',
+  base: isSSRBuild ? 'https://shellquest-web-static.onrender.com/' : '/',
   resolve: {
     alias: {
       '@': path.join(__dirname, './src/'),

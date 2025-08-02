@@ -3,6 +3,14 @@
 ## Overview
 OpenTUI provides a rich set of UI components and rendering capabilities for building sophisticated terminal user interfaces. This guide will help you understand and utilize the full power of the OpenTUI engine.
 
+## ⚠️ Important Buffer/Drawing API Notes
+When working with OpenTUI buffers and drawing:
+1. **Create buffers using**: `renderer.lib.createOptimizedBuffer(width, height, respectAlpha)`
+2. **Access buffer via**: `frameBufferRenderable.frameBuffer` (NOT `.buffer`)
+3. **Draw to buffer using**: `buffer.setCell(x, y, char, fgColor, bgColor)` (NOT `setPixel`)
+4. **Colors must be RGBA objects**: Use `RGBA.fromHex()`, `RGBA.fromInts()`, or `RGBA.fromValues()`
+5. **Clear buffers with**: `buffer.clear()` or `buffer.clear(bgColor)`
+
 ## Core Concepts
 
 ### 1. Renderer System
@@ -220,9 +228,11 @@ container.clear();
 For pixel-perfect drawing and custom graphics.
 
 ```typescript
-import { FrameBufferRenderable } from '../core';
+import { FrameBufferRenderable, RGBA } from '../core';
 
-const canvas = new FrameBufferRenderable('my-canvas', {
+// Create buffer first using renderer.lib
+const buffer = renderer.lib.createOptimizedBuffer(80, 40, true);
+const canvas = new FrameBufferRenderable('my-canvas', buffer, {
   x: 10,
   y: 10,
   width: 80,
@@ -230,12 +240,20 @@ const canvas = new FrameBufferRenderable('my-canvas', {
   zIndex: 50
 });
 
-// Drawing methods
-canvas.setPixel(x, y, char, color);
-canvas.drawText(x, y, text, color);
-canvas.drawLine(x1, y1, x2, y2, char, color);
-canvas.drawRect(x, y, width, height, char, color, filled);
-canvas.clear();
+// Access the buffer through frameBuffer property
+const drawBuffer = canvas.frameBuffer;
+
+// Drawing methods - use RGBA colors
+const color = RGBA.fromHex(0xFF0000); // Red
+const bgColor = RGBA.fromHex(0x000000); // Black
+
+drawBuffer.setCell(x, y, char, color, bgColor);
+drawBuffer.clear(); // or drawBuffer.clear(bgColor) to clear with specific color
+
+// RGBA color creation methods:
+RGBA.fromHex(0xFF0000) // From hex number
+RGBA.fromInts(255, 0, 0, 255) // From RGBA values (0-255)
+RGBA.fromValues(1.0, 0.0, 0.0, 1.0) // From normalized values (0-1)
 ```
 
 ## Layout System
@@ -284,22 +302,27 @@ element.setBorderColor('#00AAFF');
 
 ## Color System
 
-Colors can be specified in multiple formats:
+Colors in OpenTUI use the RGBA class for buffer operations:
 
 ```typescript
-// Hex colors
-'#FF0000'  // Red
-'#00FF00'  // Green
-'#0000FF'  // Blue
+import { RGBA } from '../core';
 
-// RGB array
-[255, 0, 0]  // Red
+// Create RGBA colors using factory methods:
+const red = RGBA.fromHex(0xFF0000);
+const green = RGBA.fromInts(0, 255, 0, 255);
+const blue = RGBA.fromValues(0.0, 0.0, 1.0, 1.0);
 
-// Named colors (if supported)
-'red', 'green', 'blue'
+// For styled text, use hex strings:
+const textColor = '#FF0000';  // Red
+const bgColor = '#00FF00';     // Green
 
-// RGBA object
-{ r: 255, g: 0, b: 0, a: 255 }
+// When working with buffers:
+buffer.setCell(x, y, char, fgColor, bgColor); // Uses RGBA objects
+
+// Common color patterns:
+const transparent = RGBA.fromInts(0, 0, 0, 0);
+const white = RGBA.fromHex(0xFFFFFF);
+const black = RGBA.fromHex(0x000000);
 ```
 
 ## Input Handling
@@ -370,6 +393,8 @@ import {
   InputElement,
   InputElementEvents,
   StyledTextRenderable,
+  FrameBufferRenderable,
+  RGBA,
   t, bold, fg
 } from '../core';
 
@@ -382,7 +407,7 @@ function createLoginForm(renderer: CliRenderer) {
 
   // Title
   const title = renderer.createStyledText('title', {
-    fragment: t`${bold(fg('#00AAFF')('Login to TUI Crawler'))}`,
+    fragment: t`${bold(fg('#00AAFF')('Login to shellquest.sh'))}`,
     x: 0,
     y: 0,
     width: 40,
@@ -475,13 +500,26 @@ function createModal(renderer: CliRenderer, message: string) {
   });
   
   // Semi-transparent background
-  const bg = new FrameBufferRenderable('modal-bg', {
+  const bgBuffer = renderer.lib.createOptimizedBuffer(
+    process.stdout.columns, 
+    process.stdout.rows, 
+    true
+  );
+  const bg = new FrameBufferRenderable('modal-bg', bgBuffer, {
     x: 0,
     y: 0,
     width: process.stdout.columns,
     height: process.stdout.rows
   });
-  bg.fill('░', '#000000');
+  
+  // Fill with pattern
+  const dimColor = RGBA.fromInts(64, 64, 64, 128);
+  const bgColor = RGBA.fromHex(0x000000);
+  for (let y = 0; y < bgBuffer.height; y++) {
+    for (let x = 0; x < bgBuffer.width; x++) {
+      bgBuffer.setCell(x, y, '░', dimColor, bgColor);
+    }
+  }
   overlay.add(bg);
   
   // Modal content

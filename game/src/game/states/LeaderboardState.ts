@@ -5,6 +5,8 @@ import {
     type TabSelectOption,
     FrameBufferRenderable,
     StyledTextRenderable,
+    OptimizedBuffer,
+    RGBA,
     t,
     bold,
     fg,
@@ -73,7 +75,8 @@ export class LeaderboardState extends BaseState {
         this.stateContainer.add(this.periodTabs);
 
         // Leaderboard area
-        this.leaderboardArea = new FrameBufferRenderable('leaderboard-area', {
+        this.leaderboardArea = new FrameBufferRenderable('leaderboard-area', 
+            this.renderer.lib.createOptimizedBuffer(termWidth - 20, termHeight - 15, true), {
             x: 10,
             y: 10,
             width: termWidth - 20,
@@ -107,25 +110,27 @@ export class LeaderboardState extends BaseState {
     private drawBorder(): void {
         if (!this.leaderboardArea) return;
 
-        const buffer = this.leaderboardArea.buffer;
+        const buffer = this.leaderboardArea.frameBuffer;
         const width = this.leaderboardArea.width;
         const height = this.leaderboardArea.height;
+        const borderColor = RGBA.fromHex(0x666666);
+        const bgColor = RGBA.fromHex(0x000000);
 
         // Draw border
         for (let x = 0; x < width; x++) {
-            buffer.setPixel(x, 0, '─', 0x666666);
-            buffer.setPixel(x, height - 1, '─', 0x666666);
+            buffer.setCell(x, 0, '─', borderColor, bgColor);
+            buffer.setCell(x, height - 1, '─', borderColor, bgColor);
         }
         for (let y = 0; y < height; y++) {
-            buffer.setPixel(0, y, '│', 0x666666);
-            buffer.setPixel(width - 1, y, '│', 0x666666);
+            buffer.setCell(0, y, '│', borderColor, bgColor);
+            buffer.setCell(width - 1, y, '│', borderColor, bgColor);
         }
 
         // Corners
-        buffer.setPixel(0, 0, '╭', 0x666666);
-        buffer.setPixel(width - 1, 0, '╮', 0x666666);
-        buffer.setPixel(0, height - 1, '╰', 0x666666);
-        buffer.setPixel(width - 1, height - 1, '╯', 0x666666);
+        buffer.setCell(0, 0, '╭', borderColor, bgColor);
+        buffer.setCell(width - 1, 0, '╮', borderColor, bgColor);
+        buffer.setCell(0, height - 1, '╰', borderColor, bgColor);
+        buffer.setCell(width - 1, height - 1, '╯', borderColor, bgColor);
     }
 
     private updateLeaderboard(): void {

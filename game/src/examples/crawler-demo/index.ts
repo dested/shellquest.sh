@@ -9,13 +9,13 @@ import {
   RGBA,
   type ParsedKey,
   type MouseEvent,
-} from "../core";
-import { getKeyHandler } from "../core/ui/lib/KeyHandler.ts";
+} from "../../core";
+import { getKeyHandler } from "../../core/ui/lib/KeyHandler.ts";
 import { TileMap, TILE_SIZE } from "./tilemap/TileMap.ts";
 import { LayeredRenderer, type Entity } from "./tilemap/LayeredRenderer.ts";
 import { BrowserLayeredRenderer } from "./tilemap/BrowserLayeredRenderer.ts";
 import { Level } from "./level.ts";
-import { renderFontToFrameBuffer, measureText } from "../core/ui/ascii.font.ts";
+import { renderFontToFrameBuffer, measureText } from "../../core/ui/ascii.font.ts";
 
 // Check if we're in a browser environment
 const isBrowser = typeof window !== "undefined";

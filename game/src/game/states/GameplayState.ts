@@ -3,6 +3,8 @@ import { GameOverState } from './GameOverState';
 import {
     FrameBufferRenderable,
     StyledTextRenderable,
+    OptimizedBuffer,
+    RGBA,
     t,
     bold,
     fg,
@@ -30,7 +32,8 @@ export class GameplayState extends BaseState {
         const termHeight = this.renderer.terminalHeight;
 
         // Game area
-        this.gameArea = new FrameBufferRenderable('game-area', {
+        this.gameArea = new FrameBufferRenderable('game-area', 
+            this.renderer.lib.createOptimizedBuffer(termWidth, termHeight - 10, true), {
             x: 0,
             y: 0,
             width: termWidth,
@@ -73,7 +76,7 @@ ${fg('#CCCCCC')('Level 1')} ${fg('#00FF00')('Time: 30s')} ${fg('#FF8800')('Weapo
     private drawGame(): void {
         if (!this.gameArea) return;
 
-        const buffer = this.gameArea.buffer;
+        const buffer = this.gameArea.frameBuffer;
         buffer.clear();
 
         // Draw simple dungeon room
@@ -82,40 +85,48 @@ ${fg('#CCCCCC')('Level 1')} ${fg('#00FF00')('Time: 30s')} ${fg('#FF8800')('Weapo
         const roomX = 10;
         const roomY = 5;
 
+        const wallColor = RGBA.fromHex(0x888888);
+        const floorColor = RGBA.fromHex(0x333333);
+        const bgColor = RGBA.fromHex(0x000000);
+        const playerColor = RGBA.fromHex(0x00FF00);
+        const enemyColor = RGBA.fromHex(0xFF0000);
+        const itemColor = RGBA.fromHex(0xFFFF00);
+        const coinColor = RGBA.fromHex(0xFFD700);
+
         // Draw walls
         for (let x = roomX; x < roomX + roomWidth; x++) {
-            buffer.setPixel(x, roomY, '═', 0x888888);
-            buffer.setPixel(x, roomY + roomHeight, '═', 0x888888);
+            buffer.setCell(x, roomY, '═', wallColor, bgColor);
+            buffer.setCell(x, roomY + roomHeight, '═', wallColor, bgColor);
         }
         for (let y = roomY; y < roomY + roomHeight; y++) {
-            buffer.setPixel(roomX, y, '║', 0x888888);
-            buffer.setPixel(roomX + roomWidth, y, '║', 0x888888);
+            buffer.setCell(roomX, y, '║', wallColor, bgColor);
+            buffer.setCell(roomX + roomWidth, y, '║', wallColor, bgColor);
         }
 
         // Corners
-        buffer.setPixel(roomX, roomY, '╔', 0x888888);
-        buffer.setPixel(roomX + roomWidth, roomY, '╗', 0x888888);
-        buffer.setPixel(roomX, roomY + roomHeight, '╚', 0x888888);
-        buffer.setPixel(roomX + roomWidth, roomY + roomHeight, '╝', 0x888888);
+        buffer.setCell(roomX, roomY, '╔', wallColor, bgColor);
+        buffer.setCell(roomX + roomWidth, roomY, '╗', wallColor, bgColor);
+        buffer.setCell(roomX, roomY + roomHeight, '╚', wallColor, bgColor);
+        buffer.setCell(roomX + roomWidth, roomY + roomHeight, '╝', wallColor, bgColor);
 
         // Draw floor
         for (let y = roomY + 1; y < roomY + roomHeight; y++) {
             for (let x = roomX + 1; x < roomX + roomWidth; x++) {
-                buffer.setPixel(x, y, '·', 0x333333);
+                buffer.setCell(x, y, '·', floorColor, bgColor);
             }
         }
 
         // Draw player
-        buffer.setPixel(this.playerX, this.playerY, '@', 0x00FF00);
+        buffer.setCell(this.playerX, this.playerY, '@', playerColor, bgColor);
 
         // Draw some enemies
-        buffer.setPixel(roomX + 10, roomY + 5, 'g', 0xFF0000);
-        buffer.setPixel(roomX + 25, roomY + 12, 's', 0xFF0000);
+        buffer.setCell(roomX + 10, roomY + 5, 'g', enemyColor, bgColor);
+        buffer.setCell(roomX + 25, roomY + 12, 's', enemyColor, bgColor);
 
         // Draw items
-        buffer.setPixel(roomX + 5, roomY + 10, '†', 0xFFFF00); // Sword
-        buffer.setPixel(roomX + 30, roomY + 3, '○', 0xFFD700); // Coin
-        buffer.setPixel(roomX + 20, roomY + 15, '⌐', 0xFFD700); // Key
+        buffer.setCell(roomX + 5, roomY + 10, '†', itemColor, bgColor); // Sword
+        buffer.setCell(roomX + 30, roomY + 3, '○', coinColor, bgColor); // Coin
+        buffer.setCell(roomX + 20, roomY + 15, '⌐', coinColor, bgColor); // Key
     }
 
     handleInput(key: ParsedKey): void {

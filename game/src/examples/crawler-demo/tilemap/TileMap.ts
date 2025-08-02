@@ -1,4 +1,4 @@
-import { RGBA } from "../../core/types.ts"
+import { RGBA } from "../../../core/types.ts"
 import { tilemapData, getNormalizedPixelAt, type TilemapData } from "../generated/tilemapData"
 
 // Constants for tile sizing

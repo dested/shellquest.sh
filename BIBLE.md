@@ -1,12 +1,12 @@
-TUI Crawler
+shellquest.sh
 ====
 
 
 # Overview
 
-We are building a terminal based procedurally generated dungeon crawler named tui crawler. it is for engineers to play something while they are bored or waiting for ai or compiling. each dungeon level is very short, just enough time to be fun and challenging.
+We are building a terminal based procedurally generated dungeon crawler named shellquest.sh. it is for engineers to play something while they are bored or waiting for ai or compiling. each dungeon level is very short, just enough time to be fun and challenging.
 
-A player will run `bunx tui-crawler` or `npx tui-crawler` and it will install the package and immediately start the game.
+A player will run `bunx shellquest` or `npx shellquest` and it will install the package and immediately start the game.
 
 # Non game screens
 
@@ -166,8 +166,8 @@ etc
 
 # Website
 
-There will also need to be an accompanying website (react typescript tailwind shadcn etc) that will show some landing page details about the game with screenshots, explain how it works, have a character viewer (https://tui-crawler.com/u/user-name) and the ladder viewer.
+There will also need to be an accompanying website (react typescript tailwind shadcn etc) that will show some landing page details about the game with screenshots, explain how it works, have a character viewer (https://shellquest.sh/u/user-name) and the ladder viewer.
 
-Both in the game and the website you can replay any level that was played from start to finish with like a scrubber style visualization. you like to the game https://tui-crawler.com/g/game-id and you see it from start to finish.
+Both in the game and the website you can replay any level that was played from start to finish with like a scrubber style visualization. you like to the game https://shellquest.sh/g/game-id and you see it from start to finish.
 
 Both the game and the website need a donate button that just links to a stripe page

@@ -9,6 +9,8 @@ import {
     GroupRenderable,
     StyledTextRenderable,
     FrameBufferRenderable,
+    OptimizedBuffer,
+    RGBA,
     t,
     bold,
     fg,
@@ -53,8 +55,9 @@ export class AuthState extends BaseState {
         const centerX = Math.floor(termWidth / 2);
         const centerY = Math.floor(termHeight / 2);
 
-        // Create logo
-        this.logoBuffer = new FrameBufferRenderable('auth-logo', {
+        // Create logo using FrameBufferRenderable with OptimizedBuffer
+        this.logoBuffer = new FrameBufferRenderable('auth-logo', 
+            this.renderer.lib.createOptimizedBuffer(14, 8, true), {
             x: centerX - 7,
             y: centerY - 18,
             width: 14,
@@ -66,7 +69,7 @@ export class AuthState extends BaseState {
 
         // Title
         this.titleText = this.renderer.createStyledText('auth-title', {
-            fragment: t`${bold(fg('#00FFFF')('TUI CRAWLER'))}`,
+            fragment: t`${bold(fg('#00FFFF')('shellquest.sh'))}`,
             x: centerX - 6,
             y: centerY - 10,
             width: 12,
@@ -143,7 +146,6 @@ export class AuthState extends BaseState {
             maxLength: GAME_CONFIG.MAX_PASSWORD_LENGTH,
             title: 'Password',
             titleAlignment: 'left',
-            // TODO: Add password masking when OpenTUI supports it
         });
 
         // Confirm password input
@@ -218,17 +220,24 @@ export class AuthState extends BaseState {
             '▓▓▓▓▓▓▓▓▓▓▓▓▓▓',
         ];
 
-        const buffer = this.logoBuffer.buffer;
+        const buffer = this.logoBuffer.frameBuffer;
         buffer.clear();
 
         for (let y = 0; y < logo.length; y++) {
             const line = logo[y];
             for (let x = 0; x < line.length; x++) {
                 const char = line[x];
-                const color = char === '▓' ? 0x00FFFF : 
-                             char === '░' ? 0x006666 : 
-                             0xFFFF00;
-                buffer.setPixel(x, y, char, color);
+                let color: RGBA;
+                
+                if (char === '▓') {
+                    color = RGBA.fromHex(0x00FFFF);
+                } else if (char === '░') {
+                    color = RGBA.fromHex(0x006666);
+                } else {
+                    color = RGBA.fromHex(0xFFFF00);
+                }
+                
+                buffer.setCell(x, y, char, color, RGBA.fromHex(0x000000));
             }
         }
     }

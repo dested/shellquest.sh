@@ -9,11 +9,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-TUI Crawler is a terminal-based procedurally generated dungeon crawler designed for engineers to play during idle time (compilation, AI waiting, etc.). It features:
+shellquest.sh is a terminal-based procedurally generated dungeon crawler designed for engineers to play during idle time (compilation, AI waiting, etc.). It features:
 - Real-time combat with ASCII graphics
 - Character progression and competitive ladders
 - Server-side verification for anti-cheat
-- Cross-platform terminal game running via `bunx tui-crawler`
+- Cross-platform terminal game running via `bunx shellquest`
 
 ### Core Documentation
 - **Vision & Requirements**: See `BIBLE.md` for complete game design and business requirements
@@ -24,7 +24,7 @@ TUI Crawler is a terminal-based procedurally generated dungeon crawler designed 
 
 ### Project Structure
 ```
-tui-crawler/
+shellquest/
 ├── game/               # Game client (Bun/TypeScript + Zig)
 │   ├── src/
 │   │   ├── core/      # OpenTUI engine (rendering, input, UI)
@@ -178,7 +178,6 @@ Based on `TASKS.md`, the critical path for MVP:
 - `web/server/routers/`: API endpoint implementations
 - `web/prisma/schema/`: Database models
 
-## Contact & Resources
 
-- Repository: https://github.com/dested/tui-crawler
-- Issues: https://github.com/dested/tui-crawler/issues
+## Notes
+- Always run prettier after writing a file to clean it up/ 

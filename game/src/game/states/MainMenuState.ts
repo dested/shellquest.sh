@@ -8,6 +8,8 @@ import {
     type TabSelectOption,
     StyledTextRenderable,
     FrameBufferRenderable,
+    OptimizedBuffer,
+    RGBA,
     t,
     bold,
     fg,
@@ -68,7 +70,8 @@ export class MainMenuState extends BaseState {
         this.stateContainer.add(this.tabSelect);
 
         // Content area
-        this.contentArea = new FrameBufferRenderable('content-area', {
+        this.contentArea = new FrameBufferRenderable('content-area', 
+            this.renderer.lib.createOptimizedBuffer(termWidth - 4, termHeight - 10, true), {
             x: 2,
             y: 6,
             width: termWidth - 4,
@@ -113,24 +116,26 @@ export class MainMenuState extends BaseState {
     private drawContentBorder(): void {
         if (!this.contentArea) return;
 
-        const buffer = this.contentArea.buffer;
+        const buffer = this.contentArea.frameBuffer;
         const width = this.contentArea.width;
         const height = this.contentArea.height;
+        const borderColor = RGBA.fromHex(0x666666);
+        const bgColor = RGBA.fromHex(0x000000);
 
         // Draw rounded border
-        buffer.setPixel(0, 0, '╭', 0x666666);
-        buffer.setPixel(width - 1, 0, '╮', 0x666666);
-        buffer.setPixel(0, height - 1, '╰', 0x666666);
-        buffer.setPixel(width - 1, height - 1, '╯', 0x666666);
+        buffer.setCell(0, 0, '╭', borderColor, bgColor);
+        buffer.setCell(width - 1, 0, '╮', borderColor, bgColor);
+        buffer.setCell(0, height - 1, '╰', borderColor, bgColor);
+        buffer.setCell(width - 1, height - 1, '╯', borderColor, bgColor);
 
         for (let x = 1; x < width - 1; x++) {
-            buffer.setPixel(x, 0, '─', 0x666666);
-            buffer.setPixel(x, height - 1, '─', 0x666666);
+            buffer.setCell(x, 0, '─', borderColor, bgColor);
+            buffer.setCell(x, height - 1, '─', borderColor, bgColor);
         }
 
         for (let y = 1; y < height - 1; y++) {
-            buffer.setPixel(0, y, '│', 0x666666);
-            buffer.setPixel(width - 1, y, '│', 0x666666);
+            buffer.setCell(0, y, '│', borderColor, bgColor);
+            buffer.setCell(width - 1, y, '│', borderColor, bgColor);
         }
     }
 
@@ -175,7 +180,7 @@ export class MainMenuState extends BaseState {
 
         // Welcome message
         this.welcomeText = this.renderer.createStyledText('welcome-text', {
-            fragment: t`${bold(fg('#00FFFF')('Welcome to TUI Crawler!'))}
+            fragment: t`${bold(fg('#00FFFF')('Welcome to shellquest.sh!'))}
 
 ${fg('#FFFFFF')('Choose your dungeon type:')}
 
@@ -292,16 +297,16 @@ ${fg('#666666')('Use arrow keys to change settings')}`,
         const centerY = Math.floor(this.renderer.terminalHeight / 2);
 
         this.welcomeText = this.renderer.createStyledText('about-content', {
-            fragment: t`${bold(fg('#00FFFF')('TUI Crawler'))}
+            fragment: t`${bold(fg('#00FFFF')('shellquest.sh'))}
 ${fg('#666666')(`Version ${GAME_CONFIG.VERSION}`)}
 
 ${fg('#CCCCCC')('A terminal-based dungeon crawler')}
 ${fg('#CCCCCC')('for engineers and terminal enthusiasts.')}
 
 ${fg('#888888')('Created with OpenTUI engine')}
-${fg('#888888')('© 2024 TUI Crawler')}
+${fg('#888888')('© 2024 shellquest.sh')}
 
-${fg('#FFFF00')('GitHub:')} ${fg('#00AAFF')('github.com/dested/tui-crawler')}`,
+${fg('#FFFF00')('GitHub:')} ${fg('#00AAFF')('github.com/dested/shellquest.sh')}`,
             x: centerX - 20,
             y: centerY - 8,
             width: 40,

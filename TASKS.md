@@ -1,4 +1,4 @@
-# TUI Crawler - Implementation Task List
+# shellquest.sh - Implementation Task List
 
 ## Priority Legend
 - 🔴 **Critical** - Core functionality, blocks other tasks
