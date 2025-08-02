@@ -1,11 +1,11 @@
-import { TextRenderable, BoxRenderable, GroupRenderable, FrameBufferRenderable } from "../objects";
-import { RGBA } from "../types";
-import type { ParsedKey } from "../parse.keypress";
-import { getKeyHandler } from "../ui/lib/KeyHandler";
+import { TextRenderable, BoxRenderable, GroupRenderable, FrameBufferRenderable } from "../core/objects.ts";
+import { RGBA } from "../core/types.ts";
+import type { ParsedKey } from "../core/parse.keypress.ts";
+import { getKeyHandler } from "../core/ui/lib/KeyHandler";
 import { TileMap, TILE_SIZE } from "./tilemap/TileMap";
 import { BrowserLayeredRenderer, type Entity } from "./tilemap/BrowserLayeredRenderer";
-import { Level } from "./Level";
-import { renderFontToFrameBuffer, measureText } from "../ui/ascii.font";
+import { Level } from "./level.ts";
+import { renderFontToFrameBuffer, measureText } from "../core/ui/ascii.font.ts";
 
 // Game constants
 const MAP_WIDTH = 200;

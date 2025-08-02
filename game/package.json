@@ -1,6 +1,6 @@
 {
   "name": "tui-crawler",
-  "module": "src/index.ts",
+  "module": "src/core/index.ts",
   "main": "dist/index.js",
   "version": "0.2.1",
   "type": "module",
@@ -19,7 +19,7 @@
     "postinstall": "node scripts/postinstall.js",
     "build": "bun build:tilemap && bun build:ts && bun build:prod && bun build:assets",
     "build:tilemap": "node scripts/generate-tilemap-data.js",
-    "build:ts": "bun build src/crawler/index.ts --outdir dist/crawler --target bun && bun build src/index.ts --outdir dist --target bun",
+    "build:ts": "bun build src/crawler/index.ts --outdir dist/crawler --target bun && bun build src/core/index.ts --outdir dist --target bun",
     "build:assets": "bun scripts/copy-assets.js",
     "build:zig": "cd src/zig && zig build",
     "prepublishOnly": "bun run build",

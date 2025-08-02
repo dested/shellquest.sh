@@ -40,11 +40,23 @@ the app itself is using an engine called OpenTUI. it has a full pixel renderer f
 
 ## Game engine
 
-you are on a tile based grid, but you can move sub pixels inside that grid. You will collide wiht walls. Make sure before you move you do the wall check before the subpixel movement so you dont clip into walls. There are 4 layers, bottom, sprite, particles, and overlay for effect. The player and enemies are on the sprite layer.
+You are on a tile based grid, but you can move sub pixels inside that grid. You will collide wiht walls. Make sure before you move you do the wall check before the subpixel movement so you dont clip into walls. There are 4 layers, bottom, sprite, particles, and overlay for effect. The player and enemies are on the sprite layer.
+
+## Game window
+
+The terminal window will need to be a good size. At the start of the game we will ask the user to resize or scale their terminal window to make sure we have 120 across and 80 down of characters. We can crack into the TUI terminal size and get the size of the terminal window. We will then use that to render the game.
+
+## Animations
+
+Everything will need to be animated, but low resolution animations since we're in a terminal. The player walking will have 2 frames of animation, the monsters, the torches flickering, etc. Any chance we can, add some animations to make it feel alive.
 
 ## Effects
 
 There will need to be a particle effect system. like when you swing, or magic, or get hit. also shaking the screen a few pixels is really important.
+
+## Lighting
+
+There will need to be a sophisticated lighting system. Players will have fog of war around them by a circle of a radius (this can be enhanced by weapons). There will also be torches hung on the wall which will also cast lighting. The lighting will need to augment the color of the pixel being drawn. This will have to be baked into the engine itself. Also effects may cast light as they travel too.   
 
 ## SFX
 
@@ -58,7 +70,7 @@ They move with arrows or wasd, swing with space, run with shift, and swap with t
 
 experience is gotten from beating enemies and also completing dungeons. the more time left at the end of the dungeon the more experience you get.  each level is progressively harder to get. Also the dungeon generation difficulty will scale based on the level of the player
 
-# Player progression
+## Player progression
 
 You start off with a basic weapon for your class that does 1 damage. you also have 5hp and 5 mana.
 
@@ -66,7 +78,7 @@ Each level allows you to drop stronger weapons, and every 5 levels you get +1 hp
 
 You also have a run meter which runs out quickly based on your level. more level more run etc.
 
-# weapons
+## Weapons
 
 There are 5 types of swords, 5 wands, and 5 axes.
 
@@ -104,7 +116,18 @@ You will need to devise a way to generate interesting and beatable levels
 
 We are using the library rot-js to do a lot of the heavy lifting, but it will still need to be good.
 
-# Verifiability
+## Enemies
+Enemies will be procedurally generated and placed throughout the dungeon. They will have varying health and damage. The player will need to defeat them to gain experience and loot. They can also get loot from chests. Their ai does not have to be a
+sophisticated as they will just chase the player and attack when in range, but they should try to be as interesting as possible. They will also have a chance to drop items or coins when defeated.
+
+## Boss levels
+
+Every 5th level will be a boss level. The boss will be procedurally generated and will have a unique name and abilities. The player will need to defeat the boss to progress to the next level. Bosses will have higher health and damage than regular enemies, and will drop better loot when defeated.
+
+## Prize levels
+Every 10th level will be a prize level. The player will be able to choose one of three prizes. They can see what it is before they choose, but they can only choose one. The prizes will be a random item, a random amount of coins, or a random amount of experience. This will help the player progress and give them a reason to keep playing.
+
+## Verifiability
 
 Once the user starts the dungeon it will get its latest player data, and the dungeon itself. it will then record out every keypress while its playing. At the end it will ship those keypresses to the server so it can verify that there was no cheating. each levle must be played fully. that means that generation and playthrough must be 100% deterministic, with random seeds and such. Once its verfied the user gets credit and their ladder and player details are updated.
 
