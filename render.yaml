@@ -10,8 +10,8 @@ services:
       pnpm install
       pnpm prisma-generate 
       pnpm build
-#    domains:
-#      - shellquest.sh
+    domains:
+      - shellquest.sh
     startCommand: pnpm serve
     autoDeploy: true
     envVars:
@@ -26,7 +26,7 @@ services:
         value: "*"
     rootDir: web
     name: shellquest-web-static
-#    domain: static.shellquest.sh
+    domain: static.shellquest.sh
     runtime: static
     buildCommand: |
       pnpm install
