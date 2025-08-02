@@ -2,7 +2,7 @@
   "name": "tui-crawler",
   "module": "src/index.ts",
   "main": "dist/index.js",
-  "version": "0.1.9",
+  "version": "0.2.1",
   "type": "module",
   "bin": {
     "tui-crawler": "./dist/crawler/launcher.js"
@@ -65,11 +65,10 @@
     "printWidth": 120
   },
   "dependencies": {
-    "commander": "^13.1.0"
+    "rot-js": "^2.2.1"
   },
   "optionalDependencies": {
     "uiohook-napi": "1.5.4",
-    "jimp": "1.6.0",
     "yoga-layout": "3.2.1"
   },
   "trustedDependencies": [

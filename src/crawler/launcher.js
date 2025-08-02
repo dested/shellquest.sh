@@ -7,18 +7,25 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Check if we need to build Zig libraries
-const zigSrcPath = join(__dirname, '..', '..', 'src', 'zig');
+
+
+const zigSrcPath = join(__dirname, '..','..','dist','zig');
 const libPath = join(zigSrcPath, 'lib');
 
 function needsZigBuild() {
-  // Check if lib directory exists and has files
+  // Check if lib directory exists
   if (!existsSync(libPath)) return true;
-  
-  // Check for platform-specific library
+
+  // Map Node.js arch/platform to our folder names
   const platform = process.platform;
-  const arch = process.arch;
+  let arch = process.arch;
+
+  // Normalize arch to match folder names
+  // Node.js uses 'x64' for 64-bit x86, but our folders use 'x86_64'
+  if (arch === 'x64') arch = 'x86_64';
+  if (arch === 'arm64') arch = 'aarch64';
+
   let libDir;
-  
   if (platform === 'win32') {
     libDir = join(libPath, `${arch}-windows`);
   } else if (platform === 'darwin') {
@@ -26,7 +33,7 @@ function needsZigBuild() {
   } else {
     libDir = join(libPath, `${arch}-linux`);
   }
-  
+
   return !existsSync(libDir);
 }
 

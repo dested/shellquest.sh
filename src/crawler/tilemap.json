@@ -1,0 +1,328 @@
+[
+  {
+    "name": "void",
+    "x": 0,
+    "y": 22,
+    "layer": "bottom",
+    "solid": false,
+    "flipX": false,
+    "flipY": false
+  },
+  {
+    "name": "floor-stone",
+    "x": 1,
+    "y": 9,
+    "layer": "bottom"
+  },
+  {
+    "name": "floor-stone-cracked",
+    "x": 1,
+    "y": 9,
+    "layer": "bottom"
+  },
+  {
+    "name": "floor-stone-moss",
+    "x": 1,
+    "y": 9,
+    "layer": "bottom"
+  },
+  {
+    "name": "floor-stone-dark",
+    "x": 1,
+    "y": 9,
+    "layer": "bottom"
+  },
+  {
+    "name": "floor-stone-fancy",
+    "x": 1,
+    "y": 9,
+    "layer": "bottom"
+  },
+  {
+    "name": "wall-block",
+    "x": 4,
+    "y": 14,
+    "layer": "bottom",
+    "solid": true
+  },
+  {
+    "name": "wall-isolated",
+    "x": 4,
+    "y": 14,
+    "layer": "bottom",
+    "solid": true
+  },
+  {
+    "name": "wall-vertical",
+    "x": 9,
+    "y": 15,
+    "layer": "bottom",
+    "solid": true
+  },
+  {
+    "name": "wall-horizontal",
+    "x": 10,
+    "y": 15,
+    "layer": "bottom",
+    "solid": true
+  },
+  {
+    "name": "wall-corner-nw",
+    "x": 0,
+    "y": 8,
+    "layer": "bottom",
+    "solid": true
+  },
+  {
+    "name": "wall-corner-ne",
+    "x": 2,
+    "y": 8,
+    "layer": "bottom",
+    "solid": true
+  },
+  {
+    "name": "wall-corner-sw",
+    "x": 0,
+    "y": 10,
+    "layer": "bottom",
+    "solid": true
+  },
+  {
+    "name": "wall-corner-se",
+    "x": 2,
+    "y": 10,
+    "layer": "bottom",
+    "solid": true
+  },
+  {
+    "name": "wall-t-north",
+    "x": 1,
+    "y": 8,
+    "layer": "bottom",
+    "solid": true
+  },
+  {
+    "name": "wall-t-south",
+    "x": 1,
+    "y": 10,
+    "layer": "bottom",
+    "solid": true
+  },
+  {
+    "name": "wall-t-west",
+    "x": 0,
+    "y": 9,
+    "layer": "bottom",
+    "solid": true
+  },
+  {
+    "name": "wall-t-east",
+    "x": 2,
+    "y": 9,
+    "layer": "bottom",
+    "solid": true
+  },
+  {
+    "name": "wall-cross",
+    "x": 10,
+    "y": 15,
+    "layer": "bottom",
+    "solid": true
+  },
+  {
+    "name": "wall-cross-nw",
+    "x": 5,
+    "y": 4,
+    "layer": "bottom",
+    "solid": true
+  },
+  {
+    "name": "wall-cross-ne",
+    "x": 6,
+    "y": 4,
+    "layer": "bottom",
+    "solid": true
+  },
+  {
+    "name": "wall-cross-sw",
+    "x": 7,
+    "y": 4,
+    "layer": "bottom",
+    "solid": true
+  },
+  {
+    "name": "wall-cross-se",
+    "x": 8,
+    "y": 4,
+    "layer": "bottom",
+    "solid": true
+  },
+  {
+    "name": "shadow-north",
+    "x": 2,
+    "y": 15,
+    "layer": "sprite"
+  },
+  {
+    "name": "shadow-north-west",
+    "x": 4,
+    "y": 15,
+    "layer": "sprite"
+  },
+  {
+    "name": "shadow-north-east",
+    "x": 2,
+    "y": 2,
+    "layer": "sprite"
+  },
+  {
+    "name": "shadow-north-full",
+    "x": 3,
+    "y": 2,
+    "layer": "sprite"
+  },
+  {
+    "name": "shadow-west",
+    "x": 4,
+    "y": 2,
+    "layer": "sprite"
+  },
+  {
+    "name": "door-closed",
+    "x": 5,
+    "y": 1,
+    "layer": "sprite"
+  },
+  {
+    "name": "door-open",
+    "x": 6,
+    "y": 1,
+    "layer": "sprite"
+  },
+  {
+    "name": "stairs-up",
+    "x": 7,
+    "y": 1,
+    "layer": "sprite"
+  },
+  {
+    "name": "stairs-down",
+    "x": 8,
+    "y": 1,
+    "layer": "sprite"
+  },
+  {
+    "name": "chest-closed",
+    "x": 9,
+    "y": 0,
+    "layer": "sprite"
+  },
+  {
+    "name": "chest-open",
+    "x": 10,
+    "y": 0,
+    "layer": "sprite"
+  },
+  {
+    "name": "barrel",
+    "x": 11,
+    "y": 0,
+    "layer": "sprite"
+  },
+  {
+    "name": "crate",
+    "x": 12,
+    "y": 0,
+    "layer": "sprite"
+  },
+  {
+    "name": "pot",
+    "x": 13,
+    "y": 0,
+    "layer": "sprite"
+  },
+  {
+    "name": "torch-wall",
+    "x": 5,
+    "y": 2,
+    "layer": "sprite"
+  },
+  {
+    "name": "brazier-lit",
+    "x": 6,
+    "y": 2,
+    "layer": "sprite"
+  },
+  {
+    "name": "banner-red",
+    "x": 7,
+    "y": 2,
+    "layer": "sprite"
+  },
+  {
+    "name": "banner-blue",
+    "x": 8,
+    "y": 2,
+    "layer": "sprite"
+  },
+  {
+    "name": "bones",
+    "x": 9,
+    "y": 1,
+    "layer": "sprite"
+  },
+  {
+    "name": "skull",
+    "x": 10,
+    "y": 1,
+    "layer": "sprite"
+  },
+  {
+    "name": "rubble",
+    "x": 11,
+    "y": 1,
+    "layer": "sprite"
+  },
+  {
+    "name": "web",
+    "x": 12,
+    "y": 1,
+    "layer": "sprite"
+  },
+  {
+    "name": "coins",
+    "x": 9,
+    "y": 2,
+    "layer": "sprite"
+  },
+  {
+    "name": "gem-red",
+    "x": 10,
+    "y": 2,
+    "layer": "sprite"
+  },
+  {
+    "name": "gem-blue",
+    "x": 11,
+    "y": 2,
+    "layer": "sprite"
+  },
+  {
+    "name": "pillar",
+    "x": 14,
+    "y": 0,
+    "layer": "sprite"
+  },
+  {
+    "name": "statue",
+    "x": 15,
+    "y": 0,
+    "layer": "sprite"
+  },
+  {
+    "name": "player",
+    "x": 1,
+    "y": 18,
+    "layer": "sprite"
+  }
+]

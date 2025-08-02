@@ -1,5 +1,5 @@
 // Auto-generated tilemap data - DO NOT EDIT
-// Generated at 2025-08-02T16:50:41.754Z
+// Generated at 2025-08-02T18:54:19.123Z
 
 export interface TilemapData {
   width: number;

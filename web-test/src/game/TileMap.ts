@@ -10,6 +10,8 @@ export interface TileDefinition {
   y: number; // Y position in tilemap (in tiles, not pixels)
   solid?: boolean; // For collision detection
   layer?: "bottom" | "sprite" | "top"; // Which layer this tile belongs to
+  flipX?: boolean; // Whether to flip tile horizontally
+  flipY?: boolean; // Whether to flip tile vertically
 }
 
 export class TileMap {
@@ -18,7 +20,6 @@ export class TileMap {
   private tileDefinitions: Map<string, TileDefinition> = new Map();
   private tileCache: Map<string, RGBA[]> = new Map(); // Cache extracted tile pixel data
   onReady: () => void = () => {
-    console.warn("TileMap is not ready, no onReady handler defined");
   };
 
   constructor() {}
@@ -55,6 +56,8 @@ export class TileMap {
     options?: {
       solid?: boolean;
       layer?: "bottom" | "sprite" | "top";
+      flipX?: boolean;
+      flipY?: boolean;
     },
   ): void {
     this.tileDefinitions.set(name, {
@@ -63,6 +66,8 @@ export class TileMap {
       y,
       solid: options?.solid ?? false,
       layer: options?.layer ?? "bottom",
+      flipX: options?.flipX ?? false, // Add flipX option
+      flipY: options?.flipY ?? false, // Add flipY option
     });
 
     // Clear cache for this tile if it exists
@@ -82,26 +87,25 @@ export class TileMap {
       return null;
     }
 
-    debugger;
     // If we have tilemap data, extract from it
     if (this.tilemapData) {
       const pixels: RGBA[] = [];
 
+      const flipX = tileDef.flipX ?? false; // Check for flipX option
+      const flipY = tileDef.flipY ?? false; // Check for flipY option
+
       // Calculate pixel coordinates
       const startX = tileDef.x * TILE_SIZE;
       const startY = tileDef.y * TILE_SIZE;
-      function rgbaToHex(r: number, g: number, b: number, a: number): string {
-        const hex = (value: number) =>
-          Math.round(value * 255)
-            .toString(16)
-            .padStart(2, "0");
-        return `#${hex(r)}${hex(g)}${hex(b)}${hex(a)}`;
-      }
-      // Extract 4x4 pixel block
+      // Extract 16x16 pixel block with flip support
       for (let py = 0; py < TILE_SIZE; py++) {
         for (let px = 0; px < TILE_SIZE; px++) {
-          const imageX = startX + px;
-          const imageY = startY + py;
+          // Apply flipX and flipY by mirroring the pixel indices
+          const srcPx = flipX ? TILE_SIZE - 1 - px : px;
+          const srcPy = flipY ? TILE_SIZE - 1 - py : py;
+
+          const imageX = startX + srcPx;
+          const imageY = startY + srcPy;
 
           // Get normalized pixel data from generated tilemap
           const pixel = getNormalizedPixelAt(this.tilemapData, imageX, imageY);
