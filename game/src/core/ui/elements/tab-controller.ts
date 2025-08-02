@@ -1,55 +1,55 @@
-import { ContainerElement, Element, type ElementOptions } from "../element.ts"
-import { TabSelectElement, TabSelectElementEvents, GroupRenderable } from "../../index.ts"
-import type { CliRenderer, TabSelectOption } from "../../index.ts"
-import type { ColorInput } from "../../types.ts"
+import {ContainerElement, Element, type ElementOptions} from '../element.ts';
+import {TabSelectElement, TabSelectElementEvents, GroupRenderable} from '../../index.ts';
+import type {CliRenderer, TabSelectOption} from '../../index.ts';
+import type {ColorInput} from '../../types.ts';
 
 export interface TabObject {
-  title: string
-  init(tabGroup: ContainerElement): void
-  update?(deltaMs: number, tabGroup: ContainerElement): void
-  show?(): void
-  hide?(): void
+  title: string;
+  init(tabGroup: ContainerElement): void;
+  update?(deltaMs: number, tabGroup: ContainerElement): void;
+  show?(): void;
+  hide?(): void;
 }
 
 interface Tab {
-  title: string
-  tabObject: TabObject
-  group: ContainerElement
-  initialized: boolean
+  title: string;
+  tabObject: TabObject;
+  group: ContainerElement;
+  initialized: boolean;
 }
 
 export interface TabControllerElementOptions extends ElementOptions {
-  tabBarHeight?: number
-  tabBarBackgroundColor?: ColorInput
-  selectedBackgroundColor?: ColorInput
-  selectedTextColor?: ColorInput
-  selectedDescriptionColor?: ColorInput
-  showDescription?: boolean
-  showUnderline?: boolean
-  showScrollArrows?: boolean
+  tabBarHeight?: number;
+  tabBarBackgroundColor?: ColorInput;
+  selectedBackgroundColor?: ColorInput;
+  selectedTextColor?: ColorInput;
+  selectedDescriptionColor?: ColorInput;
+  showDescription?: boolean;
+  showUnderline?: boolean;
+  showScrollArrows?: boolean;
 }
 
 export enum TabControllerElementEvents {
-  TAB_CHANGED = "tabChanged",
-  FOCUSED = "focused",
-  BLURRED = "blurred",
+  TAB_CHANGED = 'tabChanged',
+  FOCUSED = 'focused',
+  BLURRED = 'blurred',
 }
 
 export class TabControllerElement extends Element {
-  public tabs: Tab[] = []
-  private currentTabIndex = 0
-  private tabSelectElement: TabSelectElement
-  private tabBarHeight: number
-  private frameCallback: ((deltaMs: number) => Promise<void>) | null = null
+  public tabs: Tab[] = [];
+  private currentTabIndex = 0;
+  private tabSelectElement: TabSelectElement;
+  private tabBarHeight: number;
+  private frameCallback: ((deltaMs: number) => Promise<void>) | null = null;
 
   constructor(
     id: string,
     private renderer: CliRenderer,
     options: TabControllerElementOptions,
   ) {
-    super(id, options)
+    super(id, options);
 
-    this.tabBarHeight = options.tabBarHeight || 4
+    this.tabBarHeight = options.tabBarHeight || 4;
 
     this.tabSelectElement = new TabSelectElement(`${id}-tabs`, {
       x: 0,
@@ -58,10 +58,10 @@ export class TabControllerElement extends Element {
       height: this.tabBarHeight,
       options: [],
       zIndex: this.zIndex + 100,
-      selectedBackgroundColor: options.selectedBackgroundColor || "#333333",
-      selectedTextColor: options.selectedTextColor || "#FFFF00",
+      selectedBackgroundColor: options.selectedBackgroundColor || '#333333',
+      selectedTextColor: options.selectedTextColor || '#FFFF00',
       textColor: this.textColor,
-      selectedDescriptionColor: options.selectedDescriptionColor || "#FFFFFF",
+      selectedDescriptionColor: options.selectedDescriptionColor || '#FFFFFF',
       backgroundColor: options.tabBarBackgroundColor || this.backgroundColor,
       borderStyle: this.borderStyle,
       borderColor: this.borderColor,
@@ -69,18 +69,18 @@ export class TabControllerElement extends Element {
       showDescription: options.showDescription ?? true,
       showUnderline: options.showUnderline ?? true,
       showScrollArrows: options.showScrollArrows ?? true,
-    })
+    });
 
     this.tabSelectElement.on(TabSelectElementEvents.SELECTION_CHANGED, (index: number) => {
-      this.switchToTab(index)
-    })
+      this.switchToTab(index);
+    });
 
-    this.add(this.tabSelectElement)
+    this.add(this.tabSelectElement);
 
     this.frameCallback = async (deltaMs) => {
-      this.update(deltaMs)
-    }
-    this.renderer.setFrameCallback(this.frameCallback)
+      this.update(deltaMs);
+    };
+    this.renderer.setFrameCallback(this.frameCallback);
   }
 
   public addTab(tabObject: TabObject): Tab {
@@ -91,20 +91,20 @@ export class TabControllerElement extends Element {
       visible: false,
       width: this.width,
       height: this.height - this.tabBarHeight,
-    })
+    });
 
-    this.add(tabGroup)
+    this.add(tabGroup);
 
     const tab: Tab = {
       title: tabObject.title,
       tabObject,
       group: tabGroup,
       initialized: false,
-    }
-    this.tabs.push(tab)
+    };
+    this.tabs.push(tab);
 
-    this.updateTabSelectOptions()
-    return tab
+    this.updateTabSelectOptions();
+    return tab;
   }
 
   private updateTabSelectOptions(): void {
@@ -112,127 +112,127 @@ export class TabControllerElement extends Element {
       name: tab.title,
       description: `Tab ${index + 1}/${this.tabs.length} - Use Left/Right arrows to navigate | Press Ctrl+C to exit | D: toggle debug`,
       value: index,
-    }))
+    }));
 
-    this.tabSelectElement.setOptions(options)
+    this.tabSelectElement.setOptions(options);
 
     if (this.tabs.length === 1) {
-      const firstTab = this.getCurrentTab()
-      firstTab.group.visible = true
-      this.initializeTab(firstTab)
+      const firstTab = this.getCurrentTab();
+      firstTab.group.visible = true;
+      this.initializeTab(firstTab);
 
       if (firstTab.tabObject.show) {
-        firstTab.tabObject.show()
+        firstTab.tabObject.show();
       }
     }
   }
 
   private initializeTab(tab: Tab): void {
     if (!tab.initialized) {
-      tab.tabObject.init(tab.group)
-      tab.initialized = true
+      tab.tabObject.init(tab.group);
+      tab.initialized = true;
     }
   }
 
   public getCurrentTab(): Tab {
-    return this.tabs[this.currentTabIndex]
+    return this.tabs[this.currentTabIndex];
   }
 
   public getCurrentTabGroup(): GroupRenderable {
-    return this.getCurrentTab().group
+    return this.getCurrentTab().group;
   }
 
   public switchToTab(index: number): void {
-    if (index < 0 || index >= this.tabs.length) return
-    if (index === this.currentTabIndex) return
+    if (index < 0 || index >= this.tabs.length) return;
+    if (index === this.currentTabIndex) return;
 
-    const currentTab = this.getCurrentTab()
-    currentTab.group.visible = false
+    const currentTab = this.getCurrentTab();
+    currentTab.group.visible = false;
     if (currentTab.tabObject.hide) {
-      currentTab.tabObject.hide()
+      currentTab.tabObject.hide();
     }
 
-    this.currentTabIndex = index
-    this.tabSelectElement.setSelectedIndex(index)
+    this.currentTabIndex = index;
+    this.tabSelectElement.setSelectedIndex(index);
 
-    const newTab = this.getCurrentTab()
-    newTab.group.visible = true
+    const newTab = this.getCurrentTab();
+    newTab.group.visible = true;
 
-    this.initializeTab(newTab)
+    this.initializeTab(newTab);
 
     if (newTab.tabObject.show) {
-      newTab.tabObject.show()
+      newTab.tabObject.show();
     }
 
-    this.emit(TabControllerElementEvents.TAB_CHANGED, index, newTab)
+    this.emit(TabControllerElementEvents.TAB_CHANGED, index, newTab);
   }
 
   public nextTab(): void {
-    this.switchToTab((this.currentTabIndex + 1) % this.tabs.length)
+    this.switchToTab((this.currentTabIndex + 1) % this.tabs.length);
   }
 
   public previousTab(): void {
-    this.switchToTab((this.currentTabIndex - 1 + this.tabs.length) % this.tabs.length)
+    this.switchToTab((this.currentTabIndex - 1 + this.tabs.length) % this.tabs.length);
   }
 
   public update(deltaMs: number): void {
-    const currentTab = this.getCurrentTab()
+    const currentTab = this.getCurrentTab();
     if (currentTab && currentTab.tabObject.update) {
-      currentTab.tabObject.update(deltaMs, currentTab.group)
+      currentTab.tabObject.update(deltaMs, currentTab.group);
     }
   }
 
   public getCurrentTabIndex(): number {
-    return this.currentTabIndex
+    return this.currentTabIndex;
   }
 
   public getTabSelectElement(): TabSelectElement {
-    return this.tabSelectElement
+    return this.tabSelectElement;
   }
 
   public focus(): void {
-    this.tabSelectElement.focus()
-    this.emit(TabControllerElementEvents.FOCUSED)
+    this.tabSelectElement.focus();
+    this.emit(TabControllerElementEvents.FOCUSED);
   }
 
   public blur(): void {
-    this.tabSelectElement.blur()
-    this.emit(TabControllerElementEvents.BLURRED)
+    this.tabSelectElement.blur();
+    this.emit(TabControllerElementEvents.BLURRED);
   }
 
   public isFocused(): boolean {
-    return this.tabSelectElement.isFocused()
+    return this.tabSelectElement.isFocused();
   }
 
   public onResize(width: number, height: number): void {
-    if (this.width === width && this.height === height) return
+    if (this.width === width && this.height === height) return;
 
-    this.width = width
-    this.height = height
+    this.width = width;
+    this.height = height;
 
-    this.tabSelectElement.setWidth(width)
-    this.tabSelectElement.setHeight(this.tabBarHeight)
+    this.tabSelectElement.setWidth(width);
+    this.tabSelectElement.setHeight(this.tabBarHeight);
 
     for (const tab of this.tabs) {
-      tab.group.y = this.tabBarHeight
+      tab.group.y = this.tabBarHeight;
     }
-    super.onResize(width, height)
+    super.onResize(width, height);
   }
 
   protected destroySelf(): void {
-    this.blur()
+    this.blur();
 
     if (this.frameCallback) {
-      this.renderer.removeFrameCallback(this.frameCallback)
-      this.frameCallback = null
+      this.renderer.removeFrameCallback(this.frameCallback);
+      this.frameCallback = null;
     }
 
     for (const tab of this.tabs) {
-      tab.group.destroy()
+      tab.group.destroy();
     }
 
-    this.tabSelectElement.destroy()
+    this.tabSelectElement.destroy();
 
-    this.removeAllListeners()
+    this.removeAllListeners();
   }
 }

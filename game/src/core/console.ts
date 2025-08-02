@@ -1,13 +1,13 @@
-import type { ColorInput } from "./types.ts";
+import type {ColorInput} from './types.ts';
 // Forward declare to avoid circular dependency
 type CliRenderer = any;
-import { EventEmitter } from "events";
-import { OptimizedBuffer } from "./buffer.ts";
-import { parseColor } from "./utils.ts";
-import { RGBA } from "./types.ts";
-import util from "node:util";
-import fs from "node:fs";
-import path from "node:path";
+import {EventEmitter} from 'events';
+import {OptimizedBuffer} from './buffer.ts';
+import {parseColor} from './utils.ts';
+import {RGBA} from './types.ts';
+import util from 'node:util';
+import fs from 'node:fs';
+import path from 'node:path';
 
 interface CallerInfo {
   functionName: string;
@@ -19,7 +19,7 @@ interface CallerInfo {
 
 function getCallerInfo(): CallerInfo | null {
   const err = new Error();
-  const stackLines = err.stack?.split("\n").slice(5) || [];
+  const stackLines = err.stack?.split('\n').slice(5) || [];
   if (!stackLines.length) return null;
 
   const callerLine = stackLines[0].trim();
@@ -30,21 +30,21 @@ function getCallerInfo(): CallerInfo | null {
   if (!match) return null;
 
   // Extract details from the match.
-  const functionName = match[1] || "<anonymous>";
+  const functionName = match[1] || '<anonymous>';
   const fullPath = match[2];
-  const fileName = fullPath.split(/[\\/]/).pop() || "<unknown>";
+  const fileName = fullPath.split(/[\\/]/).pop() || '<unknown>';
   const lineNumber = parseInt(match[3], 10) || 0;
   const columnNumber = parseInt(match[4], 10) || 0;
 
-  return { functionName, fullPath, fileName, lineNumber, columnNumber };
+  return {functionName, fullPath, fileName, lineNumber, columnNumber};
 }
 
 enum LogLevel {
-  LOG = "LOG",
-  INFO = "INFO",
-  WARN = "WARN",
-  ERROR = "ERROR",
-  DEBUG = "DEBUG",
+  LOG = 'LOG',
+  INFO = 'INFO',
+  WARN = 'WARN',
+  ERROR = 'ERROR',
+  DEBUG = 'DEBUG',
 }
 
 class TerminalConsoleCache extends EventEmitter {
@@ -75,7 +75,7 @@ class TerminalConsoleCache extends EventEmitter {
       debug: console.debug,
     };
 
-    if (process.env.SKIP_CONSOLE_CACHE !== "true") {
+    if (process.env.SKIP_CONSOLE_CACHE !== 'true') {
       this.activate();
     }
   }
@@ -106,7 +106,7 @@ class TerminalConsoleCache extends EventEmitter {
 
   private overrideConsoleMethods(): void {
     return;
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       return;
     }
     console.log = (...args: any[]) => {
@@ -132,7 +132,12 @@ class TerminalConsoleCache extends EventEmitter {
 
   public addLogEntry(level: LogLevel, ...args: any[]) {
     const callerInfo = this._collectCallerInfo ? getCallerInfo() : null;
-    const logEntry: [Date, LogLevel, any[], CallerInfo | null] = [new Date(), level, args, callerInfo];
+    const logEntry: [Date, LogLevel, any[], CallerInfo | null] = [
+      new Date(),
+      level,
+      args,
+      callerInfo,
+    ];
 
     if (this._cachingEnabled) {
       if (this._cachedLogs.length >= this.MAX_CACHE_SIZE) {
@@ -149,7 +154,7 @@ class TerminalConsoleCache extends EventEmitter {
       this._cachedLogs.shift();
     }
     const entry = this.addLogEntry(level, ...args);
-    this.emit("entry", entry);
+    this.emit('entry', entry);
   }
 
   public destroy(): void {
@@ -158,15 +163,15 @@ class TerminalConsoleCache extends EventEmitter {
 }
 
 const terminalConsoleCache = new TerminalConsoleCache();
-process.on("exit", () => {
+process.on('exit', () => {
   terminalConsoleCache.destroy();
 });
 
 export enum ConsolePosition {
-  TOP = "top",
-  BOTTOM = "bottom",
-  LEFT = "left",
-  RIGHT = "right",
+  TOP = 'top',
+  BOTTOM = 'bottom',
+  LEFT = 'left',
+  RIGHT = 'right',
 }
 
 export interface ConsoleOptions {
@@ -192,22 +197,22 @@ const DEFAULT_CONSOLE_OPTIONS: Required<ConsoleOptions> = {
   position: ConsolePosition.BOTTOM,
   sizePercent: 30,
   zIndex: Infinity,
-  colorInfo: "#00FFFF", // Cyan
-  colorWarn: "#FFFF00", // Yellow
-  colorError: "#FF0000", // Red
-  colorDebug: "#808080", // Gray
-  colorDefault: "#FFFFFF", // White
+  colorInfo: '#00FFFF', // Cyan
+  colorWarn: '#FFFF00', // Yellow
+  colorError: '#FF0000', // Red
+  colorDebug: '#808080', // Gray
+  colorDefault: '#FFFFFF', // White
   backgroundColor: RGBA.fromValues(0.1, 0.1, 0.1, 0.7),
   startInDebugMode: false,
-  title: "Console",
+  title: 'Console',
   titleBarColor: RGBA.fromValues(0.05, 0.05, 0.05, 0.7),
-  titleBarTextColor: "#FFFFFF", // Default to same as default log text color
-  cursorColor: "#00A0FF", // Bright blue default cursor
+  titleBarTextColor: '#FFFFFF', // Default to same as default log text color
+  cursorColor: '#00A0FF', // Bright blue default cursor
   maxStoredLogs: 2000,
   maxDisplayLines: 3000,
 };
 
-const CONSOLE_FB_ID = "____console_fb";
+const CONSOLE_FB_ID = '____console_fb';
 const INDENT_WIDTH = 2;
 
 interface DisplayLine {
@@ -256,7 +261,7 @@ export class TerminalConsole extends EventEmitter {
   constructor(renderer: CliRenderer, options: ConsoleOptions = {}) {
     super();
     this.renderer = renderer;
-    this.options = { ...DEFAULT_CONSOLE_OPTIONS, ...options };
+    this.options = {...DEFAULT_CONSOLE_OPTIONS, ...options};
     this.stdinHandler = this.handleStdin.bind(this);
     this._debugModeEnabled = this.options.startInDebugMode;
     terminalConsoleCache.setCollectCallerInfo(this._debugModeEnabled);
@@ -268,18 +273,20 @@ export class TerminalConsole extends EventEmitter {
     this._rgbaDefault = parseColor(this.options.colorDefault);
     this.backgroundColor = parseColor(this.options.backgroundColor);
     this._rgbaTitleBar = parseColor(this.options.titleBarColor);
-    this._rgbaTitleBarText = parseColor(this.options.titleBarTextColor || this.options.colorDefault);
+    this._rgbaTitleBarText = parseColor(
+      this.options.titleBarTextColor || this.options.colorDefault,
+    );
     this._title = this.options.title;
     this._rgbaCursor = parseColor(this.options.cursorColor);
 
     this._updateConsoleDimensions();
     this._scrollToBottom(true);
 
-    terminalConsoleCache.on("entry", (logEntry: [Date, LogLevel, any[], CallerInfo | null]) => {
+    terminalConsoleCache.on('entry', (logEntry: [Date, LogLevel, any[], CallerInfo | null]) => {
       this._handleNewLog(logEntry);
     });
 
-    if (process.env.SHOW_CONSOLE === "true") {
+    if (process.env.SHOW_CONSOLE === 'true') {
       this.show();
     }
   }
@@ -361,19 +368,20 @@ export class TerminalConsole extends EventEmitter {
     const currentPositionIndex = this._positions.indexOf(this.options.position);
 
     switch (key) {
-      case "\u001b": // ESC key
+      case '\u001b': // ESC key
         this.blur();
         break;
-      case "\u001b[1;2A": // Shift+UpArrow - Scroll to top
+      case '\u001b[1;2A': // Shift+UpArrow - Scroll to top
         if (this.scrollTopIndex > 0 || this.currentLineIndex > 0) {
           // Check if not already at top
           this.scrollTopIndex = 0;
           this.currentLineIndex = 0;
-          this.isScrolledToBottom = this._displayLines.length <= Math.max(1, this.consoleHeight - 1);
+          this.isScrolledToBottom =
+            this._displayLines.length <= Math.max(1, this.consoleHeight - 1);
           needsRedraw = true;
         }
         break;
-      case "\u001b[1;2B": // Shift+DownArrow - Scroll to bottom
+      case '\u001b[1;2B': // Shift+DownArrow - Scroll to bottom
         const logAreaHeightForScroll = Math.max(1, this.consoleHeight - 1);
         const maxScrollPossible = Math.max(0, this._displayLines.length - logAreaHeightForScroll);
         if (this.scrollTopIndex < maxScrollPossible || !this.isScrolledToBottom) {
@@ -382,7 +390,7 @@ export class TerminalConsole extends EventEmitter {
           needsRedraw = true;
         }
         break;
-      case "\u001b[A": // Up arrow
+      case '\u001b[A': // Up arrow
         if (this.currentLineIndex > 0) {
           this.currentLineIndex--;
           needsRedraw = true;
@@ -392,7 +400,7 @@ export class TerminalConsole extends EventEmitter {
           needsRedraw = true;
         }
         break;
-      case "\u001b[B": // Down arrow
+      case '\u001b[B': // Down arrow
         const canCursorMoveDown =
           this.currentLineIndex < logAreaHeight - 1 &&
           this.scrollTopIndex + this.currentLineIndex < displayLineCount - 1;
@@ -406,25 +414,26 @@ export class TerminalConsole extends EventEmitter {
           needsRedraw = true;
         }
         break;
-      case "\u0010": // Ctrl+p (Previous position)
-        const prevIndex = (currentPositionIndex - 1 + this._positions.length) % this._positions.length;
+      case '\u0010': // Ctrl+p (Previous position)
+        const prevIndex =
+          (currentPositionIndex - 1 + this._positions.length) % this._positions.length;
         this.options.position = this._positions[prevIndex];
         this.resize(this.renderer.terminalWidth, this.renderer.terminalHeight);
         break;
-      case "\u000f": // Ctrl+o (Next/Other position)
+      case '\u000f': // Ctrl+o (Next/Other position)
         const nextIndex = (currentPositionIndex + 1) % this._positions.length;
         this.options.position = this._positions[nextIndex];
         this.resize(this.renderer.terminalWidth, this.renderer.terminalHeight);
         break;
-      case "+":
+      case '+':
         this.options.sizePercent = Math.min(100, this.options.sizePercent + 5);
         this.resize(this.renderer.terminalWidth, this.renderer.terminalHeight);
         break;
-      case "-":
+      case '-':
         this.options.sizePercent = Math.max(10, this.options.sizePercent - 5);
         this.resize(this.renderer.terminalWidth, this.renderer.terminalHeight);
         break;
-      case "\u0013": // Ctrl+s (Save logs)
+      case '\u0013': // Ctrl+s (Save logs)
         this.saveLogsToFile();
         break;
     }
@@ -436,21 +445,21 @@ export class TerminalConsole extends EventEmitter {
 
   private attachStdin(): void {
     if (this.isFocused) return;
-    process.stdin.on("data", this.stdinHandler);
+    process.stdin.on('data', this.stdinHandler);
     this.isFocused = true;
   }
 
   private detachStdin(): void {
     if (!this.isFocused) return;
-    process.stdin.off("data", this.stdinHandler);
+    process.stdin.off('data', this.stdinHandler);
     this.isFocused = false;
   }
 
   private formatTimestamp(date: Date): string {
-    return new Intl.DateTimeFormat("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
+    return new Intl.DateTimeFormat('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
       hour12: false,
     }).format(date);
   }
@@ -460,22 +469,24 @@ export class TerminalConsole extends EventEmitter {
       .map((arg) => {
         if (arg instanceof Error) {
           const errorProps = arg;
-          return `Error: ${errorProps.message}\n` + (errorProps.stack ? `${errorProps.stack}\n` : "");
+          return (
+            `Error: ${errorProps.message}\n` + (errorProps.stack ? `${errorProps.stack}\n` : '')
+          );
         }
-        if (typeof arg === "object" && arg !== null) {
+        if (typeof arg === 'object' && arg !== null) {
           try {
-            return util.inspect(arg, { depth: null });
+            return util.inspect(arg, {depth: null});
           } catch (e) {
             return String(arg);
           }
         }
         try {
-          return util.inspect(arg, { depth: null });
+          return util.inspect(arg, {depth: null});
         } catch (e) {
           return String(arg);
         }
       })
-      .join(" ");
+      .join(' ');
   }
 
   public resize(width: number, height: number): void {
@@ -561,7 +572,7 @@ export class TerminalConsole extends EventEmitter {
 
   public dumpCache(): void {
     for (const logEntry of terminalConsoleCache.cachedLogs) {
-      console.log(logEntry.join(" "));
+      console.log(logEntry.join(' '));
     }
   }
 
@@ -576,7 +587,7 @@ export class TerminalConsole extends EventEmitter {
 
     // --- Draw Title Bar ---
     this.frameBuffer.fillRect(0, 0, this.consoleWidth, 1, this._rgbaTitleBar);
-    const dynamicTitle = `${this._title}${this.isFocused ? " (Focused)" : ""}`;
+    const dynamicTitle = `${this._title}${this.isFocused ? ' (Focused)' : ''}`;
     const titleX = Math.max(0, Math.floor((this.consoleWidth - dynamicTitle.length) / 2));
     this.frameBuffer.drawText(dynamicTitle, titleX, 0, this._rgbaTitleBarText, this._rgbaTitleBar);
 
@@ -604,19 +615,24 @@ export class TerminalConsole extends EventEmitter {
           break;
       }
 
-      const linePrefix = displayLine.indent ? " ".repeat(INDENT_WIDTH) : "";
+      const linePrefix = displayLine.indent ? ' '.repeat(INDENT_WIDTH) : '';
       const textToDraw = displayLine.text;
       const textAvailableWidth = this.consoleWidth - 1 - (displayLine.indent ? INDENT_WIDTH : 0);
 
       const showCursor = this.isFocused && lineY - 1 === this.currentLineIndex;
 
       if (showCursor) {
-        this.frameBuffer.drawText(">", 0, lineY, this._rgbaCursor, this.backgroundColor);
+        this.frameBuffer.drawText('>', 0, lineY, this._rgbaCursor, this.backgroundColor);
       } else {
-        this.frameBuffer.drawText(" ", 0, lineY, this._rgbaDefault, this.backgroundColor);
+        this.frameBuffer.drawText(' ', 0, lineY, this._rgbaDefault, this.backgroundColor);
       }
 
-      this.frameBuffer.drawText(`${linePrefix}${textToDraw.substring(0, textAvailableWidth)}`, 1, lineY, levelColor);
+      this.frameBuffer.drawText(
+        `${linePrefix}${textToDraw.substring(0, textAvailableWidth)}`,
+        1,
+        lineY,
+        levelColor,
+      );
 
       lineY++;
     }
@@ -658,21 +674,25 @@ export class TerminalConsole extends EventEmitter {
     const displayLines: DisplayLine[] = [];
 
     const timestamp = this.formatTimestamp(date);
-    const callerSource = callerInfo ? `${callerInfo.fileName}:${callerInfo.lineNumber}` : "unknown";
-    const prefix = `[${timestamp}] [${level}]` + (this._debugModeEnabled ? ` [${callerSource}]` : "") + " ";
+    const callerSource = callerInfo ? `${callerInfo.fileName}:${callerInfo.lineNumber}` : 'unknown';
+    const prefix =
+      `[${timestamp}] [${level}]` + (this._debugModeEnabled ? ` [${callerSource}]` : '') + ' ';
 
     const formattedArgs = this.formatArguments(args);
-    const initialLines = formattedArgs.split("\n");
+    const initialLines = formattedArgs.split('\n');
 
     for (let i = 0; i < initialLines.length; i++) {
       const lineText = initialLines[i];
       const isFirstLineOfEntry = i === 0;
       const availableWidth = this.consoleWidth - (isFirstLineOfEntry ? 0 : INDENT_WIDTH);
-      const linePrefix = isFirstLineOfEntry ? prefix : " ".repeat(INDENT_WIDTH);
+      const linePrefix = isFirstLineOfEntry ? prefix : ' '.repeat(INDENT_WIDTH);
       const textToWrap = isFirstLineOfEntry ? linePrefix + lineText : lineText;
 
       let currentPos = 0;
-      while (currentPos < textToWrap.length || (isFirstLineOfEntry && currentPos === 0 && textToWrap.length === 0)) {
+      while (
+        currentPos < textToWrap.length ||
+        (isFirstLineOfEntry && currentPos === 0 && textToWrap.length === 0)
+      ) {
         const segment = textToWrap.substring(currentPos, currentPos + availableWidth);
         const isFirstSegmentOfLine = currentPos === 0;
 
@@ -723,14 +743,19 @@ export class TerminalConsole extends EventEmitter {
 
       for (const [date, level, args, callerInfo] of allLogEntries) {
         const timestampStr = this.formatTimestamp(date);
-        const callerSource = callerInfo ? `${callerInfo.fileName}:${callerInfo.lineNumber}` : "unknown";
-        const prefix = `[${timestampStr}] [${level}]` + (this._debugModeEnabled ? ` [${callerSource}]` : "") + " ";
+        const callerSource = callerInfo
+          ? `${callerInfo.fileName}:${callerInfo.lineNumber}`
+          : 'unknown';
+        const prefix =
+          `[${timestampStr}] [${level}]` +
+          (this._debugModeEnabled ? ` [${callerSource}]` : '') +
+          ' ';
         const formattedArgs = this.formatArguments(args);
         logLines.push(prefix + formattedArgs);
       }
 
-      const content = logLines.join("\n");
-      fs.writeFileSync(filepath, content, "utf8");
+      const content = logLines.join('\n');
+      fs.writeFileSync(filepath, content, 'utf8');
 
       console.info(`Console logs saved to: ${filename}`);
     } catch (error) {

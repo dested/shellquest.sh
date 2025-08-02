@@ -7,7 +7,7 @@ export const uIOhook = {
   stop: () => {},
   keyTap: (key: string, modifiers?: string[]) => {},
   keyToggle: (key: string, type: string, modifiers?: string[]) => {},
-}
+};
 
 export const UiohookKey = {
   Escape: 'Escape',
@@ -106,9 +106,9 @@ export const UiohookKey = {
   NumpadDivide: 'NumpadDivide',
   NumpadEnter: 'NumpadEnter',
   NumLock: 'NumLock',
-}
+};
 
 export default {
   uIOhook,
   UiohookKey,
-}
+};

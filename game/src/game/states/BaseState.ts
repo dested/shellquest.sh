@@ -1,44 +1,44 @@
-import { CliRenderer, GroupRenderable, type ParsedKey, type MouseEvent } from '../../core';
+import {CliRenderer, GroupRenderable, type ParsedKey, type MouseEvent} from '../../core';
 
 export abstract class BaseState {
-    protected renderer: CliRenderer;
-    protected rootContainer: GroupRenderable;
-    protected stateContainer: GroupRenderable;
-    protected stateManager: any;
+  protected renderer: CliRenderer;
+  protected rootContainer: GroupRenderable;
+  protected stateContainer: GroupRenderable;
+  protected stateManager: any;
 
-    constructor() {}
+  constructor() {}
 
-    init(renderer: CliRenderer, rootContainer: GroupRenderable, stateManager: any): void {
-        this.renderer = renderer;
-        this.rootContainer = rootContainer;
-        this.stateManager = stateManager;
-        
-        // Create a container for this state
-        this.stateContainer = new GroupRenderable(`state-${Date.now()}`, {
-            x: 0,
-            y: 0,
-            zIndex: 10,
-            visible: true,
-        });
-        this.rootContainer.add(this.stateContainer);
-        
-        this.onEnter();
+  init(renderer: CliRenderer, rootContainer: GroupRenderable, stateManager: any): void {
+    this.renderer = renderer;
+    this.rootContainer = rootContainer;
+    this.stateManager = stateManager;
+
+    // Create a container for this state
+    this.stateContainer = new GroupRenderable(`state-${Date.now()}`, {
+      x: 0,
+      y: 0,
+      zIndex: 10,
+      visible: true,
+    });
+    this.rootContainer.add(this.stateContainer);
+
+    this.onEnter();
+  }
+
+  abstract onEnter(): void;
+
+  abstract onExit(): void;
+
+  abstract handleInput(key: ParsedKey): void;
+
+  handleMouse(event: MouseEvent): void {
+    // Override in subclasses if needed
+  }
+
+  cleanup(): void {
+    this.onExit();
+    if (this.stateContainer && this.rootContainer) {
+      this.rootContainer.remove(this.stateContainer.id);
     }
-
-    abstract onEnter(): void;
-
-    abstract onExit(): void;
-
-    abstract handleInput(key: ParsedKey): void;
-
-    handleMouse(event: MouseEvent): void {
-        // Override in subclasses if needed
-    }
-
-    cleanup(): void {
-        this.onExit();
-        if (this.stateContainer && this.rootContainer) {
-            this.rootContainer.remove(this.stateContainer.id);
-        }
-    }
+  }
 }

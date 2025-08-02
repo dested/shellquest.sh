@@ -1,75 +1,74 @@
-import { hexToRgb } from "./utils.ts"
+import {hexToRgb} from './utils.ts';
 
 export class RGBA {
-  buffer: Float32Array
+  buffer: Float32Array;
 
   constructor(buffer: Float32Array) {
-    this.buffer = buffer
+    this.buffer = buffer;
   }
 
   static fromArray(array: Float32Array) {
-    return new RGBA(array)
+    return new RGBA(array);
   }
 
   static fromValues(r: number, g: number, b: number, a: number = 1.0) {
-    return new RGBA(new Float32Array([r, g, b, a]))
+    return new RGBA(new Float32Array([r, g, b, a]));
   }
 
   static fromInts(r: number, g: number, b: number, a: number = 255) {
-    return new RGBA(new Float32Array([r / 255, g / 255, b / 255, a / 255]))
+    return new RGBA(new Float32Array([r / 255, g / 255, b / 255, a / 255]));
   }
 
-  static fromHex(hex: string|number): RGBA {
-    if (typeof hex === "number") {
-      hex = `#${hex.toString(16).padStart(6, '0')}`;
+  static fromHex(hex: string | number): RGBA {
+    if (typeof hex === 'number') {
+      return hexToRgb(`#${hex.toString(16).padStart(6, '0')}`);
     } else if (!/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(hex)) {
-      return hexToRgb(hex)
+      return hexToRgb(hex);
     }
-
   }
 
   get r(): number {
-    return this.buffer[0]
+    return this.buffer[0];
   }
 
   set r(value: number) {
-    this.buffer[0] = value
+    this.buffer[0] = value;
   }
 
   get g(): number {
-    return this.buffer[1]
+    return this.buffer[1];
   }
 
   set g(value: number) {
-    this.buffer[1] = value
+    this.buffer[1] = value;
   }
 
   get b(): number {
-    return this.buffer[2]
+    return this.buffer[2];
   }
 
   set b(value: number) {
-    this.buffer[2] = value
+    this.buffer[2] = value;
   }
 
   get a(): number {
-    return this.buffer[3]
+    return this.buffer[3];
   }
 
   set a(value: number) {
-    this.buffer[3] = value
+    this.buffer[3] = value;
   }
 
   map<R>(fn: (value: number) => R) {
-    return [fn(this.r), fn(this.g), fn(this.b), fn(this.a)]
+    return [fn(this.r), fn(this.g), fn(this.b), fn(this.a)];
   }
 
   toString() {
-    return `rgba(${this.r.toFixed(2)}, ${this.g.toFixed(2)}, ${this.b.toFixed(2)}, ${this.a.toFixed(2)})`
+    return `rgba(${this.r.toFixed(2)}, ${this.g.toFixed(2)}, ${this.b.toFixed(2)}, ${this.a.toFixed(2)})`;
   }
 }
 
-export type ColorInput = string | RGBA
+export type ColorInput = string | RGBA;
 
 export const TextAttributes = {
   NONE: 0,
@@ -81,9 +80,9 @@ export const TextAttributes = {
   INVERSE: 1 << 5, // 32
   HIDDEN: 1 << 6, // 64
   STRIKETHROUGH: 1 << 7, // 128
-}
+};
 
-export type CursorStyle = "block" | "line" | "underline"
+export type CursorStyle = 'block' | 'line' | 'underline';
 
 export enum DebugOverlayCorner {
   topLeft = 0,
@@ -93,15 +92,14 @@ export enum DebugOverlayCorner {
 }
 
 export interface RenderContext {
-  addToHitGrid: (x: number, y: number, width: number, height: number, id: number) => void
-  width: () => number
-  height: () => number
+  addToHitGrid: (x: number, y: number, width: number, height: number, id: number) => void;
+  width: () => number;
+  height: () => number;
 }
 
 export interface SelectionState {
-  anchor: { x: number; y: number }
-  focus: { x: number; y: number }
-  isActive: boolean
-  isSelecting: boolean
+  anchor: {x: number; y: number};
+  focus: {x: number; y: number};
+  isActive: boolean;
+  isSelecting: boolean;
 }
-

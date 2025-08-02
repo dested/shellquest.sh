@@ -1,223 +1,223 @@
-import { OptimizedBuffer } from "./buffer.ts"
-import type { RenderContext, SelectionState } from "./types.ts"
-import { EventEmitter } from "events"
+import {OptimizedBuffer} from './buffer.ts';
+import type {RenderContext, SelectionState} from './types.ts';
+import {EventEmitter} from 'events';
 
 // MouseEvent is defined in index.ts, we'll define a minimal interface here to avoid circular dep
 export interface MouseEvent {
-  type: string
-  x: number
-  y: number
-  button: number
+  type: string;
+  x: number;
+  y: number;
+  button: number;
   modifiers: {
-    shift: boolean
-    alt: boolean
-    ctrl: boolean
-  }
-  preventDefault(): void
+    shift: boolean;
+    alt: boolean;
+    ctrl: boolean;
+  };
+  preventDefault(): void;
 }
 
 export interface RenderableOptions {
-  x: number
-  y: number
-  width: number
-  height: number
-  zIndex: number
-  visible?: boolean
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  zIndex: number;
+  visible?: boolean;
 }
 
-let renderableNumber = 1
+let renderableNumber = 1;
 
 export abstract class Renderable extends EventEmitter {
-  static renderablesByNumber: Map<number, Renderable> = new Map()
+  static renderablesByNumber: Map<number, Renderable> = new Map();
 
-  public readonly id: string
-  public readonly num: number
-  protected ctx: RenderContext | null = null
-  private _x: number
-  private _y: number
-  private _width: number
-  private _height: number
-  private _zIndex: number
-  public visible: boolean
-  public selectable: boolean = false
-  
-  private renderableMap: Map<string, Renderable> = new Map()
-  private renderableArray: Renderable[] = []
-  private needsZIndexSort: boolean = false
-  public parent: Renderable | null = null
+  public readonly id: string;
+  public readonly num: number;
+  protected ctx: RenderContext | null = null;
+  private _x: number;
+  private _y: number;
+  private _width: number;
+  private _height: number;
+  private _zIndex: number;
+  public visible: boolean;
+  public selectable: boolean = false;
+
+  private renderableMap: Map<string, Renderable> = new Map();
+  private renderableArray: Renderable[] = [];
+  private needsZIndexSort: boolean = false;
+  public parent: Renderable | null = null;
 
   constructor(id: string, options: RenderableOptions) {
-    super()
-    this.id = id
-    this.num = renderableNumber++
-    this._x = options.x
-    this._y = options.y
-    this._width = options.width
-    this._height = options.height
-    this._zIndex = options.zIndex
-    this.visible = options.visible !== false
-    Renderable.renderablesByNumber.set(this.num, this)
+    super();
+    this.id = id;
+    this.num = renderableNumber++;
+    this._x = options.x;
+    this._y = options.y;
+    this._width = options.width;
+    this._height = options.height;
+    this._zIndex = options.zIndex;
+    this.visible = options.visible !== false;
+    Renderable.renderablesByNumber.set(this.num, this);
   }
 
   public hasSelection(): boolean {
-    return false
+    return false;
   }
 
   public onSelectionChanged(selection: SelectionState | null): boolean {
     // Default implementation: do nothing
     // Override this method to provide custom selection handling
-    return false
+    return false;
   }
 
   public getSelectedText(): string {
-    return ""
+    return '';
   }
 
   public shouldStartSelection(x: number, y: number): boolean {
-    return false
+    return false;
   }
 
   public set needsUpdate(value: boolean) {
     if (this.parent) {
-      this.parent.needsUpdate = value
+      this.parent.needsUpdate = value;
     }
   }
 
   public get x(): number {
     if (this.parent) {
-      return this.parent.x + this._x
+      return this.parent.x + this._x;
     }
-    return this._x
+    return this._x;
   }
 
   public set x(value: number) {
-    this._x = value
+    this._x = value;
   }
 
   public get y(): number {
     if (this.parent) {
-      return this.parent.y + this._y
+      return this.parent.y + this._y;
     }
-    return this._y
+    return this._y;
   }
 
   public set y(value: number) {
-    this._y = value
+    this._y = value;
   }
 
   public get width(): number {
-    return this._width
+    return this._width;
   }
 
   public set width(value: number) {
-    this._width = value
+    this._width = value;
   }
 
   public get height(): number {
-    return this._height
+    return this._height;
   }
 
   public set height(value: number) {
-    this._height = value
+    this._height = value;
   }
 
   public get zIndex(): number {
-    return this._zIndex
+    return this._zIndex;
   }
 
   public set zIndex(value: number) {
     if (this._zIndex !== value) {
-      this._zIndex = value
-      this.parent?.requestZIndexSort()
+      this._zIndex = value;
+      this.parent?.requestZIndexSort();
     }
   }
 
   public requestZIndexSort(): void {
-    this.needsZIndexSort = true
+    this.needsZIndexSort = true;
   }
 
   private ensureZIndexSorted(): void {
     if (this.needsZIndexSort) {
-      this.renderableArray.sort((a, b) => (a.zIndex > b.zIndex ? 1 : a.zIndex < b.zIndex ? -1 : 0))
-      this.needsZIndexSort = false
+      this.renderableArray.sort((a, b) => (a.zIndex > b.zIndex ? 1 : a.zIndex < b.zIndex ? -1 : 0));
+      this.needsZIndexSort = false;
     }
   }
 
-  public clear (): void {
+  public clear(): void {
     for (const child of this.renderableArray) {
-      this.remove(child.id)
+      this.remove(child.id);
     }
   }
 
   public add(obj: Renderable): void {
     if (this.renderableMap.has(obj.id)) {
-      this.remove(obj.id)
+      this.remove(obj.id);
     }
 
     if (obj.parent) {
-      obj.parent.remove(obj.id)
+      obj.parent.remove(obj.id);
     }
 
-    obj.parent = this
+    obj.parent = this;
     if (this.ctx) {
-      obj.ctx = this.ctx
+      obj.ctx = this.ctx;
     }
 
-    this.renderableArray.push(obj)
-    this.needsZIndexSort = true
-    this.renderableMap.set(obj.id, obj)
-    this.emit("child:added", obj)
+    this.renderableArray.push(obj);
+    this.needsZIndexSort = true;
+    this.renderableMap.set(obj.id, obj);
+    this.emit('child:added', obj);
   }
 
   public propagateContext(ctx: RenderContext | null): void {
-    this.ctx = ctx
+    this.ctx = ctx;
     for (const child of this.renderableArray) {
-      child.propagateContext(ctx)
+      child.propagateContext(ctx);
     }
   }
 
   public getRenderable(id: string): Renderable | undefined {
-    return this.renderableMap.get(id)
+    return this.renderableMap.get(id);
   }
 
   public remove(id: string): void {
     if (!id) {
-      return
+      return;
     }
     if (this.renderableMap.has(id)) {
-      const obj = this.renderableMap.get(id)
+      const obj = this.renderableMap.get(id);
       if (obj) {
-        obj.parent = null
-        obj.propagateContext(null)
+        obj.parent = null;
+        obj.propagateContext(null);
       }
-      this.renderableMap.delete(id)
+      this.renderableMap.delete(id);
 
-      const index = this.renderableArray.findIndex((obj) => obj.id === id)
+      const index = this.renderableArray.findIndex((obj) => obj.id === id);
       if (index !== -1) {
-        this.renderableArray.splice(index, 1)
+        this.renderableArray.splice(index, 1);
       }
-      this.emit("child:removed", id)
+      this.emit('child:removed', id);
     }
   }
 
   public getAllElementIds(): string[] {
-    return Array.from(this.renderableMap.keys())
+    return Array.from(this.renderableMap.keys());
   }
 
   public getChildren(): Renderable[] {
-    return [...this.renderableArray]
+    return [...this.renderableArray];
   }
 
   public render(buffer: OptimizedBuffer, deltaTime: number): void {
-    if (!this.visible) return
+    if (!this.visible) return;
 
-    this.renderSelf(buffer, deltaTime)
+    this.renderSelf(buffer, deltaTime);
 
-    this.ctx?.addToHitGrid(this.x, this.y, this.width, this.height, this.num)
-    this.ensureZIndexSorted()
+    this.ctx?.addToHitGrid(this.x, this.y, this.width, this.height, this.num);
+    this.ensureZIndexSorted();
 
     for (const child of this.renderableArray) {
-      child.render(buffer, deltaTime)
+      child.render(buffer, deltaTime);
     }
   }
 
@@ -230,18 +230,18 @@ export abstract class Renderable extends EventEmitter {
     if (this.parent) {
       throw new Error(
         `Cannot destroy ${this.id} while it still has a parent (${this.parent.id}). Remove from parent first.`,
-      )
+      );
     }
 
     for (const child of this.renderableArray) {
-      child.parent = null
-      child.destroy()
+      child.parent = null;
+      child.destroy();
     }
-    this.renderableArray = []
-    this.renderableMap.clear()
-    Renderable.renderablesByNumber.delete(this.num)
+    this.renderableArray = [];
+    this.renderableMap.clear();
+    Renderable.renderablesByNumber.delete(this.num);
 
-    this.destroySelf()
+    this.destroySelf();
   }
 
   protected destroySelf(): void {
@@ -250,9 +250,9 @@ export abstract class Renderable extends EventEmitter {
   }
 
   public processMouseEvent(event: MouseEvent): void {
-    this.onMouseEvent(event)
+    this.onMouseEvent(event);
     if (this.parent && !event.defaultPrevented) {
-      this.parent.processMouseEvent(event)
+      this.parent.processMouseEvent(event);
     }
   }
 

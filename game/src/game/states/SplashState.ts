@@ -1,5 +1,5 @@
-import { BaseState } from "./BaseState";
-import { AuthState } from "./AuthState";
+import {BaseState} from './BaseState';
+import {AuthState} from './AuthState';
 import {
   FrameBufferRenderable,
   StyledTextRenderable,
@@ -8,9 +8,9 @@ import {
   fg,
   type ParsedKey,
   OptimizedBuffer,
-  RGBA
-} from "../../core";
-import { COLORS, GAME_CONFIG } from "../constants";
+  RGBA,
+} from '../../core';
+import {COLORS, GAME_CONFIG} from '../constants';
 
 export class SplashState extends BaseState {
   private animationTime: number = 0;
@@ -59,18 +59,22 @@ export class SplashState extends BaseState {
 
     // Create logo buffer for animated ASCII art
 
-    this.logoBuffer = new FrameBufferRenderable("logo-buffer", this.renderer.lib.createOptimizedBuffer(60, 20, true), {
-      x: centerX - 30,
-      y: centerY - 15,
-      width: 60,
-      height: 20,
-      zIndex: 100,
-    });
+    this.logoBuffer = new FrameBufferRenderable(
+      'logo-buffer',
+      this.renderer.lib.createOptimizedBuffer(60, 20, true),
+      {
+        x: centerX - 30,
+        y: centerY - 15,
+        width: 60,
+        height: 20,
+        zIndex: 100,
+      },
+    );
     this.stateContainer.add(this.logoBuffer);
 
     // Title text
-    this.titleText = this.renderer.createStyledText("title", {
-      fragment: t`${bold(fg("#00FFFF")("shellquest.sh"))}`,
+    this.titleText = this.renderer.createStyledText('title', {
+      fragment: t`${bold(fg('#00FFFF')('shellquest.sh'))}`,
       x: centerX - 6,
       y: centerY + 8,
       width: 12,
@@ -80,8 +84,8 @@ export class SplashState extends BaseState {
     this.stateContainer.add(this.titleText);
 
     // Prompt text
-    this.promptText = this.renderer.createStyledText("prompt", {
-      fragment: t`${fg("#FFFF00")("Press any key to continue")}`,
+    this.promptText = this.renderer.createStyledText('prompt', {
+      fragment: t`${fg('#FFFF00')('Press any key to continue')}`,
       x: centerX - 13,
       y: centerY + 10,
       width: 26,
@@ -91,8 +95,8 @@ export class SplashState extends BaseState {
     this.stateContainer.add(this.promptText);
 
     // Version text
-    this.versionText = this.renderer.createStyledText("version", {
-      fragment: t`${fg("#666666")(`v${GAME_CONFIG.VERSION}`)}`,
+    this.versionText = this.renderer.createStyledText('version', {
+      fragment: t`${fg('#666666')(`v${GAME_CONFIG.VERSION}`)}`,
       x: termWidth - 10,
       y: termHeight - 2,
       width: 8,
@@ -102,8 +106,8 @@ export class SplashState extends BaseState {
     this.stateContainer.add(this.versionText);
 
     // Copyright text
-    this.copyrightText = this.renderer.createStyledText("copyright", {
-      fragment: t`${fg("#666666")("© 2024 shellquest.sh")}`,
+    this.copyrightText = this.renderer.createStyledText('copyright', {
+      fragment: t`${fg('#666666')('© 2024 shellquest.sh')}`,
       x: 2,
       y: termHeight - 2,
       width: 20,
@@ -121,8 +125,8 @@ export class SplashState extends BaseState {
       // Update prompt text pulsing
       if (this.promptText) {
         const brightness = 0.5 + Math.sin(this.animationTime * 3) * 0.5;
-        const color = this.interpolateColor("#666666", "#FFFF00", brightness);
-        this.promptText.fragment = t`${fg(color)("Press any key to continue")}`;
+        const color = this.interpolateColor('#666666', '#FFFF00', brightness);
+        this.promptText.fragment = t`${fg(color)('Press any key to continue')}`;
       }
 
       // Auto-transition after display time
@@ -140,22 +144,22 @@ export class SplashState extends BaseState {
 
     // Draw animated skull logo
     const skull = [
-      "         ▓▓▓▓▓▓▓▓▓▓▓▓▓▓         ",
-      "       ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓       ",
-      "     ▓▓▓▓░░░░░░░░░░░░░░▓▓▓▓     ",
-      "    ▓▓▓░░░░░░░░░░░░░░░░░░▓▓▓    ",
-      "   ▓▓▓░░░██░░░░░░░░██░░░░▓▓▓   ",
-      "  ▓▓▓░░░████░░░░░░████░░░░▓▓▓  ",
-      "  ▓▓░░░░████░░░░░░████░░░░░▓▓  ",
-      "  ▓▓░░░░░██░░░░░░░░██░░░░░░▓▓  ",
-      "  ▓▓░░░░░░░░░░██░░░░░░░░░░░▓▓  ",
-      "  ▓▓░░░░░░░░░████░░░░░░░░░░▓▓  ",
-      "  ▓▓▓░░░░░░████████░░░░░░░▓▓▓  ",
-      "   ▓▓▓░░░████████████░░░░▓▓▓   ",
-      "    ▓▓▓░░██████████████░░▓▓▓    ",
-      "     ▓▓▓▓░░██████████░░▓▓▓▓     ",
-      "       ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓       ",
-      "         ▓▓▓▓▓▓▓▓▓▓▓▓▓▓         ",
+      '         ▓▓▓▓▓▓▓▓▓▓▓▓▓▓         ',
+      '       ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓       ',
+      '     ▓▓▓▓░░░░░░░░░░░░░░▓▓▓▓     ',
+      '    ▓▓▓░░░░░░░░░░░░░░░░░░▓▓▓    ',
+      '   ▓▓▓░░░██░░░░░░░░██░░░░▓▓▓   ',
+      '  ▓▓▓░░░████░░░░░░████░░░░▓▓▓  ',
+      '  ▓▓░░░░████░░░░░░████░░░░░▓▓  ',
+      '  ▓▓░░░░░██░░░░░░░░██░░░░░░▓▓  ',
+      '  ▓▓░░░░░░░░░░██░░░░░░░░░░░▓▓  ',
+      '  ▓▓░░░░░░░░░████░░░░░░░░░░▓▓  ',
+      '  ▓▓▓░░░░░░████████░░░░░░░▓▓▓  ',
+      '   ▓▓▓░░░████████████░░░░▓▓▓   ',
+      '    ▓▓▓░░██████████████░░▓▓▓    ',
+      '     ▓▓▓▓░░██████████░░▓▓▓▓     ',
+      '       ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓       ',
+      '         ▓▓▓▓▓▓▓▓▓▓▓▓▓▓         ',
     ];
 
     const offsetY = 2;
@@ -163,17 +167,17 @@ export class SplashState extends BaseState {
       const line = skull[y];
       for (let x = 0; x < line.length; x++) {
         const char = line[x];
-        let color:RGBA =RGBA.fromInts(255, 255, 255); // Default white color
+        let color: RGBA = RGBA.fromInts(255, 255, 255); // Default white color
 
-        if (char === "▓") {
+        if (char === '▓') {
           // Animated rainbow effect for border
           const hue = (this.animationTime * 60 + x * 10 + y * 5) % 360;
           color = this.hslToRgb(hue / 360, 0.7, 0.5);
-        } else if (char === "░") {
+        } else if (char === '░') {
           // Subtle pulsing for inner area
           const brightness = 0.3 + Math.sin(this.animationTime * 2) * 0.1;
           color = this.rgbToHex(brightness, brightness, brightness);
-        } else if (char === "█") {
+        } else if (char === '█') {
           // Eyes and mouth glow
           const pulse = 0.7 + Math.sin(this.animationTime * 4) * 0.3;
           color = this.rgbToHex(pulse, 0, 0);
@@ -210,7 +214,7 @@ export class SplashState extends BaseState {
   }
 
   private rgbToHex(r: number, g: number, b: number) {
-    return RGBA.fromValues(r,g,b);
+    return RGBA.fromValues(r, g, b);
   }
 
   private interpolateColor(color1: string, color2: string, t: number): string {
@@ -229,7 +233,7 @@ export class SplashState extends BaseState {
     const g = Math.round(g1 + (g2 - g1) * t);
     const b = Math.round(b1 + (b2 - b1) * t);
 
-    return "#" + ((r << 16) | (g << 8) | b).toString(16).padStart(6, "0");
+    return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
   }
 
   handleInput(key: ParsedKey): void {

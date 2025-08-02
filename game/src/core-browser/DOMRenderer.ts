@@ -1,16 +1,16 @@
-import { RGBA, type RenderContext, type SelectionState } from "../core/types.ts";
-import { OptimizedBuffer } from "./browser-buffer";
-import { Renderable } from "../core/Renderable.ts";
+import {RGBA, type RenderContext, type SelectionState} from '../core/types.ts';
+import {OptimizedBuffer} from './browser-buffer';
+import {Renderable} from '../core/Renderable.ts';
 import {
   GroupRenderable,
   FrameBufferRenderable,
   type FrameBufferOptions,
   type StyledTextOptions,
   StyledTextRenderable,
-} from "../core/objects.ts";
-import { parseKeypress } from "./browser-keypress";
-import { TerminalConsole, type ConsoleOptions } from "./console-stub";
-import { Selection } from "../core/selection.ts";
+} from '../core/objects.ts';
+import {parseKeypress} from './browser-keypress';
+import {TerminalConsole, type ConsoleOptions} from './console-stub';
+import {Selection} from '../core/selection.ts';
 
 export interface DOMRendererConfig {
   targetFps?: number;
@@ -35,7 +35,7 @@ export class DOMRenderer extends Renderable {
   private terminalDiv: HTMLDivElement;
   private cells: HTMLSpanElement[][] = [];
   private cellCache: Map<string, DirtyCell> = new Map();
-  
+
   public width: number;
   public height: number;
   private _isRunning: boolean = false;
@@ -72,8 +72,13 @@ export class DOMRenderer extends Renderable {
     frameCallbackTime: 0,
   };
 
-  constructor(container: HTMLDivElement, width: number, height: number, config: DOMRendererConfig = {}) {
-    super("__dom_renderer__", { x: 0, y: 0, zIndex: 0, visible: true, width, height });
+  constructor(
+    container: HTMLDivElement,
+    width: number,
+    height: number,
+    config: DOMRendererConfig = {},
+  ) {
+    super('__dom_renderer__', {x: 0, y: 0, zIndex: 0, visible: true, width, height});
 
     this.container = container;
     this.width = width;
@@ -93,8 +98,8 @@ export class DOMRenderer extends Renderable {
     };
 
     // Create terminal div with proper styling
-    this.terminalDiv = document.createElement("div");
-    this.terminalDiv.className = "terminal";
+    this.terminalDiv = document.createElement('div');
+    this.terminalDiv.className = 'terminal';
     this.terminalDiv.style.cssText = `
       font-family: 'Courier New', monospace;
       font-size: 14px;
@@ -134,7 +139,7 @@ export class DOMRenderer extends Renderable {
     // Create a grid of spans for each cell
     for (let y = 0; y < this.height; y++) {
       const row: HTMLSpanElement[] = [];
-      const rowDiv = document.createElement("div");
+      const rowDiv = document.createElement('div');
       rowDiv.style.cssText = `
         height: 1.2em;
         white-space: pre;
@@ -144,14 +149,14 @@ export class DOMRenderer extends Renderable {
       `;
 
       for (let x = 0; x < this.width; x++) {
-        const cell = document.createElement("span");
+        const cell = document.createElement('span');
         cell.style.cssText = `
           display: inline-block;
           width: 1ch;
           height: 1.2em;
           overflow: hidden;
         `;
-        cell.textContent = " ";
+        cell.textContent = ' ';
         rowDiv.appendChild(cell);
         row.push(cell);
       }
@@ -162,11 +167,11 @@ export class DOMRenderer extends Renderable {
   }
 
   private setupInput(): void {
-    document.addEventListener("keydown", (e) => {
+    document.addEventListener('keydown', (e) => {
       const key = parseKeypress(e);
-      this.emit("key", key);
+      this.emit('key', key);
 
-      if (key.raw === "`") {
+      if (key.raw === '`') {
         this.console.toggle();
         e.preventDefault();
       }
@@ -176,32 +181,35 @@ export class DOMRenderer extends Renderable {
   private setupMouse(): void {
     if (!this._useMouse) return;
 
-    const getCellCoords = (e: MouseEvent): { x: number; y: number } => {
+    const getCellCoords = (e: MouseEvent): {x: number; y: number} => {
       const rect = this.terminalDiv.getBoundingClientRect();
       const charWidth = rect.width / this.width;
       const charHeight = rect.height / this.height;
       const x = Math.floor((e.clientX - rect.left) / charWidth);
       const y = Math.floor((e.clientY - rect.top) / charHeight);
-      return { x: Math.max(0, Math.min(this.width - 1, x)), y: Math.max(0, Math.min(this.height - 1, y)) };
+      return {
+        x: Math.max(0, Math.min(this.width - 1, x)),
+        y: Math.max(0, Math.min(this.height - 1, y)),
+      };
     };
 
-    this.terminalDiv.addEventListener("mousemove", (e) => {
-      const { x, y } = getCellCoords(e);
+    this.terminalDiv.addEventListener('mousemove', (e) => {
+      const {x, y} = getCellCoords(e);
 
       if (this.lastOverRenderable) {
         const event = {
           x,
           y,
-          type: "move" as const,
+          type: 'move' as const,
           button: 0,
-          modifiers: { shift: e.shiftKey, alt: e.altKey, ctrl: e.ctrlKey },
+          modifiers: {shift: e.shiftKey, alt: e.altKey, ctrl: e.ctrlKey},
         };
         this.lastOverRenderable.processMouseEvent(event as any);
       }
     });
 
-    this.terminalDiv.addEventListener("mousedown", (e) => {
-      const { x, y } = getCellCoords(e);
+    this.terminalDiv.addEventListener('mousedown', (e) => {
+      const {x, y} = getCellCoords(e);
 
       // Handle selection start
       const maybeRenderable = this.findRenderableAt(x, y);
@@ -210,7 +218,7 @@ export class DOMRenderer extends Renderable {
       }
     });
 
-    this.terminalDiv.addEventListener("mouseup", () => {
+    this.terminalDiv.addEventListener('mouseup', () => {
       if (this.selectionState?.isSelecting) {
         this.finishSelection();
       }
@@ -283,7 +291,7 @@ export class DOMRenderer extends Renderable {
 
   public createStyledText(id: string, options: StyledTextOptions): StyledTextRenderable {
     if (!options.fragment) {
-      throw new Error("StyledText requires a fragment");
+      throw new Error('StyledText requires a fragment');
     }
 
     const width = options.width ?? this.width;
@@ -369,7 +377,7 @@ export class DOMRenderer extends Renderable {
       try {
         await frameCallback(deltaTime);
       } catch (error) {
-        console.error("Error in frame callback:", error);
+        console.error('Error in frame callback:', error);
       }
     }
 
@@ -404,13 +412,13 @@ export class DOMRenderer extends Renderable {
         }
 
         const domCell = this.cells[y][x];
-        const char = cell.char || " ";
+        const char = cell.char || ' ';
         const fg = cell.fg;
         const bg = cell.bg;
 
         updates.push(() => {
           // Update text content
-          domCell.textContent = char === "" ? " " : char;
+          domCell.textContent = char === '' ? ' ' : char;
 
           // Update colors - RGBA values are already normalized (0-1)
           const fgColor = `rgba(${Math.round(fg.r * 255)}, ${Math.round(fg.g * 255)}, ${Math.round(fg.b * 255)}, ${fg.a})`;
@@ -422,22 +430,23 @@ export class DOMRenderer extends Renderable {
           // Handle text attributes
           if (cell.attributes) {
             const attrs = cell.attributes;
-            let textDecoration = "";
-            let fontWeight = "normal";
-            let fontStyle = "normal";
+            let textDecoration = '';
+            let fontWeight = 'normal';
+            let fontStyle = 'normal';
 
-            if (attrs & 1) fontWeight = "bold"; // Bold
-            if (attrs & 2) fontStyle = "italic"; // Italic
-            if (attrs & 4) textDecoration = "underline"; // Underline
-            if (attrs & 8) textDecoration = textDecoration ? textDecoration + " line-through" : "line-through"; // Strikethrough
+            if (attrs & 1) fontWeight = 'bold'; // Bold
+            if (attrs & 2) fontStyle = 'italic'; // Italic
+            if (attrs & 4) textDecoration = 'underline'; // Underline
+            if (attrs & 8)
+              textDecoration = textDecoration ? textDecoration + ' line-through' : 'line-through'; // Strikethrough
 
             domCell.style.fontWeight = fontWeight;
             domCell.style.fontStyle = fontStyle;
             domCell.style.textDecoration = textDecoration;
           } else {
-            domCell.style.fontWeight = "normal";
-            domCell.style.fontStyle = "normal";
-            domCell.style.textDecoration = "none";
+            domCell.style.fontWeight = 'normal';
+            domCell.style.fontStyle = 'normal';
+            domCell.style.textDecoration = 'none';
           }
         });
 
@@ -449,7 +458,7 @@ export class DOMRenderer extends Renderable {
     // Batch DOM updates
     if (updates.length > 0) {
       requestAnimationFrame(() => {
-        updates.forEach(update => update());
+        updates.forEach((update) => update());
       });
     }
   }
@@ -470,11 +479,11 @@ export class DOMRenderer extends Renderable {
   }
 
   public clearTerminal(): void {
-    this.cells.forEach(row => {
-      row.forEach(cell => {
-        cell.textContent = " ";
-        cell.style.color = "#fff";
-        cell.style.backgroundColor = "#000";
+    this.cells.forEach((row) => {
+      row.forEach((cell) => {
+        cell.textContent = ' ';
+        cell.style.color = '#fff';
+        cell.style.backgroundColor = '#000';
       });
     });
   }
@@ -505,20 +514,20 @@ export class DOMRenderer extends Renderable {
     this.selectionContainers.push(startRenderable.parent || this);
 
     this.selectionState = {
-      anchor: { x, y },
-      focus: { x, y },
+      anchor: {x, y},
+      focus: {x, y},
       isActive: true,
       isSelecting: true,
     };
 
-    this.currentSelection = new Selection({ x, y }, { x, y });
+    this.currentSelection = new Selection({x, y}, {x, y});
     this.notifySelectablesOfSelectionChange();
   }
 
   private finishSelection(): void {
     if (this.selectionState) {
       this.selectionState.isSelecting = false;
-      this.emit("selection", this.currentSelection);
+      this.emit('selection', this.currentSelection);
     }
   }
 
@@ -534,7 +543,7 @@ export class DOMRenderer extends Renderable {
   private notifySelectablesOfSelectionChange(): void {
     let normalizedSelection: SelectionState | null = null;
     if (this.selectionState) {
-      normalizedSelection = { ...this.selectionState };
+      normalizedSelection = {...this.selectionState};
 
       if (
         normalizedSelection.anchor.y > normalizedSelection.focus.y ||
@@ -555,13 +564,15 @@ export class DOMRenderer extends Renderable {
     for (const [, renderable] of Renderable.renderablesByNumber) {
       if (renderable.visible && renderable.selectable) {
         const currentContainer =
-          this.selectionContainers.length > 0 ? this.selectionContainers[this.selectionContainers.length - 1] : null;
+          this.selectionContainers.length > 0
+            ? this.selectionContainers[this.selectionContainers.length - 1]
+            : null;
         let hasSelection = false;
         if (!currentContainer || this.isWithinContainer(renderable, currentContainer)) {
           hasSelection = renderable.onSelectionChanged(normalizedSelection);
         } else {
           hasSelection = renderable.onSelectionChanged(
-            normalizedSelection ? { ...normalizedSelection, isActive: false } : null,
+            normalizedSelection ? {...normalizedSelection, isActive: false} : null,
           );
         }
 
@@ -594,7 +605,9 @@ export class DOMRenderer extends Renderable {
   }
 
   public getSelectionContainer(): Renderable | null {
-    return this.selectionContainers.length > 0 ? this.selectionContainers[this.selectionContainers.length - 1] : null;
+    return this.selectionContainers.length > 0
+      ? this.selectionContainers[this.selectionContainers.length - 1]
+      : null;
   }
 
   public get needsUpdate(): boolean {

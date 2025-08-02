@@ -1,16 +1,16 @@
-import { RGBA } from "../../../core/types.ts"
-import { tilemapData, getNormalizedPixelAt, type TilemapData } from "../generated/tilemapData"
+import {RGBA} from '../../../core/types.ts';
+import {tilemapData, getNormalizedPixelAt, type TilemapData} from '../generated/tilemapData';
 
 // Constants for tile sizing
-export const TILE_SIZE = 16 // 4x4 pixels per tile
-export const TILE_PIXELS = TILE_SIZE * TILE_SIZE
+export const TILE_SIZE = 16; // 4x4 pixels per tile
+export const TILE_PIXELS = TILE_SIZE * TILE_SIZE;
 
 export interface TileDefinition {
   name: string;
   x: number; // X position in tilemap (in tiles, not pixels)
   y: number; // Y position in tilemap (in tiles, not pixels)
   solid?: boolean; // For collision detection
-  layer?: "bottom" | "sprite" | "top"; // Which layer this tile belongs to
+  layer?: 'bottom' | 'sprite' | 'top'; // Which layer this tile belongs to
   flipX?: boolean; // Whether to flip tile horizontally
   flipY?: boolean; // Whether to flip tile vertically
 }
@@ -37,7 +37,9 @@ export class TileMap {
 
     // Load from generated data
     if (!(tilemapName in tilemapData)) {
-      throw new Error(`Tilemap data not found for: ${tilemapName}. Run 'npm run build:tilemap' to generate.`);
+      throw new Error(
+        `Tilemap data not found for: ${tilemapName}. Run 'npm run build:tilemap' to generate.`,
+      );
     }
 
     this.tilemapData = tilemapData[tilemapName];
@@ -53,7 +55,7 @@ export class TileMap {
     y: number,
     options?: {
       solid?: boolean;
-      layer?: "bottom" | "sprite" | "top";
+      layer?: 'bottom' | 'sprite' | 'top';
       flipX?: boolean;
       flipY?: boolean;
     },
@@ -63,7 +65,7 @@ export class TileMap {
       x,
       y,
       solid: options?.solid ?? false,
-      layer: options?.layer ?? "bottom",
+      layer: options?.layer ?? 'bottom',
       flipX: options?.flipX ?? false, // Add flipX option
       flipY: options?.flipY ?? false, // Add flipY option
     });
@@ -138,7 +140,7 @@ export class TileMap {
   /**
    * Get all tile names for a specific layer
    */
-  getTilesForLayer(layer: "bottom" | "sprite" | "top"): string[] {
+  getTilesForLayer(layer: 'bottom' | 'sprite' | 'top'): string[] {
     const tiles: string[] = [];
     for (const [name, def] of this.tileDefinitions) {
       if (def.layer === layer) {

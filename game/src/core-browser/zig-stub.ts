@@ -1,5 +1,5 @@
 // Stub for Zig native library in browser
-import { OptimizedBuffer } from './browser-buffer'
+import {OptimizedBuffer} from './browser-buffer';
 
 export function resolveRenderLib() {
   return {
@@ -15,13 +15,13 @@ export function resolveRenderLib() {
     addToHitGrid: () => {},
     checkHit: () => 0,
     render: () => {},
-    createOptimizedBuffer: (width: number, height: number, respectAlpha?: boolean) => 
+    createOptimizedBuffer: (width: number, height: number, respectAlpha?: boolean) =>
       new OptimizedBuffer(width, height, respectAlpha || false),
     setCursorPosition: () => {},
     setCursorStyle: () => {},
     setCursorColor: () => {},
     updateStats: () => {},
-  }
+  };
 }
 
-export type RenderLib = ReturnType<typeof resolveRenderLib>
+export type RenderLib = ReturnType<typeof resolveRenderLib>;

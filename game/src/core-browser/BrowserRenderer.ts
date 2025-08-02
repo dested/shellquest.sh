@@ -1,16 +1,16 @@
-import { RGBA, type RenderContext, type SelectionState } from "../core/types.ts";
-import { OptimizedBuffer } from "./browser-buffer";
-import { Renderable } from "../core/Renderable.ts";
+import {RGBA, type RenderContext, type SelectionState} from '../core/types.ts';
+import {OptimizedBuffer} from './browser-buffer';
+import {Renderable} from '../core/Renderable.ts';
 import {
   GroupRenderable,
   FrameBufferRenderable,
   type FrameBufferOptions,
   type StyledTextOptions,
   StyledTextRenderable,
-} from "../core/objects.ts";
-import { parseKeypress } from "./browser-keypress";
-import { TerminalConsole, type ConsoleOptions } from "./console-stub";
-import { Selection } from "../core/selection.ts";
+} from '../core/objects.ts';
+import {parseKeypress} from './browser-keypress';
+import {TerminalConsole, type ConsoleOptions} from './console-stub';
+import {Selection} from '../core/selection.ts';
 
 export interface BrowserRendererConfig {
   targetFps?: number;
@@ -62,8 +62,13 @@ export class BrowserRenderer extends Renderable {
     frameCallbackTime: 0,
   };
 
-  constructor(container: HTMLDivElement, width: number, height: number, config: BrowserRendererConfig = {}) {
-    super("__browser_renderer__", { x: 0, y: 0, zIndex: 0, visible: true, width, height });
+  constructor(
+    container: HTMLDivElement,
+    width: number,
+    height: number,
+    config: BrowserRendererConfig = {},
+  ) {
+    super('__browser_renderer__', {x: 0, y: 0, zIndex: 0, visible: true, width, height});
 
     this.container = container;
     this.width = width;
@@ -83,18 +88,18 @@ export class BrowserRenderer extends Renderable {
       // Add other methods as needed
     };
 
-    this.canvas = document.createElement("canvas");
+    this.canvas = document.createElement('canvas');
     this.canvas.width = width * CHAR_WIDTH;
     this.canvas.height = height * CHAR_HEIGHT;
-    this.canvas.style.backgroundColor = "#000";
-    this.canvas.style.imageRendering = "pixelated";
-    this.canvas.style.fontFamily = "monospace";
+    this.canvas.style.backgroundColor = '#000';
+    this.canvas.style.imageRendering = 'pixelated';
+    this.canvas.style.fontFamily = 'monospace';
     this.container.appendChild(this.canvas);
 
-    this.ctx = this.canvas.getContext("2d", { alpha: false })!;
+    this.ctx = this.canvas.getContext('2d', {alpha: false})!;
     this.ctx.imageSmoothingEnabled = false;
     this.ctx.font = `${CHAR_HEIGHT - 4}px monospace`;
-    this.ctx.textBaseline = "top";
+    this.ctx.textBaseline = 'top';
     (this.ctx as any).addToHitGrid = () => {};
 
     this.nextRenderBuffer = new OptimizedBuffer(width, height, false);
@@ -114,11 +119,11 @@ export class BrowserRenderer extends Renderable {
   }
 
   private setupInput(): void {
-    document.addEventListener("keydown", (e) => {
+    document.addEventListener('keydown', (e) => {
       const key = parseKeypress(e);
-      this.emit("key", key);
+      this.emit('key', key);
 
-      if (key.raw === "`") {
+      if (key.raw === '`') {
         this.console.toggle();
         e.preventDefault();
       }
@@ -128,7 +133,7 @@ export class BrowserRenderer extends Renderable {
   private setupMouse(): void {
     if (!this._useMouse) return;
 
-    this.canvas.addEventListener("mousemove", (e) => {
+    this.canvas.addEventListener('mousemove', (e) => {
       const rect = this.canvas.getBoundingClientRect();
       const x = Math.floor((e.clientX - rect.left) / CHAR_WIDTH);
       const y = Math.floor((e.clientY - rect.top) / CHAR_HEIGHT);
@@ -137,15 +142,15 @@ export class BrowserRenderer extends Renderable {
         const event = {
           x,
           y,
-          type: "move" as const,
+          type: 'move' as const,
           button: 0,
-          modifiers: { shift: e.shiftKey, alt: e.altKey, ctrl: e.ctrlKey },
+          modifiers: {shift: e.shiftKey, alt: e.altKey, ctrl: e.ctrlKey},
         };
         this.lastOverRenderable.processMouseEvent(event as any);
       }
     });
 
-    this.canvas.addEventListener("mousedown", (e) => {
+    this.canvas.addEventListener('mousedown', (e) => {
       const rect = this.canvas.getBoundingClientRect();
       const x = Math.floor((e.clientX - rect.left) / CHAR_WIDTH);
       const y = Math.floor((e.clientY - rect.top) / CHAR_HEIGHT);
@@ -157,7 +162,7 @@ export class BrowserRenderer extends Renderable {
       }
     });
 
-    this.canvas.addEventListener("mouseup", () => {
+    this.canvas.addEventListener('mouseup', () => {
       if (this.selectionState?.isSelecting) {
         this.finishSelection();
       }
@@ -230,7 +235,7 @@ export class BrowserRenderer extends Renderable {
 
   public createStyledText(id: string, options: StyledTextOptions): StyledTextRenderable {
     if (!options.fragment) {
-      throw new Error("StyledText requires a fragment");
+      throw new Error('StyledText requires a fragment');
     }
 
     const width = options.width ?? this.width;
@@ -316,7 +321,7 @@ export class BrowserRenderer extends Renderable {
       try {
         await frameCallback(deltaTime);
       } catch (error) {
-        console.error("Error in frame callback:", error);
+        console.error('Error in frame callback:', error);
       }
     }
 
@@ -338,7 +343,7 @@ export class BrowserRenderer extends Renderable {
   }
 
   private drawBufferToCanvas(): void {
-    this.ctx.fillStyle = "#000";
+    this.ctx.fillStyle = '#000';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
@@ -355,7 +360,7 @@ export class BrowserRenderer extends Renderable {
         }
 
         // Draw character - only if not a space
-        if (cell.char && cell.char !== " " && cell.fg) {
+        if (cell.char && cell.char !== ' ' && cell.fg) {
           this.ctx.fillStyle = `rgba(${Math.round(cell.fg.r * 255)}, ${Math.round(cell.fg.g * 255)}, ${Math.round(cell.fg.b * 255)}, ${cell.fg.a})`;
           this.ctx.fillText(cell.char, px + 1, py + 2);
         }
@@ -364,7 +369,7 @@ export class BrowserRenderer extends Renderable {
   }
 
   public clearTerminal(): void {
-    this.ctx.fillStyle = "#000";
+    this.ctx.fillStyle = '#000';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
@@ -394,20 +399,20 @@ export class BrowserRenderer extends Renderable {
     this.selectionContainers.push(startRenderable.parent || this);
 
     this.selectionState = {
-      anchor: { x, y },
-      focus: { x, y },
+      anchor: {x, y},
+      focus: {x, y},
       isActive: true,
       isSelecting: true,
     };
 
-    this.currentSelection = new Selection({ x, y }, { x, y });
+    this.currentSelection = new Selection({x, y}, {x, y});
     this.notifySelectablesOfSelectionChange();
   }
 
   private finishSelection(): void {
     if (this.selectionState) {
       this.selectionState.isSelecting = false;
-      this.emit("selection", this.currentSelection);
+      this.emit('selection', this.currentSelection);
     }
   }
 
@@ -423,7 +428,7 @@ export class BrowserRenderer extends Renderable {
   private notifySelectablesOfSelectionChange(): void {
     let normalizedSelection: SelectionState | null = null;
     if (this.selectionState) {
-      normalizedSelection = { ...this.selectionState };
+      normalizedSelection = {...this.selectionState};
 
       if (
         normalizedSelection.anchor.y > normalizedSelection.focus.y ||
@@ -444,13 +449,15 @@ export class BrowserRenderer extends Renderable {
     for (const [, renderable] of Renderable.renderablesByNumber) {
       if (renderable.visible && renderable.selectable) {
         const currentContainer =
-          this.selectionContainers.length > 0 ? this.selectionContainers[this.selectionContainers.length - 1] : null;
+          this.selectionContainers.length > 0
+            ? this.selectionContainers[this.selectionContainers.length - 1]
+            : null;
         let hasSelection = false;
         if (!currentContainer || this.isWithinContainer(renderable, currentContainer)) {
           hasSelection = renderable.onSelectionChanged(normalizedSelection);
         } else {
           hasSelection = renderable.onSelectionChanged(
-            normalizedSelection ? { ...normalizedSelection, isActive: false } : null,
+            normalizedSelection ? {...normalizedSelection, isActive: false} : null,
           );
         }
 
@@ -483,7 +490,9 @@ export class BrowserRenderer extends Renderable {
   }
 
   public getSelectionContainer(): Renderable | null {
-    return this.selectionContainers.length > 0 ? this.selectionContainers[this.selectionContainers.length - 1] : null;
+    return this.selectionContainers.length > 0
+      ? this.selectionContainers[this.selectionContainers.length - 1]
+      : null;
   }
 
   public get needsUpdate(): boolean {

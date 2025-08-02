@@ -4,147 +4,149 @@
  */
 
 export class EventEmitter {
-  private events: Map<string | symbol, Function[]> = new Map()
-  private maxListeners: number = 10
+  private events: Map<string | symbol, Function[]> = new Map();
+  private maxListeners: number = 10;
 
   addListener(eventName: string | symbol, listener: Function): this {
-    return this.on(eventName, listener)
+    return this.on(eventName, listener);
   }
 
   on(eventName: string | symbol, listener: Function): this {
     if (!this.events.has(eventName)) {
-      this.events.set(eventName, [])
+      this.events.set(eventName, []);
     }
-    const listeners = this.events.get(eventName)!
-    listeners.push(listener)
-    
+    const listeners = this.events.get(eventName)!;
+    listeners.push(listener);
+
     // Warning for too many listeners
     if (listeners.length > this.maxListeners) {
-      console.warn(`MaxListenersExceededWarning: Possible EventEmitter memory leak detected. ${listeners.length} ${String(eventName)} listeners added.`)
+      console.warn(
+        `MaxListenersExceededWarning: Possible EventEmitter memory leak detected. ${listeners.length} ${String(eventName)} listeners added.`,
+      );
     }
-    
-    return this
+
+    return this;
   }
 
   once(eventName: string | symbol, listener: Function): this {
     const onceWrapper = (...args: any[]) => {
-      this.removeListener(eventName, onceWrapper)
-      listener.apply(this, args)
-    }
-    return this.on(eventName, onceWrapper)
+      this.removeListener(eventName, onceWrapper);
+      listener.apply(this, args);
+    };
+    return this.on(eventName, onceWrapper);
   }
 
   removeListener(eventName: string | symbol, listener: Function): this {
-    const listeners = this.events.get(eventName)
+    const listeners = this.events.get(eventName);
     if (listeners) {
-      const index = listeners.indexOf(listener)
+      const index = listeners.indexOf(listener);
       if (index !== -1) {
-        listeners.splice(index, 1)
+        listeners.splice(index, 1);
         if (listeners.length === 0) {
-          this.events.delete(eventName)
+          this.events.delete(eventName);
         }
       }
     }
-    return this
+    return this;
   }
 
   off(eventName: string | symbol, listener: Function): this {
-    return this.removeListener(eventName, listener)
+    return this.removeListener(eventName, listener);
   }
 
   removeAllListeners(eventName?: string | symbol): this {
     if (eventName === undefined) {
-      this.events.clear()
+      this.events.clear();
     } else {
-      this.events.delete(eventName)
+      this.events.delete(eventName);
     }
-    return this
+    return this;
   }
 
   emit(eventName: string | symbol, ...args: any[]): boolean {
-    const listeners = this.events.get(eventName)
+    const listeners = this.events.get(eventName);
     if (!listeners || listeners.length === 0) {
-      return false
+      return false;
     }
 
     // Copy listeners array to avoid issues if listeners are modified during emission
-    const listenersToCall = [...listeners]
+    const listenersToCall = [...listeners];
     for (const listener of listenersToCall) {
       try {
-        listener.apply(this, args)
+        listener.apply(this, args);
       } catch (error) {
         // In Node.js, uncaught exceptions in event handlers are handled by the 'error' event
         if (eventName !== 'error') {
-          this.emit('error', error)
+          this.emit('error', error);
         } else {
           // If error event handler throws, we need to handle it somehow
-          console.error('Uncaught exception in error event handler:', error)
+          console.error('Uncaught exception in error event handler:', error);
         }
       }
     }
-    return true
+    return true;
   }
 
   eventNames(): (string | symbol)[] {
-    return Array.from(this.events.keys())
+    return Array.from(this.events.keys());
   }
 
   listeners(eventName: string | symbol): Function[] {
-    const listeners = this.events.get(eventName)
-    return listeners ? [...listeners] : []
+    const listeners = this.events.get(eventName);
+    return listeners ? [...listeners] : [];
   }
 
   listenerCount(eventName: string | symbol): number {
-    const listeners = this.events.get(eventName)
-    return listeners ? listeners.length : 0
+    const listeners = this.events.get(eventName);
+    return listeners ? listeners.length : 0;
   }
 
   getMaxListeners(): number {
-    return this.maxListeners
+    return this.maxListeners;
   }
 
   setMaxListeners(n: number): this {
-    this.maxListeners = n
-    return this
+    this.maxListeners = n;
+    return this;
   }
 
   prependListener(eventName: string | symbol, listener: Function): this {
     if (!this.events.has(eventName)) {
-      this.events.set(eventName, [])
+      this.events.set(eventName, []);
     }
-    this.events.get(eventName)!.unshift(listener)
-    return this
+    this.events.get(eventName)!.unshift(listener);
+    return this;
   }
 
   prependOnceListener(eventName: string | symbol, listener: Function): this {
     const onceWrapper = (...args: any[]) => {
-      this.removeListener(eventName, onceWrapper)
-      listener.apply(this, args)
-    }
-    return this.prependListener(eventName, onceWrapper)
+      this.removeListener(eventName, onceWrapper);
+      listener.apply(this, args);
+    };
+    return this.prependListener(eventName, onceWrapper);
   }
 }
 
 // Default export and named export for compatibility
-export default EventEmitter
+export default EventEmitter;
 
 // Static methods and properties to match Node.js EventEmitter
-EventEmitter.defaultMaxListeners = 10
+EventEmitter.defaultMaxListeners = 10;
 
 // Export commonly used functions
 export function once(emitter: EventEmitter, eventName: string | symbol): Promise<any[]> {
   return new Promise((resolve, reject) => {
     function onEvent(...args: any[]) {
-      emitter.removeListener('error', onError)
-      resolve(args)
+      emitter.removeListener('error', onError);
+      resolve(args);
     }
-    
+
     function onError(error: Error) {
-      emitter.removeListener(eventName, onEvent)
-      reject(error)
+      emitter.removeListener(eventName, onEvent);
+      reject(error);
     }
-    
-    emitter.once(eventName, onEvent)
-    emitter.once('error', onError)
-  })
+
+    emitter.once(eventName, onEvent);
+    emitter.once('error', onError);
+  });
 }

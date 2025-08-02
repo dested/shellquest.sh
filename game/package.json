@@ -64,10 +64,6 @@
   "peerDependencies": {
     "typescript": "^5"
   },
-  "prettier": {
-    "semi": true,
-    "printWidth": 120
-  },
   "dependencies": {
     "rot-js": "^2.2.1"
   },

@@ -9,16 +9,16 @@ import {
   RGBA,
   type ParsedKey,
   type MouseEvent,
-} from "../../core";
-import { getKeyHandler } from "../../core/ui/lib/KeyHandler.ts";
-import { TileMap, TILE_SIZE } from "./tilemap/TileMap.ts";
-import { LayeredRenderer, type Entity } from "./tilemap/LayeredRenderer.ts";
-import { BrowserLayeredRenderer } from "./tilemap/BrowserLayeredRenderer.ts";
-import { Level } from "./level.ts";
-import { renderFontToFrameBuffer, measureText } from "../../core/ui/ascii.font.ts";
+} from '../../core';
+import {getKeyHandler} from '../../core/ui/lib/KeyHandler.ts';
+import {TileMap, TILE_SIZE} from './tilemap/TileMap.ts';
+import {LayeredRenderer, type Entity} from './tilemap/LayeredRenderer.ts';
+import {BrowserLayeredRenderer} from './tilemap/BrowserLayeredRenderer.ts';
+import {Level} from './level.ts';
+import {renderFontToFrameBuffer, measureText} from '../../core/ui/ascii.font.ts';
 
 // Check if we're in a browser environment
-const isBrowser = typeof window !== "undefined";
+const isBrowser = typeof window !== 'undefined';
 
 // Game constants
 const MAP_WIDTH = 200;
@@ -32,8 +32,8 @@ class Player implements Entity {
   subY: number = 0;
   width: number = 1;
   height: number = 1;
-  tileName: string = "player";
-  layer: "sprite" = "sprite";
+  tileName: string = 'player';
+  layer: 'sprite' = 'sprite';
   facingLeft: boolean = false; // Track which direction player is facing
 
   hp: number = 70;
@@ -143,7 +143,7 @@ class DungeonCrawlerGame {
   private manaBar: GroupRenderable;
 
   // Movement state
-  private moveDirection = { x: 0, y: 0 };
+  private moveDirection = {x: 0, y: 0};
   private moveInterval: NodeJS.Timeout | number | null = null; // Support both Node and browser timers
   private moveSpeed = 30; // ms between moves when holding key (faster for smoother movement)
   private subTileSpeed = 1; // Move 1 sub-tile at a time (out of 4 per tile)
@@ -156,13 +156,18 @@ class DungeonCrawlerGame {
 
     // Initialize tile map
     this.tileMap = new TileMap();
-    
-    this.gameContainer = new GroupRenderable("game-container", { x: 0, y: 0, zIndex: 0, visible: true });
+
+    this.gameContainer = new GroupRenderable('game-container', {
+      x: 0,
+      y: 0,
+      zIndex: 0,
+      visible: true,
+    });
     this.renderer.add(this.gameContainer);
 
     this.initializeSync();
 
-    renderer.on("resize", () => {
+    renderer.on('resize', () => {
       this.gameContainer.clear();
       this.setupUI();
       this.update();
@@ -185,7 +190,7 @@ class DungeonCrawlerGame {
     this.camera.update(this.player.preciseX, this.player.preciseY);
 
     this.update();
-      this.update();
+    this.update();
   }
 
   private setupLayeredRenderer(): void {
@@ -230,49 +235,54 @@ class DungeonCrawlerGame {
     const barPadding = 3;
 
     // --- HEALTH BAR (LEFT) ---
-    this.healthBar = new GroupRenderable("health-bar", { x: barPadding, y: barY, zIndex: 10, visible: true });
+    this.healthBar = new GroupRenderable('health-bar', {
+      x: barPadding,
+      y: barY,
+      zIndex: 10,
+      visible: true,
+    });
 
     // Fancy health container with gradient-like background
-    const healthBg = new BoxRenderable("health-bg", {
+    const healthBg = new BoxRenderable('health-bg', {
       x: 0,
       y: 0,
       width: barWidth,
       height: barHeight,
-      borderStyle: "heavy",
-      borderColor: "#ff4444",
-      bg: "#2a0000",
+      borderStyle: 'heavy',
+      borderColor: '#ff4444',
+      bg: '#2a0000',
       zIndex: 10,
     });
     this.healthBar.add(healthBg);
 
     // Decorative corner elements
-    const healthCornerTL = new TextRenderable("health-corner-tl", {
+    const healthCornerTL = new TextRenderable('health-corner-tl', {
       x: 1,
       y: 0,
-      content: "♦",
-      fg: "#ff6666",
+      content: '♦',
+      fg: '#ff6666',
       zIndex: 13,
     });
     this.healthBar.add(healthCornerTL);
 
-    const healthCornerTR = new TextRenderable("health-corner-tr", {
+    const healthCornerTR = new TextRenderable('health-corner-tr', {
       x: barWidth - 2,
       y: 0,
-      content: "♦",
-      fg: "#ff6666",
+      content: '♦',
+      fg: '#ff6666',
       zIndex: 13,
     });
     this.healthBar.add(healthCornerTR);
 
     // Title with block font using FrameBufferRenderable
-    const healthTitleText = "HEALTH";
-    const { width: healthTitleWidth, height: healthTitleHeight } = measureText({
+    const healthTitleText = 'HEALTH';
+    const {width: healthTitleWidth, height: healthTitleHeight} = measureText({
       text: healthTitleText,
-      font: "block",
+      font: 'block',
     });
     const healthTitleX = Math.floor((barWidth - healthTitleWidth) / 2);
 
-    const healthTitle = this.renderer.createFrameBuffer("health-title", {
+    const healthTitle = this.renderer.createFrameBuffer('health-title', {
       width: healthTitleWidth,
       height: healthTitleHeight,
       x: healthTitleX,
@@ -287,19 +297,19 @@ class DungeonCrawlerGame {
       y: 0,
       fg: [RGBA.fromInts(255, 120, 120, 255), RGBA.fromInts(255, 80, 80, 255)],
       bg: RGBA.fromInts(42, 0, 0, 255),
-      font: "block",
+      font: 'block',
     });
     this.healthBar.add(healthTitle);
 
     // Health bar background track (positioned below block font text)
-    const healthTrackBg = new BoxRenderable("health-track-bg", {
+    const healthTrackBg = new BoxRenderable('health-track-bg', {
       x: 3,
       y: 7, // Below the 5-line tall block font
       width: barWidth - 6,
       height: 3,
-      bg: "#330000",
-      borderStyle: "single",
-      borderColor: "#660000",
+      bg: '#330000',
+      borderStyle: 'single',
+      borderColor: '#660000',
       zIndex: 11,
     });
     this.healthBar.add(healthTrackBg);
@@ -309,24 +319,24 @@ class DungeonCrawlerGame {
     const healthFillWidth = Math.max(0, Math.floor((barWidth - 8) * healthPercent));
 
     // Main fill
-    const healthFill = new BoxRenderable("health-fill", {
+    const healthFill = new BoxRenderable('health-fill', {
       x: 4,
       y: 8,
       width: healthFillWidth,
       height: 1,
-      bg: "#ff3333",
+      bg: '#ff3333',
       zIndex: 12,
     });
     this.healthBar.add(healthFill);
 
     // Highlight on top of fill
     if (healthFillWidth > 0) {
-      const healthFillHighlight = new BoxRenderable("health-fill-highlight", {
+      const healthFillHighlight = new BoxRenderable('health-fill-highlight', {
         x: 4,
         y: 8,
         width: Math.min(healthFillWidth, Math.floor(healthFillWidth * 0.7)),
         height: 1,
-        bg: "#ff6666",
+        bg: '#ff6666',
         zIndex: 13,
       });
       this.healthBar.add(healthFillHighlight);
@@ -335,7 +345,7 @@ class DungeonCrawlerGame {
     this.gameContainer.add(this.healthBar);
 
     // --- MANA BAR (RIGHT) ---
-    this.manaBar = new GroupRenderable("mana-bar", {
+    this.manaBar = new GroupRenderable('mana-bar', {
       x: barPadding + barWidth + 2,
       y: barY,
       zIndex: 10,
@@ -343,46 +353,46 @@ class DungeonCrawlerGame {
     });
 
     // Fancy mana container
-    const manaBg = new BoxRenderable("mana-bg", {
+    const manaBg = new BoxRenderable('mana-bg', {
       x: 0,
       y: 0,
       width: barWidth,
       height: barHeight,
-      borderStyle: "heavy",
-      borderColor: "#4499ff",
-      bg: "#001a3a",
+      borderStyle: 'heavy',
+      borderColor: '#4499ff',
+      bg: '#001a3a',
       zIndex: 10,
     });
     this.manaBar.add(manaBg);
 
     // Decorative corner elements
-    const manaCornerTL = new TextRenderable("mana-corner-tl", {
+    const manaCornerTL = new TextRenderable('mana-corner-tl', {
       x: 1,
       y: 0,
-      content: "◊",
-      fg: "#66aaff",
+      content: '◊',
+      fg: '#66aaff',
       zIndex: 13,
     });
     this.manaBar.add(manaCornerTL);
 
-    const manaCornerTR = new TextRenderable("mana-corner-tr", {
+    const manaCornerTR = new TextRenderable('mana-corner-tr', {
       x: barWidth - 2,
       y: 0,
-      content: "◊",
-      fg: "#66aaff",
+      content: '◊',
+      fg: '#66aaff',
       zIndex: 13,
     });
     this.manaBar.add(manaCornerTR);
 
     // Title with block font using FrameBufferRenderable
-    const manaTitleText = "MANA";
-    const { width: manaTitleWidth, height: manaTitleHeight } = measureText({
+    const manaTitleText = 'MANA';
+    const {width: manaTitleWidth, height: manaTitleHeight} = measureText({
       text: manaTitleText,
-      font: "block",
+      font: 'block',
     });
     const manaTitleX = Math.floor((barWidth - manaTitleWidth) / 2);
 
-    const manaTitle = this.renderer.createFrameBuffer("mana-title", {
+    const manaTitle = this.renderer.createFrameBuffer('mana-title', {
       width: manaTitleWidth,
       height: manaTitleHeight,
       x: manaTitleX,
@@ -397,19 +407,19 @@ class DungeonCrawlerGame {
       y: 0,
       fg: [RGBA.fromInts(120, 180, 255, 255), RGBA.fromInts(80, 140, 255, 255)],
       bg: RGBA.fromInts(0, 26, 58, 255),
-      font: "block",
+      font: 'block',
     });
     this.manaBar.add(manaTitle);
 
     // Mana bar background track (positioned below block font text)
-    const manaTrackBg = new BoxRenderable("mana-track-bg", {
+    const manaTrackBg = new BoxRenderable('mana-track-bg', {
       x: 3,
       y: 7, // Below the 5-line tall block font
       width: barWidth - 6,
       height: 3,
-      bg: "#001133",
-      borderStyle: "single",
-      borderColor: "#003366",
+      bg: '#001133',
+      borderStyle: 'single',
+      borderColor: '#003366',
       zIndex: 11,
     });
     this.manaBar.add(manaTrackBg);
@@ -419,24 +429,24 @@ class DungeonCrawlerGame {
     const manaFillWidth = Math.max(0, Math.floor((barWidth - 8) * manaPercent));
 
     // Main fill
-    const manaFill = new BoxRenderable("mana-fill", {
+    const manaFill = new BoxRenderable('mana-fill', {
       x: 4,
       y: 8,
       width: manaFillWidth,
       height: 1,
-      bg: "#0099ff",
+      bg: '#0099ff',
       zIndex: 12,
     });
     this.manaBar.add(manaFill);
 
     // Highlight on top of fill
     if (manaFillWidth > 0) {
-      const manaFillHighlight = new BoxRenderable("mana-fill-highlight", {
+      const manaFillHighlight = new BoxRenderable('mana-fill-highlight', {
         x: 4,
         y: 8,
         width: Math.min(manaFillWidth, Math.floor(manaFillWidth * 0.7)),
         height: 1,
-        bg: "#33bbff",
+        bg: '#33bbff',
         zIndex: 13,
       });
       this.manaBar.add(manaFillHighlight);
@@ -446,11 +456,11 @@ class DungeonCrawlerGame {
 
     // --- DECORATIVE DIVIDER ---
     const dividerY = barHeight + 2;
-    const divider = new TextRenderable("divider", {
+    const divider = new TextRenderable('divider', {
       x: 0,
       y: dividerY,
-      content: "═".repeat(width),
-      fg: "#666666",
+      content: '═'.repeat(width),
+      fg: '#666666',
       zIndex: 5,
     });
     this.gameContainer.add(divider);
@@ -461,35 +471,35 @@ class DungeonCrawlerGame {
     const mapBorderWidth = width;
     const mapBorderX = 0;
 
-    this.mapBorder = new BoxRenderable("map-border", {
+    this.mapBorder = new BoxRenderable('map-border', {
       x: mapBorderX,
       y: mapBorderY,
       width: mapBorderWidth,
       height: mapBorderHeight,
-      borderStyle: "heavy",
-      borderColor: "#8a7f76",
-      bg: "#000000",
-      title: "",
-      titleAlignment: "center",
+      borderStyle: 'heavy',
+      borderColor: '#8a7f76',
+      bg: '#000000',
+      title: '',
+      titleAlignment: 'center',
       zIndex: 2,
     });
     this.gameContainer.add(this.mapBorder);
 
     // Additional decorative elements on the border
-    const leftDecor = new TextRenderable("left-decor", {
+    const leftDecor = new TextRenderable('left-decor', {
       x: 2,
       y: mapBorderY,
-      content: "╬═══╬",
-      fg: "#aa9988",
+      content: '╬═══╬',
+      fg: '#aa9988',
       zIndex: 3,
     });
     this.gameContainer.add(leftDecor);
 
-    const rightDecor = new TextRenderable("right-decor", {
+    const rightDecor = new TextRenderable('right-decor', {
       x: width - 7,
       y: mapBorderY,
-      content: "╬═══╬",
-      fg: "#aa9988",
+      content: '╬═══╬',
+      fg: '#aa9988',
       zIndex: 3,
     });
     this.gameContainer.add(rightDecor);
@@ -498,43 +508,43 @@ class DungeonCrawlerGame {
   private setupInput(): void {
     const keyHandler = getKeyHandler();
 
-    keyHandler.on("keypress", (key: ParsedKey) => {
+    keyHandler.on('keypress', (key: ParsedKey) => {
       switch (key.raw) {
-        case "\u0003":
+        case '\u0003':
           if (isBrowser) {
-            console.log("Ctrl+C pressed (exit disabled in browser)");
+            console.log('Ctrl+C pressed (exit disabled in browser)');
           } else {
             process.exit(0);
           }
           break;
-        case "`":
+        case '`':
           this.renderer.console.toggle();
           break;
-        case "t":
+        case 't':
           this.renderer.toggleDebugOverlay();
           break;
       }
     });
 
-    keyHandler.on("keydown", (key: ParsedKey) => {
+    keyHandler.on('keydown', (key: ParsedKey) => {
       let dx = 0;
       let dy = 0;
 
       switch (key.name) {
-        case "w":
-        case "up":
+        case 'w':
+        case 'up':
           dy = -1;
           break;
-        case "s":
-        case "down":
+        case 's':
+        case 'down':
           dy = 1;
           break;
-        case "a":
-        case "left":
+        case 'a':
+        case 'left':
           dx = -1;
           break;
-        case "d":
-        case "right":
+        case 'd':
+        case 'right':
           dx = 1;
           break;
       }
@@ -553,7 +563,7 @@ class DungeonCrawlerGame {
               this.movePlayer(this.moveDirection.x, this.moveDirection.y);
             }
           };
-          
+
           // Use appropriate timer function for environment
           if (isBrowser) {
             this.moveInterval = window.setInterval(intervalFn, this.moveSpeed);
@@ -564,29 +574,29 @@ class DungeonCrawlerGame {
       }
     });
 
-    keyHandler.on("keyup", (key: ParsedKey) => {
+    keyHandler.on('keyup', (key: ParsedKey) => {
       // Check if this key was part of current movement
       switch (key.name) {
-        case "w":
-        case "up":
+        case 'w':
+        case 'up':
           if (this.moveDirection.y === -1) {
             this.moveDirection.y = 0;
           }
           break;
-        case "s":
-        case "down":
+        case 's':
+        case 'down':
           if (this.moveDirection.y === 1) {
             this.moveDirection.y = 0;
           }
           break;
-        case "a":
-        case "left":
+        case 'a':
+        case 'left':
           if (this.moveDirection.x === -1) {
             this.moveDirection.x = 0;
           }
           break;
-        case "d":
-        case "right":
+        case 'd':
+        case 'right':
           if (this.moveDirection.x === 1) {
             this.moveDirection.x = 0;
           }
@@ -692,15 +702,15 @@ class DungeonCrawlerGame {
     this.layeredRenderer.destroy();
 
     // Clean up frame buffers
-    this.renderer.remove("health-title");
-    this.renderer.remove("mana-title");
+    this.renderer.remove('health-title');
+    this.renderer.remove('mana-title');
 
     this.renderer.remove(this.gameContainer.id);
   }
 }
 
 export async function run(renderer: CliRenderer | any): Promise<void> {
-  renderer.setBackgroundColor("#000000");
+  renderer.setBackgroundColor('#000000');
   const game = new DungeonCrawlerGame(renderer);
 
   // Store game instance for cleanup
@@ -726,6 +736,6 @@ if (!isBrowser) {
     targetFps: 30,
   });
 
-  renderer.setBackgroundColor("#000000");
+  renderer.setBackgroundColor('#000000');
   await run(renderer);
 }
