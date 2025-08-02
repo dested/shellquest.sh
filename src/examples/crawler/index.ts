@@ -24,15 +24,28 @@ const MAP_HEIGHT = 200
 class Player implements Entity {
   gridX: number = 10
   gridY: number = 10
+  // Sub-tile positions for smooth movement (0-3 within each tile)
+  subX: number = 0
+  subY: number = 0
   width: number = 1
   height: number = 1
   tileName: string = "player"
   layer: "sprite" = "sprite"
+  facingLeft: boolean = false // Track which direction player is facing
 
   hp: number = 70
   maxHp: number = 100
   mana: number = 20
   maxMana: number = 50
+  
+  // Get precise position in sub-tile units (4 sub-tiles per tile)
+  get preciseX(): number {
+    return this.gridX * 4 + this.subX
+  }
+  
+  get preciseY(): number {
+    return this.gridY * 4 + this.subY
+  }
 }
 
 class Camera {
@@ -40,6 +53,15 @@ class Camera {
 
   x: number = 0
   y: number = 0
+  // Sub-tile camera positions for smooth scrolling
+  subX: number = 0
+  subY: number = 0
+  
+  // Target positions for smooth interpolation
+  targetX: number = 0
+  targetY: number = 0
+  targetSubX: number = 0
+  targetSubY: number = 0
 
   get viewportWidth(): number {
     // Each 16x16 tile is 16 characters wide
@@ -51,14 +73,55 @@ class Camera {
     return Math.floor((this.game.renderer.terminalHeight - 16) / (TILE_SIZE / 2))
   }
 
-  update(playerX: number, playerY: number): void {
-    // Calculate ideal camera position to center player
-    const idealX = playerX - Math.floor(this.viewportWidth / 2)
-    const idealY = playerY - Math.floor(this.viewportHeight / 2)
-
+  update(playerPreciseX: number, playerPreciseY: number): void {
+    // Work in sub-tile units (4 sub-tiles per tile)
+    const centerX = this.viewportWidth * 2 // Center in sub-tile units
+    const centerY = this.viewportHeight * 2
+    
+    // Calculate ideal camera position in sub-tile units
+    const idealPreciseX = playerPreciseX - centerX
+    const idealPreciseY = playerPreciseY - centerY
+    
+    // Convert to tile and sub-tile components
+    this.targetX = Math.floor(idealPreciseX / 4)
+    this.targetSubX = idealPreciseX % 4
+    this.targetY = Math.floor(idealPreciseY / 4)
+    this.targetSubY = idealPreciseY % 4
+    
     // Clamp to map bounds
-    this.x = Math.max(0, Math.min(idealX, MAP_WIDTH - this.viewportWidth))
-    this.y = Math.max(0, Math.min(idealY, MAP_HEIGHT - this.viewportHeight))
+    const maxX = MAP_WIDTH - this.viewportWidth
+    const maxY = MAP_HEIGHT - this.viewportHeight
+    
+    if (this.targetX < 0) {
+      this.targetX = 0
+      this.targetSubX = 0
+    } else if (this.targetX >= maxX) {
+      this.targetX = maxX
+      this.targetSubX = 0
+    }
+    
+    if (this.targetY < 0) {
+      this.targetY = 0
+      this.targetSubY = 0
+    } else if (this.targetY >= maxY) {
+      this.targetY = maxY
+      this.targetSubY = 0
+    }
+    
+    // Smooth interpolation (instant for now, can be smoothed later)
+    this.x = this.targetX
+    this.subX = this.targetSubX
+    this.y = this.targetY
+    this.subY = this.targetSubY
+  }
+  
+  // Get precise camera position in sub-tile units
+  get preciseX(): number {
+    return this.x * 4 + this.subX
+  }
+  
+  get preciseY(): number {
+    return this.y * 4 + this.subY
   }
 }
 
@@ -79,7 +142,8 @@ class DungeonCrawlerGame {
   // Movement state
   private moveDirection = { x: 0, y: 0 }
   private moveInterval: NodeJS.Timeout | null = null
-  private moveSpeed = 50 // ms between moves when holding key
+  private moveSpeed = 30 // ms between moves when holding key (faster for smoother movement)
+  private subTileSpeed = 1 // Move 1 sub-tile at a time (out of 4 per tile)
 
   constructor(renderer: CliRenderer) {
     this.renderer = renderer
@@ -103,7 +167,7 @@ class DungeonCrawlerGame {
     this.level.addEntity(this.player)
 
     // Center camera on player
-    this.camera.update(this.player.gridX, this.player.gridY)
+    this.camera.update(this.player.preciseX, this.player.preciseY)
 
     this.update()
     this.tileMap.onReady = () => {
@@ -493,13 +557,43 @@ class DungeonCrawlerGame {
   }
 
   private movePlayer(dx: number, dy: number): void {
-    const newX = this.player.gridX + dx
-    const newY = this.player.gridY + dy
-
-    if (!this.level.isSolid(newX, newY)) {
-      this.player.gridX = newX
-      this.player.gridY = newY
-      this.camera.update(this.player.gridX, this.player.gridY)
+    // Update facing direction based on horizontal movement
+    if (dx < 0) {
+      this.player.facingLeft = true
+    } else if (dx > 0) {
+      this.player.facingLeft = false
+    }
+    
+    // Move in sub-tile increments
+    let newSubX = this.player.subX + dx * this.subTileSpeed
+    let newSubY = this.player.subY + dy * this.subTileSpeed
+    let newGridX = this.player.gridX
+    let newGridY = this.player.gridY
+    
+    // Handle tile transitions
+    if (newSubX < 0) {
+      newGridX--
+      newSubX = 3
+    } else if (newSubX > 3) {
+      newGridX++
+      newSubX = 0
+    }
+    
+    if (newSubY < 0) {
+      newGridY--
+      newSubY = 3
+    } else if (newSubY > 3) {
+      newGridY++
+      newSubY = 0
+    }
+    
+    // Check collision at the target tile position
+    if (!this.level.isSolid(newGridX, newGridY)) {
+      this.player.gridX = newGridX
+      this.player.gridY = newGridY
+      this.player.subX = newSubX
+      this.player.subY = newSubY
+      this.camera.update(this.player.preciseX, this.player.preciseY)
       this.update()
     }
   }
@@ -507,14 +601,32 @@ class DungeonCrawlerGame {
   private update(): void {
     // Clear all layers
     this.layeredRenderer.clear()
-    // Render bottom layer (tiles)
-    this.layeredRenderer.renderBottomLayer(this.level.getBottomLayerTiles(), this.camera.x, this.camera.y)
+    // Render bottom layer (tiles) with sub-tile offset
+    this.layeredRenderer.renderBottomLayer(
+      this.level.getBottomLayerTiles(), 
+      this.camera.x, 
+      this.camera.y,
+      this.camera.subX,
+      this.camera.subY
+    )
 
-    // Render sprite layer (entities including player)
-    this.layeredRenderer.renderSpriteLayer(this.level.getEntities(), this.camera.x, this.camera.y)
+    // Render sprite layer (entities including player) with sub-tile offset
+    this.layeredRenderer.renderSpriteLayer(
+      this.level.getEntities(), 
+      this.camera.x, 
+      this.camera.y,
+      this.camera.subX,
+      this.camera.subY
+    )
 
-    // Render top layer (overlays)
-    this.layeredRenderer.renderTopLayer(this.level.getTopLayerTiles(), this.camera.x, this.camera.y)
+    // Render top layer (overlays) with sub-tile offset
+    this.layeredRenderer.renderTopLayer(
+      this.level.getTopLayerTiles(), 
+      this.camera.x, 
+      this.camera.y,
+      this.camera.subX,
+      this.camera.subY
+    )
 
     this.renderer.renderOnce()
   }

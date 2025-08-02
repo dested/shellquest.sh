@@ -18,6 +18,8 @@ const BLOCK_CHARS = {
 export interface Entity {
   gridX: number
   gridY: number
+  subX?: number // Sub-tile X position (0-3)
+  subY?: number // Sub-tile Y position (0-3)
   width: number // Width in tiles (e.g., 2 for 2x1 entity)
   height: number // Height in tiles
   tileName: string
@@ -99,8 +101,12 @@ export class LayeredRenderer {
     if (!pixels) return
 
     // Calculate character position (16x8 chars per tile)
-    const charX = gridX * TILE_SIZE + offsetX
-    const charY = gridY * (TILE_SIZE / 2) + Math.floor(offsetY / 2) // Tiles are 8 chars tall
+    // offsetX and offsetY are in pixels, need to convert to character units
+    const charOffsetX = Math.floor(offsetX / 1) // 1 pixel = 1 character horizontally
+    const charOffsetY = Math.floor(offsetY / 2) // 2 pixels = 1 character vertically (half-blocks)
+    
+    const charX = gridX * TILE_SIZE + charOffsetX
+    const charY = gridY * (TILE_SIZE / 2) + charOffsetY // Tiles are 8 chars tall
 
     // Process the 16x16 pixel tile as 16x8 characters
     // Each character combines 2 vertical pixels
@@ -202,20 +208,30 @@ export class LayeredRenderer {
   /**
    * Render the bottom layer (full grid of tiles)
    */
-  renderBottomLayer(tiles: string[][], cameraX: number = 0, cameraY: number = 0): void {
+  renderBottomLayer(tiles: string[][], cameraX: number = 0, cameraY: number = 0, subX: number = 0, subY: number = 0): void {
     // Clear with a dark background
     this.bottomLayer.frameBuffer.clear(RGBA.fromHex("#0a0a0a"))
 
-    // Draw tiles
-    for (let y = 0; y < this.viewportHeight; y++) {
-      for (let x = 0; x < this.viewportWidth; x++) {
+    // Calculate pixel offset from sub-tile position (each sub-tile is 4 pixels)
+    const pixelOffsetX = -subX * 4
+    const pixelOffsetY = -subY * 4
+    
+    // Render one extra tile in each direction to handle partial tiles at edges
+    const startX = subX > 0 ? -1 : 0
+    const startY = subY > 0 ? -1 : 0
+    const endX = this.viewportWidth + (subX > 0 ? 1 : 0)
+    const endY = this.viewportHeight + (subY > 0 ? 1 : 0)
+
+    // Draw tiles with sub-tile offset
+    for (let y = startY; y <= endY; y++) {
+      for (let x = startX; x <= endX; x++) {
         const worldX = x + cameraX
         const worldY = y + cameraY
 
         if (worldY >= 0 && worldY < tiles.length && worldX >= 0 && worldX < tiles[worldY].length) {
           const tileName = tiles[worldY][worldX]
           if (tileName) {
-            this.renderTile(this.bottomLayer, tileName, x, y)
+            this.renderTile(this.bottomLayer, tileName, x, y, pixelOffsetX, pixelOffsetY)
           }
         }
       }
@@ -228,27 +244,47 @@ export class LayeredRenderer {
   /**
    * Render entities on the sprite layer
    */
-  renderSpriteLayer(entities: Entity[], cameraX: number = 0, cameraY: number = 0): void {
+  renderSpriteLayer(entities: Entity[], cameraX: number = 0, cameraY: number = 0, subX: number = 0, subY: number = 0): void {
     this.spriteLayer.frameBuffer.clear(RGBA.fromValues(0, 0, 0, 0))
 
     // Sort entities by Y position for proper depth
-    const sortedEntities = [...entities].sort((a, b) => a.gridY - b.gridY)
+    const sortedEntities = [...entities].sort((a, b) => {
+      const aY = a.gridY + (a.subY || 0) / 4
+      const bY = b.gridY + (b.subY || 0) / 4
+      return aY - bY
+    })
 
     for (const entity of sortedEntities) {
-      // Check if entity is visible in viewport
+      // Calculate entity position with sub-tile precision
+      const entitySubX = entity.subX || 0
+      const entitySubY = entity.subY || 0
+      
+      // Calculate screen position in tiles
       const screenX = entity.gridX - cameraX
       const screenY = entity.gridY - cameraY
+      
+      // Calculate pixel offset for this entity
+      const entityPixelOffsetX = (entitySubX - subX) * 4
+      const entityPixelOffsetY = (entitySubY - subY) * 4
 
+      // Check if entity is visible in viewport (with some margin for sub-tile offsets)
       if (
-        screenX >= -entity.width &&
-        screenX < this.viewportWidth &&
-        screenY >= -entity.height &&
-        screenY < this.viewportHeight
+        screenX >= -entity.width - 1 &&
+        screenX <= this.viewportWidth + 1 &&
+        screenY >= -entity.height - 1 &&
+        screenY <= this.viewportHeight + 1
       ) {
         // Render multi-tile entities
         for (let ty = 0; ty < entity.height; ty++) {
           for (let tx = 0; tx < entity.width; tx++) {
-            this.renderTile(this.spriteLayer, entity.tileName, screenX + tx, screenY + ty)
+            this.renderTile(
+              this.spriteLayer, 
+              entity.tileName, 
+              screenX + tx, 
+              screenY + ty,
+              entityPixelOffsetX,
+              entityPixelOffsetY
+            )
           }
         }
       }
@@ -265,15 +301,22 @@ export class LayeredRenderer {
     overlayTiles: Array<{ tileName: string; gridX: number; gridY: number }>,
     cameraX: number = 0,
     cameraY: number = 0,
+    subX: number = 0,
+    subY: number = 0,
   ): void {
     this.topLayer.frameBuffer.clear(RGBA.fromValues(0, 0, 0, 0))
+
+    // Calculate pixel offset from sub-tile position
+    const pixelOffsetX = -subX * 4
+    const pixelOffsetY = -subY * 4
 
     for (const overlay of overlayTiles) {
       const screenX = overlay.gridX - cameraX
       const screenY = overlay.gridY - cameraY
 
-      if (screenX >= 0 && screenX < this.viewportWidth && screenY >= 0 && screenY < this.viewportHeight) {
-        this.renderTile(this.topLayer, overlay.tileName, screenX, screenY)
+      // Check with margin for sub-tile offsets
+      if (screenX >= -1 && screenX <= this.viewportWidth && screenY >= -1 && screenY <= this.viewportHeight) {
+        this.renderTile(this.topLayer, overlay.tileName, screenX, screenY, pixelOffsetX, pixelOffsetY)
       }
     }
   }
