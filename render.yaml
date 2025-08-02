@@ -1,0 +1,46 @@
+services:
+  - type: web
+    name: tui-crawler-web
+    rootDir: web
+    env: node
+    branch: main
+    plan: standard
+    region: oregon
+    buildCommand: |
+      pnpm install
+      pnpm prisma-generate 
+      pnpm build
+#    domains:
+#      - tui-crawler.com
+    startCommand: pnpm serve
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL    # inject DB connection string at deploy time
+        fromDatabase:
+          name: tui-crawler-db       # must match the database name below
+          property: connectionString
+  - type: web
+    headers:
+      - path: /*
+        name: Access-Control-Allow-Origin
+        value: "*"
+    rootDir: web
+    name: tui-crawler-web-static
+#    domain: static.tui-crawler.app
+    runtime: static
+    buildCommand: |
+      pnpm install
+      pnpm prisma-generate 
+      pnpm build:client
+    staticPublishPath: ./dist/app/client
+
+databases:
+  - name: tui-crawler-db
+    databaseName: tui-crawler
+    user: app_user
+    plan: basic-256mb
+    region: oregon
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: everywhere
+

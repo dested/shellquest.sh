@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "alwaysStrict": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "checkJs": true,
+    "noEmitOnError": false,
+    "declaration": true,
+    "declarationMap": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "incremental": true,
+    "jsx": "react-jsx",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "strict": true,
+    "outDir": "dist/app",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "skipLibCheck": true,
+    "sourceMap": false,
+    "target": "es2022",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@client/*": ["./src/*"],
+      "@server/*": ["./server/*"]
+    },
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "isolatedModules": true,
+    "noUncheckedIndexedAccess": false,
+    "noEmit": true
+  },
+  "include": ["api/**/*", "types/*", "server.ts", "./server/types/prismaJson.d.ts"],
+  "exclude": ["dist", "src/**/*.tsx"],
+  "ts-node": {
+    "transpileOnly": true,
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
+  }
+}
