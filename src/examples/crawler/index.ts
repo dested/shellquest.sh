@@ -6,6 +6,7 @@ import {
   TextRenderable,
   BoxRenderable,
   GroupRenderable,
+  FrameBufferRenderable,
   RGBA,
   type ParsedKey,
   type MouseEvent,
@@ -14,6 +15,7 @@ import { getKeyHandler } from "../../ui/lib/KeyHandler.ts"
 import { TileMap, TILE_SIZE } from "./tilemap/TileMap.ts"
 import { LayeredRenderer, type Entity } from "./tilemap/LayeredRenderer.ts"
 import { Level } from "./Level.ts"
+import { renderFontToFrameBuffer, measureText } from "../../ui/ascii.font.ts"
 
 // Game constants
 const MAP_WIDTH = 200
@@ -45,8 +47,8 @@ class Camera {
   }
   get viewportHeight(): number {
     // Each 16x16 tile is 8 characters tall with half-block rendering
-    // Subtract UI space (6 lines), then divide by 8 chars per tile
-    return Math.floor((this.game.renderer.terminalHeight - 6) / (TILE_SIZE / 2))
+    // Subtract UI space (16 lines for larger UI), then divide by 8 chars per tile
+    return Math.floor((this.game.renderer.terminalHeight - 16) / (TILE_SIZE / 2))
   }
 
   update(playerX: number, playerY: number): void {
@@ -117,7 +119,7 @@ class DungeonCrawlerGame {
   private setupLayeredRenderer(): void {
     const width = this.renderer.terminalWidth
     const height = this.renderer.terminalHeight
-    const gameAreaY = 6
+    const gameAreaY = 16 // Updated to account for larger UI with block font
     // Each 16x16 tile is 16 chars wide
     const gameAreaX = Math.floor((width - (this.camera.viewportWidth * TILE_SIZE + 4)) / 2)
 
@@ -138,94 +140,239 @@ class DungeonCrawlerGame {
     const height = this.renderer.terminalHeight
 
     // --- UI BAR HEIGHTS ---
-    const barHeight = 3
-    const barWidth = Math.floor((width - 6) / 2) // 2 bars, 2px padding each side, 2px between
-    const barY = 0
-    const barPadding = 2
+    const barHeight = 12 // Much taller bars to fit block font (5 lines tall)
+    const barWidth = Math.floor((width - 8) / 2) // 2 bars with spacing
+    const barY = 1
+    const barPadding = 3
 
     // --- HEALTH BAR (LEFT) ---
     this.healthBar = new GroupRenderable("health-bar", { x: barPadding, y: barY, zIndex: 10, visible: true })
 
+    // Fancy health container with gradient-like background
     const healthBg = new BoxRenderable("health-bg", {
       x: 0,
       y: 0,
       width: barWidth,
       height: barHeight,
-      borderStyle: "double",
-      borderColor: "#ff0000",
-      bg: "#1a0000",
-      title: " HEALTH ",
-      titleAlignment: "center",
+      borderStyle: "heavy",
+      borderColor: "#ff4444",
+      bg: "#2a0000",
       zIndex: 10,
     })
     this.healthBar.add(healthBg)
 
-    const healthFill = new BoxRenderable("health-fill", {
-      x: 2,
+    // Decorative corner elements
+    const healthCornerTL = new TextRenderable("health-corner-tl", {
+      x: 1,
+      y: 0,
+      content: "♦",
+      fg: "#ff6666",
+      zIndex: 13,
+    })
+    this.healthBar.add(healthCornerTL)
+
+    const healthCornerTR = new TextRenderable("health-corner-tr", {
+      x: barWidth - 2,
+      y: 0,
+      content: "♦",
+      fg: "#ff6666",
+      zIndex: 13,
+    })
+    this.healthBar.add(healthCornerTR)
+
+    // Title with block font using FrameBufferRenderable
+    const healthTitleText = "HEALTH"
+    const { width: healthTitleWidth, height: healthTitleHeight } = measureText({ 
+      text: healthTitleText, 
+      font: "block" 
+    })
+    const healthTitleX = Math.floor((barWidth - healthTitleWidth) / 2)
+    
+    const healthTitle = this.renderer.createFrameBuffer("health-title", {
+      width: healthTitleWidth,
+      height: healthTitleHeight,
+      x: healthTitleX,
       y: 1,
-      width: Math.max(0, Math.floor((barWidth - 4) * (this.player.hp / this.player.maxHp))),
-      height: 1,
-      bg: "#ff0000",
       zIndex: 11,
+    })
+    healthTitle.frameBuffer.clear(RGBA.fromInts(42, 0, 0, 0))
+    
+    renderFontToFrameBuffer(healthTitle.frameBuffer, {
+      text: healthTitleText,
+      x: 0,
+      y: 0,
+      fg: [RGBA.fromInts(255, 120, 120, 255), RGBA.fromInts(255, 80, 80, 255)],
+      bg: RGBA.fromInts(42, 0, 0, 255),
+      font: "block",
+    })
+    this.healthBar.add(healthTitle)
+
+    // Health bar background track (positioned below block font text)
+    const healthTrackBg = new BoxRenderable("health-track-bg", {
+      x: 3,
+      y: 7,  // Below the 5-line tall block font
+      width: barWidth - 6,
+      height: 3,
+      bg: "#330000",
+      borderStyle: "single",
+      borderColor: "#660000",
+      zIndex: 11,
+    })
+    this.healthBar.add(healthTrackBg)
+
+    // Animated health fill with gradient effect
+    const healthPercent = this.player.hp / this.player.maxHp
+    const healthFillWidth = Math.max(0, Math.floor((barWidth - 8) * healthPercent))
+    
+    // Main fill
+    const healthFill = new BoxRenderable("health-fill", {
+      x: 4,
+      y: 8,
+      width: healthFillWidth,
+      height: 1,
+      bg: "#ff3333",
+      zIndex: 12,
     })
     this.healthBar.add(healthFill)
 
-    const healthText = new TextRenderable("health-text", {
-      x: Math.floor(barWidth / 2) - 5,
-      y: 1,
-      content: `${this.player.hp}/${this.player.maxHp}`,
-      fg: "#ffffff",
-      zIndex: 12,
-    })
-    this.healthBar.add(healthText)
+    // Highlight on top of fill
+    if (healthFillWidth > 0) {
+      const healthFillHighlight = new BoxRenderable("health-fill-highlight", {
+        x: 4,
+        y: 8,
+        width: Math.min(healthFillWidth, Math.floor(healthFillWidth * 0.7)),
+        height: 1,
+        bg: "#ff6666",
+        zIndex: 13,
+      })
+      this.healthBar.add(healthFillHighlight)
+    }
 
     this.gameContainer.add(this.healthBar)
 
     // --- MANA BAR (RIGHT) ---
     this.manaBar = new GroupRenderable("mana-bar", {
-      x: barPadding + barWidth + barPadding,
+      x: barPadding + barWidth + 2,
       y: barY,
       zIndex: 10,
       visible: true,
     })
 
+    // Fancy mana container
     const manaBg = new BoxRenderable("mana-bg", {
       x: 0,
       y: 0,
       width: barWidth,
       height: barHeight,
-      borderStyle: "double",
-      borderColor: "#0099ff",
-      bg: "#001a33",
-      title: " MANA ",
-      titleAlignment: "center",
+      borderStyle: "heavy",
+      borderColor: "#4499ff",
+      bg: "#001a3a",
       zIndex: 10,
     })
     this.manaBar.add(manaBg)
 
-    const manaFill = new BoxRenderable("mana-fill", {
-      x: 2,
+    // Decorative corner elements
+    const manaCornerTL = new TextRenderable("mana-corner-tl", {
+      x: 1,
+      y: 0,
+      content: "◊",
+      fg: "#66aaff",
+      zIndex: 13,
+    })
+    this.manaBar.add(manaCornerTL)
+
+    const manaCornerTR = new TextRenderable("mana-corner-tr", {
+      x: barWidth - 2,
+      y: 0,
+      content: "◊",
+      fg: "#66aaff",
+      zIndex: 13,
+    })
+    this.manaBar.add(manaCornerTR)
+
+    // Title with block font using FrameBufferRenderable
+    const manaTitleText = "MANA"
+    const { width: manaTitleWidth, height: manaTitleHeight } = measureText({ 
+      text: manaTitleText, 
+      font: "block" 
+    })
+    const manaTitleX = Math.floor((barWidth - manaTitleWidth) / 2)
+    
+    const manaTitle = this.renderer.createFrameBuffer("mana-title", {
+      width: manaTitleWidth,
+      height: manaTitleHeight,
+      x: manaTitleX,
       y: 1,
-      width: Math.max(0, Math.floor((barWidth - 4) * (this.player.mana / this.player.maxMana))),
+      zIndex: 11,
+    })
+    manaTitle.frameBuffer.clear(RGBA.fromInts(0, 26, 58, 0))
+    
+    renderFontToFrameBuffer(manaTitle.frameBuffer, {
+      text: manaTitleText,
+      x: 0,
+      y: 0,
+      fg: [RGBA.fromInts(120, 180, 255, 255), RGBA.fromInts(80, 140, 255, 255)],
+      bg: RGBA.fromInts(0, 26, 58, 255),
+      font: "block",
+    })
+    this.manaBar.add(manaTitle)
+
+    // Mana bar background track (positioned below block font text)
+    const manaTrackBg = new BoxRenderable("mana-track-bg", {
+      x: 3,
+      y: 7,  // Below the 5-line tall block font
+      width: barWidth - 6,
+      height: 3,
+      bg: "#001133",
+      borderStyle: "single",
+      borderColor: "#003366",
+      zIndex: 11,
+    })
+    this.manaBar.add(manaTrackBg)
+
+    // Animated mana fill with gradient effect
+    const manaPercent = this.player.mana / this.player.maxMana
+    const manaFillWidth = Math.max(0, Math.floor((barWidth - 8) * manaPercent))
+    
+    // Main fill
+    const manaFill = new BoxRenderable("mana-fill", {
+      x: 4,
+      y: 8,
+      width: manaFillWidth,
       height: 1,
       bg: "#0099ff",
-      zIndex: 11,
+      zIndex: 12,
     })
     this.manaBar.add(manaFill)
 
-    const manaText = new TextRenderable("mana-text", {
-      x: Math.floor(barWidth / 2) - 5,
-      y: 1,
-      content: `${this.player.mana}/${this.player.maxMana}`,
-      fg: "#ffffff",
-      zIndex: 12,
-    })
-    this.manaBar.add(manaText)
+    // Highlight on top of fill
+    if (manaFillWidth > 0) {
+      const manaFillHighlight = new BoxRenderable("mana-fill-highlight", {
+        x: 4,
+        y: 8,
+        width: Math.min(manaFillWidth, Math.floor(manaFillWidth * 0.7)),
+        height: 1,
+        bg: "#33bbff",
+        zIndex: 13,
+      })
+      this.manaBar.add(manaFillHighlight)
+    }
 
     this.gameContainer.add(this.manaBar)
 
+    // --- DECORATIVE DIVIDER ---
+    const dividerY = barHeight + 2
+    const divider = new TextRenderable("divider", {
+      x: 0,
+      y: dividerY,
+      content: "═".repeat(width),
+      fg: "#666666",
+      zIndex: 5,
+    })
+    this.gameContainer.add(divider)
+
     // --- GAME WORLD BORDER (FULL WIDTH/HEIGHT, BELOW BARS) ---
-    const mapBorderY = barHeight + 1 // 1px gap below bars
+    const mapBorderY = dividerY + 1
     const mapBorderHeight = height - mapBorderY
     const mapBorderWidth = width
     const mapBorderX = 0
@@ -235,14 +382,33 @@ class DungeonCrawlerGame {
       y: mapBorderY,
       width: mapBorderWidth,
       height: mapBorderHeight,
-      borderStyle: "rounded",
+      borderStyle: "heavy",
       borderColor: "#8a7f76",
       bg: "#000000",
-      title: " DUNGEON DEPTHS ",
+      title: "",
       titleAlignment: "center",
       zIndex: 2,
     })
     this.gameContainer.add(this.mapBorder)
+
+    // Additional decorative elements on the border
+    const leftDecor = new TextRenderable("left-decor", {
+      x: 2,
+      y: mapBorderY,
+      content: "╬═══╬",
+      fg: "#aa9988",
+      zIndex: 3,
+    })
+    this.gameContainer.add(leftDecor)
+
+    const rightDecor = new TextRenderable("right-decor", {
+      x: width - 7,
+      y: mapBorderY,
+      content: "╬═══╬",
+      fg: "#aa9988",
+      zIndex: 3,
+    })
+    this.gameContainer.add(rightDecor)
   }
 
   private setupInput(): void {
@@ -359,6 +525,11 @@ class DungeonCrawlerGame {
       this.moveInterval = null
     }
     this.layeredRenderer.destroy()
+    
+    // Clean up frame buffers
+    this.renderer.remove("health-title")
+    this.renderer.remove("mana-title")
+    
     this.renderer.remove(this.gameContainer.id)
   }
 }
