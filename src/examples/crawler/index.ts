@@ -71,6 +71,11 @@ class DungeonCrawlerGame {
   private healthBar: GroupRenderable
   private manaBar: GroupRenderable
 
+  // Movement state
+  private moveDirection = { x: 0, y: 0 }
+  private moveInterval: NodeJS.Timeout | null = null
+  private moveSpeed = 20 // ms between moves when holding key
+
   constructor(renderer: CliRenderer) {
     this.renderer = renderer
     this.player = new Player()
@@ -238,7 +243,9 @@ class DungeonCrawlerGame {
   }
 
   private setupInput(): void {
-    getKeyHandler().on("keypress", (key: ParsedKey) => {
+    const keyHandler = getKeyHandler()
+
+    keyHandler.on("keydown", (key: ParsedKey) => {
       let dx = 0
       let dy = 0
 
@@ -262,7 +269,56 @@ class DungeonCrawlerGame {
       }
 
       if (dx !== 0 || dy !== 0) {
+        this.moveDirection.x = dx
+        this.moveDirection.y = dy
+
+        // Immediately move once
         this.movePlayer(dx, dy)
+
+        // Start continuous movement if not already moving
+        if (!this.moveInterval) {
+          this.moveInterval = setInterval(() => {
+            if (this.moveDirection.x !== 0 || this.moveDirection.y !== 0) {
+              this.movePlayer(this.moveDirection.x, this.moveDirection.y)
+            }
+          }, this.moveSpeed)
+        }
+      }
+    })
+
+    keyHandler.on("keyup", (key: ParsedKey) => {
+      // Check if this key was part of current movement
+      switch (key.name) {
+        case "w":
+        case "up":
+          if (this.moveDirection.y === -1) {
+            this.moveDirection.y = 0
+          }
+          break
+        case "s":
+        case "down":
+          if (this.moveDirection.y === 1) {
+            this.moveDirection.y = 0
+          }
+          break
+        case "a":
+        case "left":
+          if (this.moveDirection.x === -1) {
+            this.moveDirection.x = 0
+          }
+          break
+        case "d":
+        case "right":
+          if (this.moveDirection.x === 1) {
+            this.moveDirection.x = 0
+          }
+          break
+      }
+
+      // Stop movement if no direction is active
+      if (this.moveDirection.x === 0 && this.moveDirection.y === 0 && this.moveInterval) {
+        clearInterval(this.moveInterval)
+        this.moveInterval = null
       }
     })
   }
@@ -295,6 +351,10 @@ class DungeonCrawlerGame {
   }
 
   destroy(): void {
+    if (this.moveInterval) {
+      clearInterval(this.moveInterval)
+      this.moveInterval = null
+    }
     this.layeredRenderer.destroy()
     this.renderer.remove(this.gameContainer.id)
   }

@@ -115,10 +115,12 @@ export class Level {
     // Initialize with dirt
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
+/*
         this.tiles[y][x] = {
           bottomTile: "dirt-full",
           solid: true,
         }
+*/
       }
     }
 
