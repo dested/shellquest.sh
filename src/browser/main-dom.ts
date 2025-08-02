@@ -9,8 +9,8 @@ export async function createDOMRenderer(config: any = {}): Promise<DOMRenderer> 
   }
 
   // Default terminal size - reduced for better performance
-  const width = 120
-  const height = 50
+  const width = 200
+  const height = 100
 
   const renderer = new DOMRenderer(container, width, height, config)
   
