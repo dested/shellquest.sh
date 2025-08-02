@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Terminal, Swords, Trophy, Sparkles, Zap, Shield, Clock, Users, ChevronRight, Gamepad2, Code2, Heart } from 'lucide-react';
 
 const Index: React.FC = () => {
+  console.log('here');
   const [glitchText, setGlitchText] = useState('shellquest.sh');
   const [terminalText, setTerminalText] = useState('');
   const [showCursor, setShowCursor] = useState(true);
@@ -91,21 +92,6 @@ const Index: React.FC = () => {
     }
   ];
 
-  const dungeonSample = [
-    "╔═══════════════════════════════════╗",
-    "║ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ ║",
-    "║ ▓.....#########.....###########▓ ║",
-    "║ ▓.@...#.......#.....#.........#▓ ║",
-    "║ ▓.....#...∞...#.....#....⚔....#▓ ║",
-    "║ ▓##############+#####+##########▓ ║",
-    "║ ▓#.....#.............#.........#▓ ║",
-    "║ ▓#.🗝..#.....ξ.......#....💀....#▓ ║",
-    "║ ▓#.....#.............#.........#▓ ║",
-    "║ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ ║",
-    "╚═══════════════════════════════════╝",
-    "  HP: ██████░░░░  MP: ████████░░  ",
-    "  Keys: 1/3  Time: 00:42  Floor: 3  "
-  ];
 
   return (
     <div className="min-h-screen bg-black text-green-400 font-mono overflow-hidden relative">
@@ -247,14 +233,6 @@ const Index: React.FC = () => {
           </h2>
           
           <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div className="bg-gray-900 border border-green-500/30 rounded-lg p-4 shadow-2xl shadow-green-500/20">
-              <pre className="text-green-400 text-xs sm:text-sm overflow-x-auto">
-                {dungeonSample.map((line, i) => (
-                  <div key={i}>{line}</div>
-                ))}
-              </pre>
-            </div>
-            
             <div className="space-y-6">
               <h3 className="text-2xl font-bold text-green-400">Game Features</h3>
               <ul className="space-y-4">

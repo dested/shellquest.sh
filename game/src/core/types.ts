@@ -19,8 +19,13 @@ export class RGBA {
     return new RGBA(new Float32Array([r / 255, g / 255, b / 255, a / 255]))
   }
 
-  static fromHex(hex: string): RGBA {
-    return hexToRgb(hex)
+  static fromHex(hex: string|number): RGBA {
+    if (typeof hex === "number") {
+      hex = `#${hex.toString(16).padStart(6, '0')}`;
+    } else if (!/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(hex)) {
+      return hexToRgb(hex)
+    }
+
   }
 
   get r(): number {
