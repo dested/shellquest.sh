@@ -128,6 +128,12 @@ export abstract class Renderable extends EventEmitter {
     }
   }
 
+  public clear (): void {
+    for (const child of this.renderableArray) {
+      this.remove(child.id)
+    }
+  }
+
   public add(obj: Renderable): void {
     if (this.renderableMap.has(obj.id)) {
       this.remove(obj.id)

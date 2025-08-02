@@ -17,7 +17,10 @@ export class TileMap {
   private imageData: ImageData | null = null
   private tileDefinitions: Map<string, TileDefinition> = new Map()
   private tileCache: Map<string, RGBA[]> = new Map() // Cache extracted tile pixel data
-  
+   onReady: () => void = () => {
+    console.warn("TileMap is not ready, no onReady handler defined")
+  }
+
   constructor(
   ) {}
   
@@ -38,6 +41,7 @@ export class TileMap {
       height: info.height,
       colorSpace: 'srgb'
     }
+    this.onReady()
 
   }
   
@@ -105,7 +109,6 @@ export class TileMap {
     // If we have image data, extract from it
     if (this.imageData) {
       const pixels: RGBA[] = []
-      debugger;
 
       // Calculate pixel coordinates
       const startX = tileDef.x * TILE_SIZE

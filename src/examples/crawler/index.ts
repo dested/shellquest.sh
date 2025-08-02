@@ -18,8 +18,6 @@ import { Level } from "./Level.ts"
 // Game constants
 const MAP_WIDTH = 200
 const MAP_HEIGHT = 200
-const VIEWPORT_WIDTH = 20 // Viewport width in tiles
-const VIEWPORT_HEIGHT = 15 // Viewport height in tiles
 
 class Player implements Entity {
   gridX: number = 10
@@ -29,29 +27,38 @@ class Player implements Entity {
   tileName: string = "player"
   layer: "sprite" = "sprite"
 
-  hp: number = 100
+  hp: number = 70
   maxHp: number = 100
-  mana: number = 50
+  mana: number = 20
   maxMana: number = 50
 }
 
 class Camera {
+  constructor(private game: DungeonCrawlerGame) {}
+
   x: number = 0
   y: number = 0
 
+  get viewportWidth(): number {
+    return this.game.renderer.terminalWidth / 4 - 1
+  }
+  get viewportHeight(): number {
+    return this.game.renderer.terminalHeight / 4 - 2 // 3px for each UI bar + 1px gap
+  }
+
   update(playerX: number, playerY: number): void {
     // Calculate ideal camera position to center player
-    const idealX = playerX - Math.floor(VIEWPORT_WIDTH / 2)
-    const idealY = playerY - Math.floor(VIEWPORT_HEIGHT / 2)
+    const idealX = playerX - Math.floor(this.viewportWidth / 2)
+    const idealY = playerY - Math.floor(this.viewportHeight / 2)
 
     // Clamp to map bounds
-    this.x = Math.max(0, Math.min(idealX, MAP_WIDTH - VIEWPORT_WIDTH))
-    this.y = Math.max(0, Math.min(idealY, MAP_HEIGHT - VIEWPORT_HEIGHT))
+    this.x = Math.max(0, Math.min(idealX, MAP_WIDTH - this.viewportWidth))
+    this.y = Math.max(0, Math.min(idealY, MAP_HEIGHT - this.viewportHeight))
   }
 }
 
 class DungeonCrawlerGame {
-  private renderer: CliRenderer
+  renderer: CliRenderer
   private player: Player
   private level: Level
   private camera: Camera
@@ -68,7 +75,7 @@ class DungeonCrawlerGame {
     this.renderer = renderer
     this.player = new Player()
     this.level = new Level(MAP_WIDTH, MAP_HEIGHT)
-    this.camera = new Camera()
+    this.camera = new Camera(this)
 
     // Initialize tile map (will be loaded from PNG later)
     this.tileMap = new TileMap()
@@ -89,22 +96,30 @@ class DungeonCrawlerGame {
     this.camera.update(this.player.gridX, this.player.gridY)
 
     this.update()
+    this.tileMap.onReady = () => {
+      this.update()
+    }
+    renderer.on("resize", () => {
+      debugger;
+      this.gameContainer.clear()
+      this.setupUI()
+      this.update()
+    })
   }
-
 
   private setupLayeredRenderer(): void {
     const width = this.renderer.terminalWidth
     const height = this.renderer.terminalHeight
     const gameAreaY = 6
-    const gameAreaX = Math.floor((width - (VIEWPORT_WIDTH * TILE_SIZE + 4)) / 2)
+    const gameAreaX = Math.floor((width - (this.camera.viewportWidth * TILE_SIZE + 4)) / 2)
 
     this.layeredRenderer = new LayeredRenderer(
       this.renderer,
       this.tileMap,
-      VIEWPORT_WIDTH,
-      VIEWPORT_HEIGHT,
+      this.camera.viewportWidth,
+      this.camera.viewportHeight,
       gameAreaX + 2,
-      gameAreaY + 1,
+      gameAreaY + 0,
     )
 
     this.gameContainer.add(this.layeredRenderer.getContainer())
@@ -159,7 +174,12 @@ class DungeonCrawlerGame {
     this.gameContainer.add(this.healthBar)
 
     // --- MANA BAR (RIGHT) ---
-    this.manaBar = new GroupRenderable("mana-bar", { x: barPadding + barWidth + barPadding, y: barY, zIndex: 10, visible: true })
+    this.manaBar = new GroupRenderable("mana-bar", {
+      x: barPadding + barWidth + barPadding,
+      y: barY,
+      zIndex: 10,
+      visible: true,
+    })
 
     const manaBg = new BoxRenderable("mana-bg", {
       x: 0,
