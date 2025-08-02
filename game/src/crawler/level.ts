@@ -575,8 +575,8 @@ export class Level {
       },
       {
         "name": "wall-cross",
-        "x": 10,
-        "y": 15,
+        "x": 6,
+        "y": 10,
         "layer": "bottom",
         "solid": true
       },

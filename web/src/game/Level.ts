@@ -1,5 +1,5 @@
-import type { TileMap } from "./TileMap.ts";
-import * as ROT from "rot-js";
+import * as ROT from 'rot-js';
+import type {TileMap} from './TileMap.ts';
 
 export interface LevelTile {
   bottomTile: string;
@@ -22,14 +22,14 @@ interface Room {
   y: number;
   width: number;
   height: number;
-  type?: "normal" | "treasure" | "boss" | "spawn";
+  type?: 'normal' | 'treasure' | 'boss' | 'spawn';
 }
 
 export class Level {
   private tiles: LevelTile[][];
   private entities: Entity[] = [];
   private rooms: Room[] = [];
-  private corridors: { x: number; y: number }[] = [];
+  private corridors: {x: number; y: number}[] = [];
 
   constructor(
     private width: number,
@@ -40,7 +40,7 @@ export class Level {
       this.tiles[y] = [];
       for (let x = 0; x < width; x++) {
         this.tiles[y][x] = {
-          bottomTile: "void",
+          bottomTile: 'void',
           solid: true,
         };
       }
@@ -69,8 +69,8 @@ export class Level {
     return this.tiles.map((row) => row.map((tile) => tile.bottomTile));
   }
 
-  getTopLayerTiles(): Array<{ tileName: string; gridX: number; gridY: number }> {
-    const topTiles: Array<{ tileName: string; gridX: number; gridY: number }> = [];
+  getTopLayerTiles(): Array<{tileName: string; gridX: number; gridY: number}> {
+    const topTiles: Array<{tileName: string; gridX: number; gridY: number}> = [];
 
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
@@ -106,8 +106,8 @@ export class Level {
     const seed = Date.now();
     ROT.RNG.setSeed(+seed);
 
-    const tileGrid: TileType[][] = Array.from({ length: this.height }, () =>
-      Array.from({ length: this.width }, () => TileType.Empty),
+    const tileGrid: TileType[][] = Array.from({length: this.height}, () =>
+      Array.from({length: this.width}, () => TileType.Empty),
     );
 
     this.rooms = [];
@@ -123,7 +123,7 @@ export class Level {
     digger.create((x, y, value) => {
       if (value === 0) {
         tileGrid[y][x] = TileType.Floor;
-        this.corridors.push({ x, y });
+        this.corridors.push({x, y});
       }
     });
 
@@ -134,15 +134,15 @@ export class Level {
         y: room.getTop(),
         width: room.getRight() - room.getLeft() + 1,
         height: room.getBottom() - room.getTop() + 1,
-        type: "normal",
+        type: 'normal',
       };
 
       if (this.rooms.length === 0) {
-        roomData.type = "spawn";
+        roomData.type = 'spawn';
       } else if (this.rooms.length === rooms.length - 1) {
-        roomData.type = "boss";
+        roomData.type = 'boss';
       } else if (Math.random() < 0.15) {
-        roomData.type = "treasure";
+        roomData.type = 'treasure';
       }
 
       this.rooms.push(roomData);
@@ -167,8 +167,10 @@ export class Level {
               tileGrid[y]?.[x - 1],
               tileGrid[y]?.[x + 1],
             ];
-            const verticalDoor = doorNeighbors[0] === TileType.Empty && doorNeighbors[1] === TileType.Empty;
-            const horizontalDoor = doorNeighbors[2] === TileType.Empty && doorNeighbors[3] === TileType.Empty;
+            const verticalDoor =
+              doorNeighbors[0] === TileType.Empty && doorNeighbors[1] === TileType.Empty;
+            const horizontalDoor =
+              doorNeighbors[2] === TileType.Empty && doorNeighbors[3] === TileType.Empty;
 
             if (verticalDoor || horizontalDoor) {
               tileGrid[y][x] = TileType.Door;
@@ -213,43 +215,44 @@ export class Level {
           const nw = x > 0 && y > 0 && grid[y - 1][x - 1] === TileType.Empty;
           const ne = x < this.width - 1 && y > 0 && grid[y - 1][x + 1] === TileType.Empty;
           const sw = x > 0 && y < this.height - 1 && grid[y + 1][x - 1] === TileType.Empty;
-          const se = x < this.width - 1 && y < this.height - 1 && grid[y + 1][x + 1] === TileType.Empty;
+          const se =
+            x < this.width - 1 && y < this.height - 1 && grid[y + 1][x + 1] === TileType.Empty;
 
-          let wallType = "wall-block";
+          let wallType = 'wall-block';
 
           if (!n && !s && !w && !e) {
-            wallType = "wall-isolated";
+            wallType = 'wall-isolated';
           } else if (n && s && !w && !e) {
-            wallType = "wall-vertical";
+            wallType = 'wall-vertical';
           } else if (!n && !s && w && e) {
-            wallType = "wall-horizontal";
+            wallType = 'wall-horizontal';
           } else if (n && e && !s && !w) {
-            wallType = "wall-corner-nw";
+            wallType = 'wall-corner-nw';
           } else if (n && w && !s && !e) {
-            wallType = "wall-corner-ne";
+            wallType = 'wall-corner-ne';
           } else if (s && e && !n && !w) {
-            wallType = "wall-corner-sw";
+            wallType = 'wall-corner-sw';
           } else if (s && w && !n && !e) {
-            wallType = "wall-corner-se";
+            wallType = 'wall-corner-se';
           } else if (!n && s && w && e) {
-            wallType = "wall-t-north";
+            wallType = 'wall-t-north';
           } else if (n && !s && w && e) {
-            wallType = "wall-t-south";
+            wallType = 'wall-t-south';
           } else if (n && s && !w && e) {
-            wallType = "wall-t-west";
+            wallType = 'wall-t-west';
           } else if (n && s && w && !e) {
-            wallType = "wall-t-east";
+            wallType = 'wall-t-east';
           } else if (n && s && w && e) {
             if (!nw && ne && sw && se) {
-              wallType = "wall-cross-nw";
+              wallType = 'wall-cross-nw';
             } else if (nw && !ne && sw && se) {
-              wallType = "wall-cross-ne";
+              wallType = 'wall-cross-ne';
             } else if (nw && ne && !sw && se) {
-              wallType = "wall-cross-sw";
+              wallType = 'wall-cross-sw';
             } else if (nw && ne && sw && !se) {
-              wallType = "wall-cross-se";
+              wallType = 'wall-cross-se';
             } else {
-              wallType = "wall-cross";
+              wallType = 'wall-cross';
             }
           }
 
@@ -259,22 +262,22 @@ export class Level {
           };
         } else if (current === TileType.Floor) {
           const room = this.getRoomAt(x, y);
-          let floorType = "floor-stone";
+          let floorType = 'floor-stone';
 
           if (room) {
             switch (room.type) {
-              case "spawn":
-                floorType = Math.random() < 0.1 ? "floor-stone-moss" : "floor-stone";
+              case 'spawn':
+                floorType = Math.random() < 0.1 ? 'floor-stone-moss' : 'floor-stone';
                 break;
-              case "boss":
-                floorType = Math.random() < 0.3 ? "floor-stone-cracked" : "floor-stone-dark";
+              case 'boss':
+                floorType = Math.random() < 0.3 ? 'floor-stone-cracked' : 'floor-stone-dark';
                 break;
-              case "treasure":
-                floorType = Math.random() < 0.2 ? "floor-stone-fancy" : "floor-stone";
+              case 'treasure':
+                floorType = Math.random() < 0.2 ? 'floor-stone-fancy' : 'floor-stone';
                 break;
               default:
-                if (Math.random() < 0.05) floorType = "floor-stone-cracked";
-                else if (Math.random() < 0.03) floorType = "floor-stone-moss";
+                if (Math.random() < 0.05) floorType = 'floor-stone-cracked';
+                else if (Math.random() < 0.03) floorType = 'floor-stone-moss';
                 break;
             }
           }
@@ -285,9 +288,9 @@ export class Level {
           };
         } else if (current === TileType.Door) {
           this.tiles[y][x] = {
-            bottomTile: "floor-stone",
+            bottomTile: 'floor-stone',
             solid: false,
-            topTile: "door-closed",
+            topTile: 'door-closed',
           };
         }
       }
@@ -301,13 +304,13 @@ export class Level {
           const leftWall = x > 0 && grid[y - 1][x - 1] === TileType.Empty;
           const rightWall = x < this.width - 1 && grid[y - 1][x + 1] === TileType.Empty;
 
-          let shadowType = "shadow-north";
+          let shadowType = 'shadow-north';
           if (leftWall && !rightWall) {
-            shadowType = "shadow-north-west";
+            shadowType = 'shadow-north-west';
           } else if (!leftWall && rightWall) {
-            shadowType = "shadow-north-east";
+            shadowType = 'shadow-north-east';
           } else if (leftWall && rightWall) {
-            shadowType = "shadow-north-full";
+            shadowType = 'shadow-north-full';
           }
 
           this.tiles[y][x].shadowTile = shadowType;
@@ -315,7 +318,7 @@ export class Level {
 
         if (x > 0 && grid[y][x] === TileType.Floor && grid[y][x - 1] === TileType.Empty) {
           if (!this.tiles[y][x].shadowTile) {
-            this.tiles[y][x].shadowTile = "shadow-west";
+            this.tiles[y][x].shadowTile = 'shadow-west';
           }
         }
       }
@@ -324,7 +327,7 @@ export class Level {
 
   private decorateRooms(grid: TileType[][]): void {
     for (const room of this.rooms) {
-      const decorationChance = room.type === "treasure" ? 0.15 : 0.05;
+      const decorationChance = room.type === 'treasure' ? 0.15 : 0.05;
 
       for (let y = room.y + 1; y < room.y + room.height - 1; y++) {
         for (let x = room.x + 1; x < room.x + room.width - 1; x++) {
@@ -334,7 +337,7 @@ export class Level {
           const nearWall = neighbors.some((n) => n === TileType.Empty);
 
           if (Math.random() < decorationChance) {
-            const decorations = this.getDecorationsForRoom(room.type || "normal", nearWall);
+            const decorations = this.getDecorationsForRoom(room.type || 'normal', nearWall);
             const decoration = decorations[Math.floor(Math.random() * decorations.length)];
 
             this.tiles[y][x].topTile = decoration.tile;
@@ -343,26 +346,26 @@ export class Level {
         }
       }
 
-      if (room.type === "treasure") {
+      if (room.type === 'treasure') {
         const centerX = Math.floor(room.x + room.width / 2);
         const centerY = Math.floor(room.y + room.height / 2);
         if (grid[centerY][centerX] === TileType.Floor) {
-          this.tiles[centerY][centerX].topTile = "chest-closed";
+          this.tiles[centerY][centerX].topTile = 'chest-closed';
           this.tiles[centerY][centerX].solid = true;
         }
       }
 
-      if (room.type === "boss") {
+      if (room.type === 'boss') {
         const positions = [
-          { x: room.x + 1, y: room.y + 1 },
-          { x: room.x + room.width - 2, y: room.y + 1 },
-          { x: room.x + 1, y: room.y + room.height - 2 },
-          { x: room.x + room.width - 2, y: room.y + room.height - 2 },
+          {x: room.x + 1, y: room.y + 1},
+          {x: room.x + room.width - 2, y: room.y + 1},
+          {x: room.x + 1, y: room.y + room.height - 2},
+          {x: room.x + room.width - 2, y: room.y + room.height - 2},
         ];
 
         for (const pos of positions) {
           if (grid[pos.y][pos.x] === TileType.Floor) {
-            this.tiles[pos.y][pos.x].topTile = "brazier-lit";
+            this.tiles[pos.y][pos.x].topTile = 'brazier-lit';
             this.tiles[pos.y][pos.x].solid = true;
           }
         }
@@ -370,33 +373,36 @@ export class Level {
     }
   }
 
-  private getDecorationsForRoom(roomType: string, nearWall: boolean): Array<{ tile: string; solid: boolean }> {
+  private getDecorationsForRoom(
+    roomType: string,
+    nearWall: boolean,
+  ): Array<{tile: string; solid: boolean}> {
     const wallDecorations = [
-      { tile: "torch-wall", solid: false },
-      { tile: "banner-red", solid: false },
-      { tile: "banner-blue", solid: false },
+      {tile: 'torch-wall', solid: false},
+      {tile: 'banner-red', solid: false},
+      {tile: 'banner-blue', solid: false},
     ];
 
     const floorDecorations = [
-      { tile: "barrel", solid: true },
-      { tile: "crate", solid: true },
-      { tile: "pot", solid: true },
-      { tile: "bones", solid: false },
-      { tile: "skull", solid: false },
-      { tile: "rubble", solid: false },
-      { tile: "web", solid: false },
+      {tile: 'barrel', solid: true},
+      {tile: 'crate', solid: true},
+      {tile: 'pot', solid: true},
+      {tile: 'bones', solid: false},
+      {tile: 'skull', solid: false},
+      {tile: 'rubble', solid: false},
+      {tile: 'web', solid: false},
     ];
 
-    if (roomType === "treasure") {
+    if (roomType === 'treasure') {
       floorDecorations.push(
-        { tile: "coins", solid: false },
-        { tile: "gem-red", solid: false },
-        { tile: "gem-blue", solid: false },
+        {tile: 'coins', solid: false},
+        {tile: 'gem-red', solid: false},
+        {tile: 'gem-blue', solid: false},
       );
     }
 
-    if (roomType === "boss") {
-      floorDecorations.push({ tile: "pillar", solid: true }, { tile: "statue", solid: true });
+    if (roomType === 'boss') {
+      floorDecorations.push({tile: 'pillar', solid: true}, {tile: 'statue', solid: true});
     }
 
     return nearWall && Math.random() < 0.3 ? wallDecorations : floorDecorations;
@@ -404,22 +410,22 @@ export class Level {
 
   private placeSpecialFeatures(grid: TileType[][]): void {
     if (this.rooms.length > 0) {
-      const spawnRoom = this.rooms.find((r) => r.type === "spawn");
+      const spawnRoom = this.rooms.find((r) => r.type === 'spawn');
       if (spawnRoom) {
         const centerX = Math.floor(spawnRoom.x + spawnRoom.width / 2);
         const centerY = Math.floor(spawnRoom.y + spawnRoom.height / 2);
         if (grid[centerY][centerX] === TileType.Floor) {
-          this.tiles[centerY][centerX].topTile = "stairs-up";
+          this.tiles[centerY][centerX].topTile = 'stairs-up';
           this.tiles[centerY][centerX].solid = false;
         }
       }
 
-      const bossRoom = this.rooms.find((r) => r.type === "boss");
+      const bossRoom = this.rooms.find((r) => r.type === 'boss');
       if (bossRoom) {
         const centerX = Math.floor(bossRoom.x + bossRoom.width / 2);
         const centerY = Math.floor(bossRoom.y + bossRoom.height / 2);
         if (grid[centerY][centerX] === TileType.Floor) {
-          this.tiles[centerY][centerX].topTile = "stairs-down";
+          this.tiles[centerY][centerX].topTile = 'stairs-down';
           this.tiles[centerY][centerX].solid = false;
         }
       }
@@ -436,347 +442,70 @@ export class Level {
   }
 
   setupTileDefinitions(tileMap: TileMap): void {
-    tileMap.loadFromFile("tilemap_packed.png");
+    tileMap.loadFromFile('tilemap_packed.png');
 
     //https://claude.ai/public/artifacts/bbc81e9f-b72b-46f3-b877-b5dddd263ddc?fullscreen=true
-    // prettier-ignore
     const tiles: {
       name: string;
       x: number;
       y: number;
-      layer: "bottom" | "sprite";
+      layer: 'bottom' | 'sprite';
       solid?: boolean;
       flipX?: boolean;
       flipY?: boolean;
     }[] = [
-      {
-        "name": "void",
-        "x": 0,
-        "y": 22,
-        "layer": "bottom",
-        "solid": false,
-        "flipX": false,
-        "flipY": false
-      },
-      {
-        "name": "floor-stone",
-        "x": 1,
-        "y": 9,
-        "layer": "bottom"
-      },
-      {
-        "name": "floor-stone-cracked",
-        "x": 1,
-        "y": 9,
-        "layer": "bottom"
-      },
-      {
-        "name": "floor-stone-moss",
-        "x": 1,
-        "y": 9,
-        "layer": "bottom"
-      },
-      {
-        "name": "floor-stone-dark",
-        "x": 1,
-        "y": 9,
-        "layer": "bottom"
-      },
-      {
-        "name": "floor-stone-fancy",
-        "x": 1,
-        "y": 9,
-        "layer": "bottom"
-      },
-      {
-        "name": "wall-block",
-        "x": 4,
-        "y": 14,
-        "layer": "bottom",
-        "solid": true
-      },
-      {
-        "name": "wall-isolated",
-        "x": 4,
-        "y": 14,
-        "layer": "bottom",
-        "solid": true
-      },
-      {
-        "name": "wall-vertical",
-        "x": 9,
-        "y": 15,
-        "layer": "bottom",
-        "solid": true
-      },
-      {
-        "name": "wall-horizontal",
-        "x": 10,
-        "y": 15,
-        "layer": "bottom",
-        "solid": true
-      },
-      {
-        "name": "wall-corner-nw",
-        "x": 0,
-        "y": 8,
-        "layer": "bottom",
-        "solid": true
-      },
-      {
-        "name": "wall-corner-ne",
-        "x": 2,
-        "y": 8,
-        "layer": "bottom",
-        "solid": true
-      },
-      {
-        "name": "wall-corner-sw",
-        "x": 0,
-        "y": 10,
-        "layer": "bottom",
-        "solid": true
-      },
-      {
-        "name": "wall-corner-se",
-        "x": 2,
-        "y": 10,
-        "layer": "bottom",
-        "solid": true
-      },
-      {
-        "name": "wall-t-north",
-        "x": 1,
-        "y": 8,
-        "layer": "bottom",
-        "solid": true
-      },
-      {
-        "name": "wall-t-south",
-        "x": 1,
-        "y": 10,
-        "layer": "bottom",
-        "solid": true
-      },
-      {
-        "name": "wall-t-west",
-        "x": 0,
-        "y": 9,
-        "layer": "bottom",
-        "solid": true
-      },
-      {
-        "name": "wall-t-east",
-        "x": 2,
-        "y": 9,
-        "layer": "bottom",
-        "solid": true
-      },
-      {
-        "name": "wall-cross",
-        "x": 10,
-        "y": 15,
-        "layer": "bottom",
-        "solid": true
-      },
-      {
-        "name": "wall-cross-nw",
-        "x": 5,
-        "y": 4,
-        "layer": "bottom",
-        "solid": true
-      },
-      {
-        "name": "wall-cross-ne",
-        "x": 6,
-        "y": 4,
-        "layer": "bottom",
-        "solid": true
-      },
-      {
-        "name": "wall-cross-sw",
-        "x": 7,
-        "y": 4,
-        "layer": "bottom",
-        "solid": true
-      },
-      {
-        "name": "wall-cross-se",
-        "x": 8,
-        "y": 4,
-        "layer": "bottom",
-        "solid": true
-      },
-      {
-        "name": "shadow-north",
-        "x": 2,
-        "y": 15,
-        "layer": "bottom"
-      },
-      {
-        "name": "shadow-north-west",
-        "x": 4,
-        "y": 15,
-        "layer": "bottom"
-      },
-      {
-        "name": "shadow-north-east",
-        "x": 2,
-        "y": 2,
-        "layer": "bottom"
-      },
-      {
-        "name": "shadow-north-full",
-        "x": 3,
-        "y": 2,
-        "layer": "bottom"
-      },
-      {
-        "name": "shadow-west",
-        "x": 4,
-        "y": 2,
-        "layer": "bottom"
-      },
-      {
-        "name": "door-closed",
-        "x": 5,
-        "y": 7,
-        "layer": "sprite"
-      },
-      {
-        "name": "door-open",
-        "x": 6,
-        "y": 6,
-        "layer": "sprite"
-      },
-      {
-        "name": "stairs-up",
-        "x": 3,
-        "y": 14,
-        "layer": "sprite"
-      },
-      {
-        "name": "stairs-down",
-        "x": 3,
-        "y": 14,
-        "layer": "sprite"
-      },
-      {
-        "name": "chest-closed",
-        "x": 5,
-        "y": 18,
-        "layer": "sprite"
-      },
-      {
-        "name": "chest-open",
-        "x": 7,
-        "y": 18,
-        "layer": "sprite"
-      },
-      {
-        "name": "barrel",
-        "x": 10,
-        "y": 17,
-        "layer": "sprite"
-      },
-      {
-        "name": "crate",
-        "x": 3,
-        "y": 16,
-        "layer": "sprite"
-      },
-      {
-        "name": "pot",
-        "x": 11,
-        "y": 8,
-        "layer": "sprite"
-      },
-      {
-        "name": "torch-wall",
-        "x": 8,
-        "y": 11,
-        "layer": "sprite"
-      },
-      {
-        "name": "brazier-lit",
-        "x": 1,
-        "y": 21,
-        "layer": "sprite"
-      },
-      {
-        "name": "banner-red",
-        "x": 0,
-        "y": 7,
-        "layer": "sprite"
-      },
-      {
-        "name": "banner-blue",
-        "x": 4,
-        "y": 7,
-        "layer": "sprite"
-      },
-      {
-        "name": "bones",
-        "x": 0,
-        "y": 13,
-        "layer": "sprite"
-      },
-      {
-        "name": "skull",
-        "x": 9,
-        "y": 8,
-        "layer": "sprite"
-      },
-      {
-        "name": "rubble",
-        "x": 6,
-        "y": 14,
-        "layer": "sprite"
-      },
-      {
-        "name": "web",
-        "x": 2,
-        "y": 12,
-        "layer": "sprite"
-      },
-      {
-        "name": "coins",
-        "x": 9,
-        "y": 7,
-        "layer": "sprite"
-      },
-      {
-        "name": "gem-red",
-        "x": 10,
-        "y": 7,
-        "layer": "sprite"
-      },
-      {
-        "name": "gem-blue",
-        "x": 11,
-        "y": 7,
-        "layer": "sprite"
-      },
-      {
-        "name": "pillar",
-        "x": 7,
-        "y": 13,
-        "layer": "sprite"
-      },
-      {
-        "name": "statue",
-        "x": 5,
-        "y": 14,
-        "layer": "sprite"
-      },
-      {
-        "name": "player",
-        "x": 0,
-        "y": 18,
-        "layer": "sprite"
-      }
+      {name: 'void', x: 0, y: 22, layer: 'bottom', solid: false, flipX: false, flipY: false},
+      {name: 'floor-stone', x: 1, y: 9, layer: 'bottom'},
+      {name: 'floor-stone-cracked', x: 1, y: 9, layer: 'bottom'},
+      {name: 'floor-stone-moss', x: 1, y: 9, layer: 'bottom'},
+      {name: 'floor-stone-dark', x: 1, y: 9, layer: 'bottom'},
+      {name: 'floor-stone-fancy', x: 1, y: 9, layer: 'bottom'},
+      {name: 'wall-block', x: 4, y: 14, layer: 'bottom', solid: true},
+      {name: 'wall-isolated', x: 4, y: 14, layer: 'bottom', solid: true},
+      {name: 'wall-vertical', x: 9, y: 15, layer: 'bottom', solid: true},
+      {name: 'wall-horizontal', x: 10, y: 15, layer: 'bottom', solid: true},
+      {name: 'wall-corner-nw', x: 0, y: 8, layer: 'bottom', solid: true},
+      {name: 'wall-corner-ne', x: 2, y: 8, layer: 'bottom', solid: true},
+      {name: 'wall-corner-sw', x: 0, y: 10, layer: 'bottom', solid: true},
+      {name: 'wall-corner-se', x: 2, y: 10, layer: 'bottom', solid: true},
+      {name: 'wall-t-north', x: 1, y: 8, layer: 'bottom', solid: true},
+      {name: 'wall-t-south', x: 1, y: 10, layer: 'bottom', solid: true},
+      {name: 'wall-t-west', x: 0, y: 9, layer: 'bottom', solid: true},
+      {name: 'wall-t-east', x: 2, y: 9, layer: 'bottom', solid: true},
+      {name: 'wall-cross', x: 6, y: 10, layer: 'bottom', solid: true},
+      {name: 'wall-cross-nw', x: 5, y: 4, layer: 'bottom', solid: true},
+      {name: 'wall-cross-ne', x: 6, y: 4, layer: 'bottom', solid: true},
+      {name: 'wall-cross-sw', x: 7, y: 4, layer: 'bottom', solid: true},
+      {name: 'wall-cross-se', x: 8, y: 4, layer: 'bottom', solid: true},
+      {name: 'shadow-north', x: 2, y: 15, layer: 'bottom'},
+      {name: 'shadow-north-west', x: 4, y: 15, layer: 'bottom'},
+      {name: 'shadow-north-east', x: 2, y: 2, layer: 'bottom'},
+      {name: 'shadow-north-full', x: 3, y: 2, layer: 'bottom'},
+      {name: 'shadow-west', x: 4, y: 2, layer: 'bottom'},
+      {name: 'door-closed', x: 5, y: 7, layer: 'sprite'},
+      {name: 'door-open', x: 6, y: 6, layer: 'sprite'},
+      {name: 'stairs-up', x: 3, y: 14, layer: 'sprite'},
+      {name: 'stairs-down', x: 3, y: 14, layer: 'sprite'},
+      {name: 'chest-closed', x: 5, y: 18, layer: 'sprite'},
+      {name: 'chest-open', x: 7, y: 18, layer: 'sprite'},
+      {name: 'barrel', x: 10, y: 17, layer: 'sprite'},
+      {name: 'crate', x: 3, y: 16, layer: 'sprite'},
+      {name: 'pot', x: 11, y: 8, layer: 'sprite'},
+      {name: 'torch-wall', x: 8, y: 11, layer: 'sprite'},
+      {name: 'brazier-lit', x: 1, y: 21, layer: 'sprite'},
+      {name: 'banner-red', x: 0, y: 7, layer: 'sprite'},
+      {name: 'banner-blue', x: 4, y: 7, layer: 'sprite'},
+      {name: 'bones', x: 0, y: 13, layer: 'sprite'},
+      {name: 'skull', x: 9, y: 8, layer: 'sprite'},
+      {name: 'rubble', x: 6, y: 14, layer: 'sprite'},
+      {name: 'web', x: 2, y: 12, layer: 'sprite'},
+      {name: 'coins', x: 9, y: 7, layer: 'sprite'},
+      {name: 'gem-red', x: 10, y: 7, layer: 'sprite'},
+      {name: 'gem-blue', x: 11, y: 7, layer: 'sprite'},
+      {name: 'pillar', x: 7, y: 13, layer: 'sprite'},
+      {name: 'statue', x: 5, y: 14, layer: 'sprite'},
+      {name: 'player', x: 0, y: 18, layer: 'sprite'},
     ];
-
     for (const tile of tiles) {
       tileMap.defineTile(tile.name, tile.x, tile.y, {
         layer: tile.layer,
@@ -804,6 +533,6 @@ export interface Entity {
   width: number;
   height: number;
   tileName: string;
-  layer: "sprite";
+  layer: 'sprite';
   facingLeft?: boolean;
 }
