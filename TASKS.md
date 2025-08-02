@@ -375,7 +375,7 @@ graph TD
 - [ ] Public launch (Week 6)
 
 ### Quality Gates
-- [ ] 30 FPS maintained during gameplay
+- [ ] 20 FPS maintained during gameplay
 - [ ] <100ms API response times
 - [ ] Zero critical bugs
 - [ ] 90% test coverage

@@ -453,7 +453,7 @@ social.shareReplay({ sessionId })
 ## Technical Considerations
 
 ### Performance Targets
-- **Frame rate**: 30 FPS rendering, 10 FPS game logic
+- **Frame rate**: 20 FPS rendering, 10 FPS game logic
 - **Latency**: <100ms API responses
 - **Memory**: <100MB client memory usage
 - **CPU**: <10% idle, <30% active gameplay

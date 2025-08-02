@@ -8,7 +8,7 @@ export const GAME_CONFIG = {
     MIN_TERMINAL_WIDTH: 80,
     MIN_TERMINAL_HEIGHT: 24,
     
-    RENDER_FPS: 30,
+    RENDER_FPS: 20,
     GAME_TICK_RATE: 1 / 10,
     
     TILE_SIZE: 1,

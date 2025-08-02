@@ -62,7 +62,7 @@ const Index: React.FC = () => {
     {
       icon: <Swords className="w-5 h-5" />,
       title: "Real-time Combat",
-      description: "ASCII-powered battles at 30 FPS"
+      description: "ASCII-powered battles at a blazing 20 FPS"
     },
     {
       icon: <Trophy className="w-5 h-5" />,
@@ -216,7 +216,7 @@ const Index: React.FC = () => {
           <div className="flex flex-wrap gap-4 justify-center mt-8">
             <Badge variant="outline" className="border-green-500 text-green-400 px-4 py-2">
               <Zap className="w-4 h-4 mr-2" />
-              30 FPS
+              20 FPS
             </Badge>
             <Badge variant="outline" className="border-green-500 text-green-400 px-4 py-2">
               <Terminal className="w-4 h-4 mr-2" />

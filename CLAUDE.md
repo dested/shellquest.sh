@@ -117,7 +117,7 @@ pnpm run console
    - Test across Windows Terminal, iTerm2, and Linux terminals
 
 2. **Performance Targets**:
-   - 30 FPS rendering, 10 FPS game logic
+   - 20 FPS rendering, 10 FPS game logic
    - <100ms API response times
    - <100MB client memory usage
 
@@ -159,7 +159,7 @@ NODE_ENV=development
 2. **Check terminal size** with `tput cols` and `tput lines`
 3. **Use the console** (`pnpm run console` in web/) for database debugging
 4. **Test cross-platform** early and often
-5. **Monitor performance** - frame rate should stay above 30 FPS
+5. **Monitor performance** - frame rate should stay above 20 FPS
 
 ## Next Steps
 
