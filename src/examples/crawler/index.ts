@@ -40,12 +40,13 @@ class Camera {
   y: number = 0
 
   get viewportWidth(): number {
-    // Each tile is 4 characters wide
-    return Math.floor(this.game.renderer.terminalWidth / 4) - 1
+    // Each 16x16 tile is 16 characters wide
+    return Math.floor(this.game.renderer.terminalWidth / TILE_SIZE) - 1
   }
   get viewportHeight(): number {
-    // Each tile is 2 characters tall with half-block rendering
-    return Math.floor((this.game.renderer.terminalHeight - 6) / 2) // Subtract UI space, then divide by 2 chars per tile
+    // Each 16x16 tile is 8 characters tall with half-block rendering
+    // Subtract UI space (6 lines), then divide by 8 chars per tile
+    return Math.floor((this.game.renderer.terminalHeight - 6) / (TILE_SIZE / 2))
   }
 
   update(playerX: number, playerY: number): void {
@@ -117,7 +118,7 @@ class DungeonCrawlerGame {
     const width = this.renderer.terminalWidth
     const height = this.renderer.terminalHeight
     const gameAreaY = 6
-    // Each tile is 4 chars wide
+    // Each 16x16 tile is 16 chars wide
     const gameAreaX = Math.floor((width - (this.camera.viewportWidth * TILE_SIZE + 4)) / 2)
 
     this.layeredRenderer = new LayeredRenderer(

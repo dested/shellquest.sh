@@ -2,7 +2,7 @@ import { RGBA } from "../../../types"
 import sharp from "sharp"
 
 // Constants for tile sizing
-export const TILE_SIZE = 4 // 4x4 pixels per tile
+export const TILE_SIZE = 16 // 4x4 pixels per tile
 export const TILE_PIXELS = TILE_SIZE * TILE_SIZE
 
 export interface TileDefinition {
@@ -63,36 +63,8 @@ export class TileMap {
     // Clear cache for this tile if it exists
     this.tileCache.delete(name)
   }
-  
-  /**
-   * Set temporary colored pixels for a tile (for testing without PNG)
-   */
-  setTemporaryTilePixels(tileName: string, color: RGBA, pattern?: number[][]): void {
-    const pixels: RGBA[] = []
-    
-    // Default pattern (solid fill)
-    const defaultPattern = [
-      [1, 1, 1, 1],
-      [1, 1, 1, 1],
-      [1, 1, 1, 1],
-      [1, 1, 1, 1]
-    ]
-    
-    const usePattern = pattern || defaultPattern
-    
-    for (let y = 0; y < TILE_SIZE; y++) {
-      for (let x = 0; x < TILE_SIZE; x++) {
-        if (usePattern[y][x] === 1) {
-          pixels.push(color)
-        } else {
-          pixels.push(RGBA.fromValues(0, 0, 0, 0)) // Transparent
-        }
-      }
-    }
-    
-    this.tileCache.set(tileName, pixels)
-  }
-  
+
+
   /**
    * Get pixel data for a specific tile
    */
