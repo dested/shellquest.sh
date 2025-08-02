@@ -17,7 +17,8 @@
   },
   "scripts": {
     "postinstall": "node scripts/postinstall.js",
-    "build": "bun build:ts && bun build:prod && bun build:assets",
+    "build": "bun build:tilemap && bun build:ts && bun build:prod && bun build:assets",
+    "build:tilemap": "node scripts/generate-tilemap-data.js",
     "build:ts": "bun build src/crawler/index.ts --outdir dist/crawler --target bun && bun build src/index.ts --outdir dist --target bun",
     "build:assets": "bun scripts/copy-assets.js",
     "build:zig": "cd src/zig && zig build",
@@ -33,6 +34,7 @@
   "license": "UNLICENSED",
   "devDependencies": {
     "@types/bun": "latest",
+    "sharp": "^0.33.5",
     "planck": "^1.4.2",
     "prettier": "3.6.2",
     "vite": "^5.0.0"
@@ -68,7 +70,6 @@
   "optionalDependencies": {
     "uiohook-napi": "1.5.4",
     "jimp": "1.6.0",
-    "sharp": "^0.33.5",
     "yoga-layout": "3.2.1"
   },
   "trustedDependencies": [

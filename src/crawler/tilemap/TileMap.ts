@@ -1,5 +1,5 @@
 import { RGBA } from "../../types"
-import sharp from "sharp"
+import { tilemapData, getNormalizedPixelAt, type TilemapData } from "../generated/tilemapData"
 
 // Constants for tile sizing
 export const TILE_SIZE = 16 // 4x4 pixels per tile
@@ -14,10 +14,11 @@ export interface TileDefinition {
 }
 
 export class TileMap {
-  private imageData: ImageData | null = null
+  private tilemapData: TilemapData | null = null
+  private tilemapName: string | null = null
   private tileDefinitions: Map<string, TileDefinition> = new Map()
   private tileCache: Map<string, RGBA[]> = new Map() // Cache extracted tile pixel data
-   onReady: () => void = () => {
+  onReady: () => void = () => {
     console.warn("TileMap is not ready, no onReady handler defined")
   }
 
@@ -25,24 +26,25 @@ export class TileMap {
   ) {}
   
   /**
-   * Load tilemap from PNG file
+   * Load tilemap from generated data
    */
   async loadFromFile(path: string): Promise<void> {
-
-    // Load and convert image to raw pixel data
-    const { data, info } = await sharp(path)
-      .raw()
-      .toBuffer({ resolveWithObject: true })
-
-    // Store image data
-    this.imageData = {
-      data: new Uint8ClampedArray(data),
-      width: info.width,
-      height: info.height,
-      colorSpace: 'srgb'
+    // Extract tilemap name from path (e.g., "tilemap_packed.png" -> "tilemap_packed")
+    const match = path.match(/([^/\\]+)\.png$/i)
+    if (!match) {
+      throw new Error(`Invalid tilemap path: ${path}`)
     }
+    
+    const tilemapName = match[1]
+    
+    // Load from generated data
+    if (!(tilemapName in tilemapData)) {
+      throw new Error(`Tilemap data not found for: ${tilemapName}. Run 'npm run build:tilemap' to generate.`)
+    }
+    
+    this.tilemapData = tilemapData[tilemapName]
+    this.tilemapName = tilemapName
     this.onReady()
-
   }
   
   /**
@@ -78,8 +80,8 @@ export class TileMap {
       return null
     }
 
-    // If we have image data, extract from it
-    if (this.imageData) {
+    // If we have tilemap data, extract from it
+    if (this.tilemapData) {
       const pixels: RGBA[] = []
 
       // Calculate pixel coordinates
@@ -92,16 +94,15 @@ export class TileMap {
           const imageX = startX + px
           const imageY = startY + py
           
-          // Calculate index in image data (RGBA format)
-          const idx = ((imageY * this.imageData.width) + imageX) * 4
+          // Get normalized pixel data from generated tilemap
+          const pixel = getNormalizedPixelAt(this.tilemapData, imageX, imageY)
           
-          // Extract RGBA values and normalize to 0-1 range
-          const r = this.imageData.data[idx] / 255
-          const g = this.imageData.data[idx + 1] / 255
-          const b = this.imageData.data[idx + 2] / 255
-          const a = this.imageData.data[idx + 3] / 255
-          
-          pixels.push(RGBA.fromValues(r, g, b, a))
+          if (pixel) {
+            pixels.push(RGBA.fromValues(pixel.r, pixel.g, pixel.b, pixel.a))
+          } else {
+            // Default to transparent if out of bounds
+            pixels.push(RGBA.fromValues(0, 0, 0, 0))
+          }
         }
       }
       
@@ -111,7 +112,7 @@ export class TileMap {
       return pixels
     }
     
-    // No image data and no cached pixels
+    // No tilemap data and no cached pixels
     return null
   }
   
