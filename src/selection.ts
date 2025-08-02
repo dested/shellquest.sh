@@ -1,4 +1,4 @@
-import { Renderable, type CliRenderer } from ".";
+import { Renderable } from "./Renderable";
 import type { SelectionState } from "./types";
 
 export class Selection {

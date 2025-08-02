@@ -1,17 +1,7 @@
-import { Renderable } from "./Renderable"
-
-import {
-  BorderChars,
-  drawBorder,
-  getBorderSides,
-  type BorderCharacters,
-  type BorderSides,
-  type BorderStyle,
-  type BorderSidesConfig,
-  type RenderableOptions,
-  Fragment,
-  type SelectionState,
-} from "."
+import { Renderable, type RenderableOptions } from "./Renderable"
+import { BorderChars, drawBorder, getBorderSides, type BorderCharacters, type BorderSides, type BorderStyle, type BorderSidesConfig } from "./ui/lib/border"
+import { Fragment } from "./styled-text"
+import type { SelectionState } from "./types"
 import type { OptimizedBuffer } from "./buffer"
 import { RGBA } from "./types"
 import { parseColor } from "./utils"

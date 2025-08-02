@@ -1,5 +1,20 @@
-import { OptimizedBuffer, type RenderContext, type MouseEvent, type SelectionState } from "."
+import { OptimizedBuffer } from "./buffer"
+import type { RenderContext, SelectionState } from "./types"
 import { EventEmitter } from "events"
+
+// MouseEvent is defined in index.ts, we'll define a minimal interface here to avoid circular dep
+export interface MouseEvent {
+  type: string
+  x: number
+  y: number
+  button: number
+  modifiers: {
+    shift: boolean
+    alt: boolean
+    ctrl: boolean
+  }
+  preventDefault(): void
+}
 
 export interface RenderableOptions {
   x: number

@@ -1,4 +1,6 @@
-import type { CliRenderer, ColorInput } from "."
+import type { ColorInput } from "./types"
+// Forward declare to avoid circular dependency
+type CliRenderer = any
 import { EventEmitter } from "events"
 import { OptimizedBuffer } from "./buffer"
 import { parseColor } from "./utils"

@@ -1,4 +1,4 @@
-import { Entity } from "./tilemap/LayeredRenderer"
+import type { Entity } from "./tilemap/LayeredRenderer"
 import type { TileMap } from "./tilemap/TileMap.ts"
 import { getAssetPath } from "./utils/assetPath.ts"
 

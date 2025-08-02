@@ -26,13 +26,16 @@
     "d-crawl": "bun --inspect-brk run src/crawler/index.ts",
     "build:dev": "cd src/zig && zig build -Doptimize=Debug",
     "build:prod": "cd src/zig && zig build -Doptimize=ReleaseFast",
-    "test": "bun test"
+    "test": "bun test",
+    "dev": "vite",
+    "build:browser": "vite build"
   },
   "license": "UNLICENSED",
   "devDependencies": {
     "@types/bun": "latest",
     "planck": "^1.4.2",
-    "prettier": "3.6.2"
+    "prettier": "3.6.2",
+    "vite": "^5.0.0"
   },
   "description": "A terminal-based dungeon crawler game with ASCII graphics",
   "keywords": [
