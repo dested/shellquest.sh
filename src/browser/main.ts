@@ -8,8 +8,8 @@ export async function createBrowserRenderer(config: any = {}): Promise<BrowserRe
   }
 
   // Default terminal size
-  const width = 120
-  const height = 40
+  const width = 300
+  const height = 200
 
   const renderer = new BrowserRenderer(container, width, height, config)
   
@@ -45,7 +45,7 @@ async function init() {
     })
 
     renderer.setBackgroundColor('#000000')
-    
+
     // Import and run the game
     const { run } = await import('../crawler/browser-game')
     await run(renderer)

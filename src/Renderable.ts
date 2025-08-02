@@ -212,6 +212,7 @@ export abstract class Renderable extends EventEmitter {
     if (!this.visible) return
 
     this.renderSelf(buffer, deltaTime)
+
     this.ctx?.addToHitGrid(this.x, this.y, this.width, this.height, this.num)
     this.ensureZIndexSorted()
 

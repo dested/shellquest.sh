@@ -105,6 +105,9 @@ class TerminalConsoleCache extends EventEmitter {
   }
 
   private overrideConsoleMethods(): void {
+    if(typeof window!== "undefined" ) {
+      return;
+    }
     console.log = (...args: any[]) => {
       this.appendToConsole(LogLevel.LOG, ...args)
     }
