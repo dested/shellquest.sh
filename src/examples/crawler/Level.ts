@@ -411,7 +411,7 @@ export class Level {
     }
 
     // Sprite layer tiles (entities)
-    tileMap.defineTile("player", 0, 2, { layer: "sprite" })
+    tileMap.defineTile("player", 29, 6, { layer: "sprite" })
 
     const rocks: { x: number; y: number; index: number }[] = []
     let index = 0

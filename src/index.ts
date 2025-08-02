@@ -98,24 +98,30 @@ async function getTerminalPixelResolution(
   stdout: NodeJS.WriteStream,
 ): Promise<PixelResolution | null> {
   return new Promise<PixelResolution | null>((resolve) => {
-    stdin.setRawMode(true)
-    const timeout = setTimeout(() => {
-      resolve(null)
-    }, 100)
-    stdin.once("data", (data) => {
-      clearTimeout(timeout)
-      const str = data.toString()
-      if (/\x1b\[4/.test(str)) {
-        // <ESC>[4;<height>;<width>t
-        const [, height, width] = str.split(";")
-        const resolution: PixelResolution = {
-          width: parseInt(width),
-          height: parseInt(height),
+    // Check if stdin supports setRawMode (TTY mode)
+    if (stdin.setRawMode && typeof stdin.setRawMode === 'function') {
+      stdin.setRawMode(true)
+      const timeout = setTimeout(() => {
+        resolve(null)
+      }, 100)
+      stdin.once("data", (data) => {
+        clearTimeout(timeout)
+        const str = data.toString()
+        if (/\x1b\[4/.test(str)) {
+          // <ESC>[4;<height>;<width>t
+          const [, height, width] = str.split(";")
+          const resolution: PixelResolution = {
+            width: parseInt(width),
+            height: parseInt(height),
+          }
+          resolve(resolution)
         }
-        resolve(resolution)
-      }
-    })
-    stdout.write("\u001b[14t")
+      })
+      stdout.write("\u001b[14t")
+    } else {
+      // If not in TTY mode, just return null
+      resolve(null)
+    }
   })
 }
 
@@ -412,7 +418,10 @@ export class CliRenderer extends Renderable {
 
   private setupTerminal(): void {
     this.stdout.write(ANSI.saveCursorState)
-    this.stdin.setRawMode(true)
+    // Check if stdin supports setRawMode (TTY mode)
+    if (this.stdin.setRawMode && typeof this.stdin.setRawMode === 'function') {
+      this.stdin.setRawMode(true)
+    }
     this.stdin.resume()
     this.stdin.setEncoding("utf8")
 
