@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TUI Crawler - DOM Renderer</title>
+  <script>
+    // Polyfill for process in browser
+    window.process = {
+      env: {},
+      platform: 'browser',
+      argv: [],
+      versions: { node: '0.0.0' },
+      stdin: { setRawMode: () => {}, resume: () => {}, setEncoding: () => {}, on: () => {} },
+      stdout: { write: () => {}, columns: 120, rows: 50 },
+      exit: (code) => console.log('Process exit called with code:', code),
+      nextTick: (fn) => setTimeout(fn, 0),
+      on: () => {},
+    }
+  </script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: monospace;
+      overflow: hidden;
+    }
+    #terminal-container {
+      background: #000;
+      border: 2px solid #333;
+      padding: 10px;
+      position: relative;
+    }
+    .terminal {
+      cursor: text;
+    }
+    .terminal div {
+      height: 1.2em;
+      line-height: 1.2;
+    }
+    .terminal span {
+      display: inline-block;
+      width: 1ch;
+      height: 1.2em;
+      text-align: center;
+      vertical-align: top;
+    }
+    .info {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: #0f0;
+      font-size: 12px;
+      font-family: monospace;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 5px;
+      border: 1px solid #0f0;
+      z-index: 1000;
+    }
+    /* Optimize performance */
+    .terminal * {
+      transform: translateZ(0);
+      backface-visibility: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div id="terminal-container">
+    <div class="info">
+      DOM Renderer (Fast)<br>
+      Use WASD or Arrow Keys to move<br>
+      Press ` for console<br>
+      Press T for debug overlay
+    </div>
+  </div>
+  <script type="module" src="/src/browser/main-dom.ts"></script>
+</body>
+</html>

@@ -12,21 +12,30 @@ import { parseKeypress } from "./browser-keypress";
 import { TerminalConsole, type ConsoleOptions } from "./console-stub";
 import { Selection } from "../selection";
 
-export interface BrowserRendererConfig {
+export interface DOMRendererConfig {
   targetFps?: number;
   consoleOptions?: ConsoleOptions;
   enableMouseMovement?: boolean;
   useMouse?: boolean;
 }
 
-const CHAR_WIDTH = 10;
-const CHAR_HEIGHT = 20;
+// Track dirty cells for efficient updates
+interface DirtyCell {
+  x: number;
+  y: number;
+  char: string;
+  fg: RGBA;
+  bg: RGBA;
+  attributes: number;
+}
 
-export class BrowserRenderer extends Renderable {
+export class DOMRenderer extends Renderable {
   public lib: any; // Browser-compatible lib interface
   private container: HTMLDivElement;
-  private canvas: HTMLCanvasElement;
-  private ctx: CanvasRenderingContext2D;
+  private terminalDiv: HTMLDivElement;
+  private cells: HTMLSpanElement[][] = [];
+  private cellCache: Map<string, DirtyCell> = new Map();
+  
   public width: number;
   public height: number;
   private _isRunning: boolean = false;
@@ -44,6 +53,7 @@ export class BrowserRenderer extends Renderable {
 
   private renderContext: RenderContext;
   public nextRenderBuffer: OptimizedBuffer;
+  private previousBuffer: OptimizedBuffer;
   private _console: TerminalConsole;
 
   private capturedRenderable?: Renderable;
@@ -62,8 +72,8 @@ export class BrowserRenderer extends Renderable {
     frameCallbackTime: 0,
   };
 
-  constructor(container: HTMLDivElement, width: number, height: number, config: BrowserRendererConfig = {}) {
-    super("__browser_renderer__", { x: 0, y: 0, zIndex: 0, visible: true, width, height });
+  constructor(container: HTMLDivElement, width: number, height: number, config: DOMRendererConfig = {}) {
+    super("__dom_renderer__", { x: 0, y: 0, zIndex: 0, visible: true, width, height });
 
     this.container = container;
     this.width = width;
@@ -80,28 +90,35 @@ export class BrowserRenderer extends Renderable {
       destroyOptimizedBuffer: (buffer: any) => {
         // No-op for browser
       },
-      // Add other methods as needed
     };
 
-    this.canvas = document.createElement("canvas");
-    this.canvas.width = width * CHAR_WIDTH;
-    this.canvas.height = height * CHAR_HEIGHT;
-    this.canvas.style.backgroundColor = "#000";
-    this.canvas.style.imageRendering = "pixelated";
-    this.canvas.style.fontFamily = "monospace";
-    this.container.appendChild(this.canvas);
+    // Create terminal div with proper styling
+    this.terminalDiv = document.createElement("div");
+    this.terminalDiv.className = "terminal";
+    this.terminalDiv.style.cssText = `
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.2;
+      background: #000;
+      color: #fff;
+      white-space: pre;
+      overflow: hidden;
+      cursor: default;
+      user-select: none;
+      position: relative;
+    `;
+    this.container.appendChild(this.terminalDiv);
 
-    this.ctx = this.canvas.getContext("2d", { alpha: false })!;
-    this.ctx.imageSmoothingEnabled = false;
-    this.ctx.font = `${CHAR_HEIGHT - 4}px monospace`;
-    this.ctx.textBaseline = "top";
-    (this.ctx as any).addToHitGrid = () => {};
+    // Create grid of span elements for efficient updates
+    this.createGrid();
 
     this.nextRenderBuffer = new OptimizedBuffer(width, height, false);
+    this.previousBuffer = new OptimizedBuffer(width, height, false);
 
     this.renderContext = {
       addToHitGrid: (x, y, width, height, id) => {
-        // Browser doesn't use hit grid for now
+        // Store hit regions for mouse interaction
+        // For now, we'll handle this simply
       },
       width: () => this.width,
       height: () => this.height,
@@ -111,6 +128,37 @@ export class BrowserRenderer extends Renderable {
 
     this.setupInput();
     this.setupMouse();
+  }
+
+  private createGrid(): void {
+    // Create a grid of spans for each cell
+    for (let y = 0; y < this.height; y++) {
+      const row: HTMLSpanElement[] = [];
+      const rowDiv = document.createElement("div");
+      rowDiv.style.cssText = `
+        height: 1.2em;
+        white-space: pre;
+        margin: 0;
+        padding: 0;
+        display: flex;
+      `;
+
+      for (let x = 0; x < this.width; x++) {
+        const cell = document.createElement("span");
+        cell.style.cssText = `
+          display: inline-block;
+          width: 1ch;
+          height: 1.2em;
+          overflow: hidden;
+        `;
+        cell.textContent = " ";
+        rowDiv.appendChild(cell);
+        row.push(cell);
+      }
+
+      this.terminalDiv.appendChild(rowDiv);
+      this.cells.push(row);
+    }
   }
 
   private setupInput(): void {
@@ -128,10 +176,17 @@ export class BrowserRenderer extends Renderable {
   private setupMouse(): void {
     if (!this._useMouse) return;
 
-    this.canvas.addEventListener("mousemove", (e) => {
-      const rect = this.canvas.getBoundingClientRect();
-      const x = Math.floor((e.clientX - rect.left) / CHAR_WIDTH);
-      const y = Math.floor((e.clientY - rect.top) / CHAR_HEIGHT);
+    const getCellCoords = (e: MouseEvent): { x: number; y: number } => {
+      const rect = this.terminalDiv.getBoundingClientRect();
+      const charWidth = rect.width / this.width;
+      const charHeight = rect.height / this.height;
+      const x = Math.floor((e.clientX - rect.left) / charWidth);
+      const y = Math.floor((e.clientY - rect.top) / charHeight);
+      return { x: Math.max(0, Math.min(this.width - 1, x)), y: Math.max(0, Math.min(this.height - 1, y)) };
+    };
+
+    this.terminalDiv.addEventListener("mousemove", (e) => {
+      const { x, y } = getCellCoords(e);
 
       if (this.lastOverRenderable) {
         const event = {
@@ -145,10 +200,8 @@ export class BrowserRenderer extends Renderable {
       }
     });
 
-    this.canvas.addEventListener("mousedown", (e) => {
-      const rect = this.canvas.getBoundingClientRect();
-      const x = Math.floor((e.clientX - rect.left) / CHAR_WIDTH);
-      const y = Math.floor((e.clientY - rect.top) / CHAR_HEIGHT);
+    this.terminalDiv.addEventListener("mousedown", (e) => {
+      const { x, y } = getCellCoords(e);
 
       // Handle selection start
       const maybeRenderable = this.findRenderableAt(x, y);
@@ -157,7 +210,7 @@ export class BrowserRenderer extends Renderable {
       }
     });
 
-    this.canvas.addEventListener("mouseup", () => {
+    this.terminalDiv.addEventListener("mouseup", () => {
       if (this.selectionState?.isSelecting) {
         this.finishSelection();
       }
@@ -206,7 +259,7 @@ export class BrowserRenderer extends Renderable {
   }
 
   public setBackgroundColor(color: string): void {
-    this.canvas.style.backgroundColor = color;
+    this.terminalDiv.style.backgroundColor = color;
   }
 
   public createFrameBuffer(id: string, options: Partial<FrameBufferOptions>) {
@@ -327,8 +380,8 @@ export class BrowserRenderer extends Renderable {
     this.render(this.nextRenderBuffer, deltaTime);
     this._console.renderToBuffer(this.nextRenderBuffer);
 
-    // Draw to canvas
-    this.drawBufferToCanvas();
+    // Update DOM efficiently
+    this.updateDOM();
 
     this.rendering = false;
 
@@ -337,35 +390,93 @@ export class BrowserRenderer extends Renderable {
     }
   }
 
-  private drawBufferToCanvas(): void {
-    this.ctx.fillStyle = "#000";
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+  private updateDOM(): void {
+    const updates: Array<() => void> = [];
+
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
         const cell = this.nextRenderBuffer.getCell(x, y);
-        if (!cell) continue;
+        const prevCell = this.previousBuffer.getCell(x, y);
 
-        const px = x * CHAR_WIDTH;
-        const py = y * CHAR_HEIGHT;
-
-        // Draw background - colors are already normalized (0-1)
-        if (cell.bg) {
-          this.ctx.fillStyle = `rgba(${Math.round(cell.bg.r * 255)}, ${Math.round(cell.bg.g * 255)}, ${Math.round(cell.bg.b * 255)}, ${cell.bg.a})`;
-          this.ctx.fillRect(px, py, CHAR_WIDTH, CHAR_HEIGHT);
+        // Only update if cell has changed
+        if (!cell || (prevCell && this.cellsEqual(cell, prevCell))) {
+          continue;
         }
 
-        // Draw character - only if not a space
-        if (cell.char && cell.char !== " " && cell.fg) {
-          this.ctx.fillStyle = `rgba(${Math.round(cell.fg.r * 255)}, ${Math.round(cell.fg.g * 255)}, ${Math.round(cell.fg.b * 255)}, ${cell.fg.a})`;
-          this.ctx.fillText(cell.char, px + 1, py + 2);
-        }
+        const domCell = this.cells[y][x];
+        const char = cell.char || " ";
+        const fg = cell.fg;
+        const bg = cell.bg;
+
+        updates.push(() => {
+          // Update text content
+          domCell.textContent = char === "" ? " " : char;
+
+          // Update colors - RGBA values are already normalized (0-1)
+          const fgColor = `rgba(${Math.round(fg.r * 255)}, ${Math.round(fg.g * 255)}, ${Math.round(fg.b * 255)}, ${fg.a})`;
+          const bgColor = `rgba(${Math.round(bg.r * 255)}, ${Math.round(bg.g * 255)}, ${Math.round(bg.b * 255)}, ${bg.a})`;
+
+          domCell.style.color = fgColor;
+          domCell.style.backgroundColor = bgColor;
+
+          // Handle text attributes
+          if (cell.attributes) {
+            const attrs = cell.attributes;
+            let textDecoration = "";
+            let fontWeight = "normal";
+            let fontStyle = "normal";
+
+            if (attrs & 1) fontWeight = "bold"; // Bold
+            if (attrs & 2) fontStyle = "italic"; // Italic
+            if (attrs & 4) textDecoration = "underline"; // Underline
+            if (attrs & 8) textDecoration = textDecoration ? textDecoration + " line-through" : "line-through"; // Strikethrough
+
+            domCell.style.fontWeight = fontWeight;
+            domCell.style.fontStyle = fontStyle;
+            domCell.style.textDecoration = textDecoration;
+          } else {
+            domCell.style.fontWeight = "normal";
+            domCell.style.fontStyle = "normal";
+            domCell.style.textDecoration = "none";
+          }
+        });
+
+        // Store in previous buffer for next frame comparison
+        this.previousBuffer.setCell(x, y, char, fg, bg, cell.attributes);
       }
+    }
+
+    // Batch DOM updates
+    if (updates.length > 0) {
+      requestAnimationFrame(() => {
+        updates.forEach(update => update());
+      });
     }
   }
 
+  private cellsEqual(a: any, b: any): boolean {
+    return (
+      a.char === b.char &&
+      a.fg.r === b.fg.r &&
+      a.fg.g === b.fg.g &&
+      a.fg.b === b.fg.b &&
+      a.fg.a === b.fg.a &&
+      a.bg.r === b.bg.r &&
+      a.bg.g === b.bg.g &&
+      a.bg.b === b.bg.b &&
+      a.bg.a === b.bg.a &&
+      a.attributes === b.attributes
+    );
+  }
+
   public clearTerminal(): void {
-    this.ctx.fillStyle = "#000";
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this.cells.forEach(row => {
+      row.forEach(cell => {
+        cell.textContent = " ";
+        cell.style.color = "#fff";
+        cell.style.backgroundColor = "#000";
+      });
+    });
   }
 
   public toggleDebugOverlay(): void {

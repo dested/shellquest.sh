@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Renderer Comparison</title>
+  <script>
+    // Polyfill for process in browser
+    window.process = {
+      env: {},
+      platform: 'browser',
+      argv: [],
+      versions: { node: '0.0.0' },
+      stdin: { setRawMode: () => {}, resume: () => {}, setEncoding: () => {}, on: () => {} },
+      stdout: { write: () => {}, columns: 80, rows: 30 },
+      exit: (code) => console.log('Process exit called with code:', code),
+      nextTick: (fn) => setTimeout(fn, 0),
+      on: () => {},
+    }
+  </script>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #222;
+      font-family: monospace;
+      color: #fff;
+    }
+    .container {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .renderer-test {
+      border: 2px solid #555;
+      padding: 10px;
+      background: #000;
+    }
+    h2 {
+      color: #0f0;
+      margin: 0 0 10px 0;
+      font-size: 16px;
+    }
+    #terminal-container-canvas,
+    #terminal-container-dom {
+      min-width: 800px;
+      min-height: 600px;
+      background: #000;
+      position: relative;
+    }
+    .controls {
+      margin-top: 20px;
+      padding: 10px;
+      background: #333;
+      border-radius: 5px;
+    }
+    button {
+      padding: 5px 15px;
+      margin: 5px;
+      background: #555;
+      color: #fff;
+      border: 1px solid #777;
+      cursor: pointer;
+      font-family: monospace;
+    }
+    button:hover {
+      background: #666;
+    }
+    .stats {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #0f0;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="color: #0f0;">Renderer Performance Comparison</h1>
+  
+  <div class="controls">
+    <button onclick="testCanvas()">Test Canvas Renderer</button>
+    <button onclick="testDOM()">Test DOM Renderer</button>
+    <button onclick="testBoth()">Test Both</button>
+    <button onclick="clearAll()">Clear</button>
+  </div>
+
+  <div class="container">
+    <div class="renderer-test">
+      <h2>Canvas Renderer</h2>
+      <div id="terminal-container-canvas"></div>
+      <div class="stats" id="canvas-stats">FPS: 0</div>
+    </div>
+    
+    <div class="renderer-test">
+      <h2>DOM Renderer (Optimized)</h2>
+      <div id="terminal-container-dom"></div>
+      <div class="stats" id="dom-stats">FPS: 0</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { BrowserRenderer } from '/src/browser/BrowserRenderer'
+    import { DOMRenderer } from '/src/browser/DOMRenderer'
+    import { TextRenderable, BoxRenderable } from '/src/objects'
+    import { RGBA } from '/src/types'
+    
+    let canvasRenderer = null
+    let domRenderer = null
+    
+    async function createTestRenderer(RendererClass, container, width = 80, height = 30) {
+      const renderer = new RendererClass(container, width, height, {
+        targetFps: 60,
+        enableMouseMovement: false,
+        useMouse: false
+      })
+      
+      // Add some test content
+      const box = new BoxRenderable('test-box', {
+        x: 5,
+        y: 5,
+        width: 20,
+        height: 10,
+        borderColor: RGBA.fromValues(0, 1, 0, 1),
+        backgroundColor: RGBA.fromValues(0, 0, 0.5, 0.8),
+        borderStyle: 'single'
+      })
+      renderer.add(box)
+      
+      const text = new TextRenderable('test-text', {
+        x: 7,
+        y: 7,
+        text: 'Hello World!',
+        color: RGBA.fromValues(1, 1, 0, 1)
+      })
+      renderer.add(text)
+      
+      // Add animated element
+      let frame = 0
+      const animated = new TextRenderable('animated', {
+        x: 30,
+        y: 15,
+        text: 'Animating...',
+        color: RGBA.fromValues(1, 0.5, 0, 1)
+      })
+      renderer.add(animated)
+      
+      renderer.setFrameCallback(async (deltaTime) => {
+        frame++
+        animated.x = 30 + Math.sin(frame * 0.05) * 10
+        animated.y = 15 + Math.cos(frame * 0.05) * 5
+        
+        // Update color
+        const r = (Math.sin(frame * 0.02) + 1) / 2
+        const g = (Math.cos(frame * 0.03) + 1) / 2
+        animated.color = RGBA.fromValues(r, g, 1, 1)
+      })
+      
+      return renderer
+    }
+    
+    window.testCanvas = async function() {
+      if (canvasRenderer) {
+        canvasRenderer.stop()
+      }
+      const container = document.getElementById('terminal-container-canvas')
+      container.innerHTML = ''
+      canvasRenderer = await createTestRenderer(BrowserRenderer, container)
+      canvasRenderer.start()
+      
+      // Monitor FPS
+      setInterval(() => {
+        if (canvasRenderer && canvasRenderer._isRunning) {
+          document.getElementById('canvas-stats').textContent = 
+            `FPS: ${canvasRenderer.renderStats?.fps || 0}`
+        }
+      }, 1000)
+    }
+    
+    window.testDOM = async function() {
+      if (domRenderer) {
+        domRenderer.stop()
+      }
+      const container = document.getElementById('terminal-container-dom')
+      container.innerHTML = ''
+      domRenderer = await createTestRenderer(DOMRenderer, container)
+      domRenderer.start()
+      
+      // Monitor FPS
+      setInterval(() => {
+        if (domRenderer && domRenderer._isRunning) {
+          document.getElementById('dom-stats').textContent = 
+            `FPS: ${domRenderer.renderStats?.fps || 0}`
+        }
+      }, 1000)
+    }
+    
+    window.testBoth = async function() {
+      await testCanvas()
+      await testDOM()
+    }
+    
+    window.clearAll = function() {
+      if (canvasRenderer) {
+        canvasRenderer.stop()
+        document.getElementById('terminal-container-canvas').innerHTML = ''
+      }
+      if (domRenderer) {
+        domRenderer.stop()
+        document.getElementById('terminal-container-dom').innerHTML = ''
+      }
+    }
+  </script>
+</body>
+</html>

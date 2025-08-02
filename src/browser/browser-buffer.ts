@@ -90,8 +90,8 @@ export class OptimizedBuffer {
 
     return {
       char: String.fromCharCode(this.buffer.char[index]),
-      fg: RGBA.fromArray(Array.from(this.buffer.fg.slice(colorIndex, colorIndex + 4))),
-      bg: RGBA.fromArray(Array.from(this.buffer.bg.slice(colorIndex, colorIndex + 4))),
+      fg: RGBA.fromArray(this.buffer.fg.slice(colorIndex, colorIndex + 4)),
+      bg: RGBA.fromArray(this.buffer.bg.slice(colorIndex, colorIndex + 4)),
       attributes: this.buffer.attributes[index],
     }
   }
@@ -104,8 +104,8 @@ export class OptimizedBuffer {
 
     return {
       char: this.buffer.char[index],
-      fg: RGBA.fromArray(Array.from(this.buffer.fg.slice(colorIndex, colorIndex + 4))),
-      bg: RGBA.fromArray(Array.from(this.buffer.bg.slice(colorIndex, colorIndex + 4))),
+      fg: RGBA.fromArray(this.buffer.fg.slice(colorIndex, colorIndex + 4)),
+      bg: RGBA.fromArray(this.buffer.bg.slice(colorIndex, colorIndex + 4)),
       attributes: this.buffer.attributes[index],
     }
   }

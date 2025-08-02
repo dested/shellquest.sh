@@ -1,4 +1,3 @@
-import type { BrowserRenderer } from "../browser/BrowserRenderer";
 import { TextRenderable, BoxRenderable, GroupRenderable, FrameBufferRenderable } from "../objects";
 import { RGBA } from "../types";
 import type { ParsedKey } from "../parse.keypress";
@@ -612,13 +611,13 @@ class DungeonCrawlerGame {
   }
 }
 
-export async function run(renderer: BrowserRenderer): Promise<void> {
+export async function run(renderer: any): Promise<void> {
   renderer.setBackgroundColor("#000000");
   const game = new DungeonCrawlerGame(renderer);
   (renderer as any)._dungeonCrawlerGame = game;
 }
 
-export function destroy(renderer: BrowserRenderer): void {
+export function destroy(renderer: any): void {
   const game = (renderer as any)._dungeonCrawlerGame as DungeonCrawlerGame | undefined;
   if (game) {
     game.destroy();
