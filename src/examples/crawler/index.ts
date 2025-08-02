@@ -16,14 +16,14 @@ import { LayeredRenderer, type Entity } from "./tilemap/LayeredRenderer.ts"
 import { Level } from "./Level.ts"
 
 // Game constants
-const MAP_WIDTH = 50
-const MAP_HEIGHT = 50
+const MAP_WIDTH = 200
+const MAP_HEIGHT = 200
 const VIEWPORT_WIDTH = 20 // Viewport width in tiles
 const VIEWPORT_HEIGHT = 15 // Viewport height in tiles
 
 class Player implements Entity {
-  gridX: number = 25
-  gridY: number = 25
+  gridX: number = 10
+  gridY: number = 10
   width: number = 1
   height: number = 1
   tileName: string = "player"
@@ -71,8 +71,8 @@ class DungeonCrawlerGame {
     this.camera = new Camera()
 
     // Initialize tile map (will be loaded from PNG later)
-    this.tileMap = new TileMap(16, 16) // Assuming 16x16 tile sheet
-    this.setupTileDefinitions()
+    this.tileMap = new TileMap()
+    this.level.setupTileDefinitions(this.tileMap)
 
     this.gameContainer = new GroupRenderable("game-container", { x: 0, y: 0, zIndex: 0, visible: true })
     this.renderer.add(this.gameContainer)
@@ -81,8 +81,8 @@ class DungeonCrawlerGame {
     this.setupLayeredRenderer()
     this.setupInput()
 
-    // Generate test level and add player
-    this.level.generateTestLevel()
+    // Generate procedural dungeon level and add player
+    this.level.procedurallyGenerateLevel()
     this.level.addEntity(this.player)
 
     // Center camera on player
@@ -91,90 +91,6 @@ class DungeonCrawlerGame {
     this.update()
   }
 
-  private setupTileDefinitions(): void {
-    // Define tiles based on your sprite map positions
-    // These are placeholder definitions - you'll update with actual positions
-
-    // Bottom layer tiles (grass variations)
-    this.tileMap.defineTile("grass", 0, 0, { layer: "bottom" })
-    this.tileMap.defineTile("grass_border_top", 1, 0, { layer: "bottom", solid: true })
-    this.tileMap.defineTile("grass_border_bottom", 2, 0, { layer: "bottom", solid: true })
-    this.tileMap.defineTile("grass_border_left", 3, 0, { layer: "bottom", solid: true })
-    this.tileMap.defineTile("grass_border_right", 4, 0, { layer: "bottom", solid: true })
-    this.tileMap.defineTile("grass_corner_tl", 5, 0, { layer: "bottom", solid: true })
-    this.tileMap.defineTile("grass_corner_tr", 6, 0, { layer: "bottom", solid: true })
-    this.tileMap.defineTile("grass_corner_bl", 7, 0, { layer: "bottom", solid: true })
-    this.tileMap.defineTile("grass_corner_br", 8, 0, { layer: "bottom", solid: true })
-    this.tileMap.defineTile("dirt", 0, 1, { layer: "bottom" })
-
-    // Sprite layer tiles (entities)
-    this.tileMap.defineTile("player", 0, 2, { layer: "sprite" })
-    this.tileMap.defineTile("rock", 1, 2, { layer: "sprite", solid: true })
-    this.tileMap.defineTile("bush", 2, 2, { layer: "sprite" })
-
-    // Top layer tiles (effects, overlays)
-    this.tileMap.defineTile("shadow", 0, 3, { layer: "top" })
-
-    // Set temporary colored pixels for testing
-    // Grass - green with some texture
-    this.tileMap.setTemporaryTilePixels("grass", RGBA.fromHex("#2d5a2d"), [
-      [1, 0, 1, 0],
-      [0, 1, 0, 1],
-      [1, 0, 1, 0],
-      [0, 1, 0, 1],
-    ])
-
-    // Grass borders - darker green
-    const borderPattern = [
-      [1, 1, 1, 1],
-      [1, 1, 1, 1],
-      [1, 1, 1, 1],
-      [1, 1, 1, 1],
-    ]
-    this.tileMap.setTemporaryTilePixels("grass_border_top", RGBA.fromHex("#1a3a1a"), borderPattern)
-    this.tileMap.setTemporaryTilePixels("grass_border_bottom", RGBA.fromHex("#1a3a1a"), borderPattern)
-    this.tileMap.setTemporaryTilePixels("grass_border_left", RGBA.fromHex("#1a3a1a"), borderPattern)
-    this.tileMap.setTemporaryTilePixels("grass_border_right", RGBA.fromHex("#1a3a1a"), borderPattern)
-    this.tileMap.setTemporaryTilePixels("grass_corner_tl", RGBA.fromHex("#0f2a0f"), borderPattern)
-    this.tileMap.setTemporaryTilePixels("grass_corner_tr", RGBA.fromHex("#0f2a0f"), borderPattern)
-    this.tileMap.setTemporaryTilePixels("grass_corner_bl", RGBA.fromHex("#0f2a0f"), borderPattern)
-    this.tileMap.setTemporaryTilePixels("grass_corner_br", RGBA.fromHex("#0f2a0f"), borderPattern)
-
-    // Dirt - brown
-    this.tileMap.setTemporaryTilePixels("dirt", RGBA.fromHex("#6b4423"), [
-      [1, 1, 0, 1],
-      [1, 0, 1, 1],
-      [0, 1, 1, 1],
-      [1, 1, 1, 0],
-    ])
-
-    // Player - yellow
-    this.tileMap.setTemporaryTilePixels("player", RGBA.fromHex("#ffff00"), [
-      [0, 1, 1, 0],
-      [1, 1, 1, 1],
-      [0, 1, 1, 0],
-      [1, 0, 0, 1],
-    ])
-
-    // Rock - gray
-    this.tileMap.setTemporaryTilePixels("rock", RGBA.fromHex("#808080"), [
-      [0, 1, 1, 0],
-      [1, 1, 1, 1],
-      [1, 1, 1, 1],
-      [0, 1, 1, 0],
-    ])
-
-    // Bush - dark green
-    this.tileMap.setTemporaryTilePixels("bush", RGBA.fromHex("#0f4f0f"), [
-      [0, 1, 1, 0],
-      [1, 1, 1, 1],
-      [1, 1, 1, 1],
-      [0, 0, 1, 0],
-    ])
-
-    // Shadow - semi-transparent black
-    this.tileMap.setTemporaryTilePixels("shadow", RGBA.fromValues(0, 0, 0, 0.5))
-  }
 
   private setupLayeredRenderer(): void {
     const width = this.renderer.terminalWidth
@@ -198,97 +114,99 @@ class DungeonCrawlerGame {
     const width = this.renderer.terminalWidth
     const height = this.renderer.terminalHeight
 
-    // Create health bar at top
-    this.healthBar = new GroupRenderable("health-bar", { x: 0, y: 0, zIndex: 1, visible: true })
-    this.healthBar.x = 0
-    this.healthBar.y = 0
+    // --- UI BAR HEIGHTS ---
+    const barHeight = 3
+    const barWidth = Math.floor((width - 6) / 2) // 2 bars, 2px padding each side, 2px between
+    const barY = 0
+    const barPadding = 2
+
+    // --- HEALTH BAR (LEFT) ---
+    this.healthBar = new GroupRenderable("health-bar", { x: barPadding, y: barY, zIndex: 10, visible: true })
 
     const healthBg = new BoxRenderable("health-bg", {
       x: 0,
       y: 0,
-      width: width,
-      height: 3,
+      width: barWidth,
+      height: barHeight,
       borderStyle: "double",
       borderColor: "#ff0000",
       bg: "#1a0000",
       title: " HEALTH ",
       titleAlignment: "center",
-      zIndex: 1,
+      zIndex: 10,
     })
     this.healthBar.add(healthBg)
 
     const healthFill = new BoxRenderable("health-fill", {
       x: 2,
       y: 1,
-      width: Math.floor((width - 4) * (this.player.hp / this.player.maxHp)),
+      width: Math.max(0, Math.floor((barWidth - 4) * (this.player.hp / this.player.maxHp))),
       height: 1,
       bg: "#ff0000",
-      zIndex: 1,
+      zIndex: 11,
     })
     this.healthBar.add(healthFill)
 
     const healthText = new TextRenderable("health-text", {
-      x: Math.floor(width / 2) - 5,
+      x: Math.floor(barWidth / 2) - 5,
       y: 1,
       content: `${this.player.hp}/${this.player.maxHp}`,
       fg: "#ffffff",
-      zIndex: 1,
+      zIndex: 12,
     })
     this.healthBar.add(healthText)
 
     this.gameContainer.add(this.healthBar)
 
-    // Create mana bar below health
-    this.manaBar = new GroupRenderable("mana-bar", { x: 0, y: 3, zIndex: 1, visible: true })
-    this.manaBar.x = 0
-    this.manaBar.y = 3
+    // --- MANA BAR (RIGHT) ---
+    this.manaBar = new GroupRenderable("mana-bar", { x: barPadding + barWidth + barPadding, y: barY, zIndex: 10, visible: true })
 
     const manaBg = new BoxRenderable("mana-bg", {
       x: 0,
       y: 0,
-      width: width,
-      height: 3,
+      width: barWidth,
+      height: barHeight,
       borderStyle: "double",
       borderColor: "#0099ff",
       bg: "#001a33",
       title: " MANA ",
       titleAlignment: "center",
-      zIndex: 1,
+      zIndex: 10,
     })
     this.manaBar.add(manaBg)
 
     const manaFill = new BoxRenderable("mana-fill", {
       x: 2,
       y: 1,
-      width: Math.floor((width - 4) * (this.player.mana / this.player.maxMana)),
+      width: Math.max(0, Math.floor((barWidth - 4) * (this.player.mana / this.player.maxMana))),
       height: 1,
       bg: "#0099ff",
-      zIndex: 1,
+      zIndex: 11,
     })
     this.manaBar.add(manaFill)
 
     const manaText = new TextRenderable("mana-text", {
-      x: Math.floor(width / 2) - 5,
+      x: Math.floor(barWidth / 2) - 5,
       y: 1,
       content: `${this.player.mana}/${this.player.maxMana}`,
       fg: "#ffffff",
-      zIndex: 1,
+      zIndex: 12,
     })
     this.manaBar.add(manaText)
 
     this.gameContainer.add(this.manaBar)
 
-    // Create game world view with border
-    const gameAreaY = 6
-    const gameAreaHeight = height - gameAreaY - 2
-    const gameAreaWidth = Math.min(width - 4, VIEWPORT_WIDTH * TILE_SIZE + 4)
-    const gameAreaX = Math.floor((width - gameAreaWidth) / 2)
+    // --- GAME WORLD BORDER (FULL WIDTH/HEIGHT, BELOW BARS) ---
+    const mapBorderY = barHeight + 1 // 1px gap below bars
+    const mapBorderHeight = height - mapBorderY
+    const mapBorderWidth = width
+    const mapBorderX = 0
 
     this.mapBorder = new BoxRenderable("map-border", {
-      x: gameAreaX,
-      y: gameAreaY,
-      width: gameAreaWidth,
-      height: gameAreaHeight,
+      x: mapBorderX,
+      y: mapBorderY,
+      width: mapBorderWidth,
+      height: mapBorderHeight,
       borderStyle: "rounded",
       borderColor: "#8a7f76",
       bg: "#000000",
@@ -344,7 +262,6 @@ class DungeonCrawlerGame {
   private update(): void {
     // Clear all layers
     this.layeredRenderer.clear()
-debugger;
     // Render bottom layer (tiles)
     this.layeredRenderer.renderBottomLayer(this.level.getBottomLayerTiles(), this.camera.x, this.camera.y)
 

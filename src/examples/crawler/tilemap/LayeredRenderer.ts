@@ -33,9 +33,9 @@ export class LayeredRenderer {
     const pixelHeight = viewportHeight * TILE_SIZE
 
     // Create OptimizedBuffers using the renderer's lib
-    const bottomBuffer = (renderer as any).lib.createOptimizedBuffer(pixelWidth, pixelHeight, false)
-    const spriteBuffer = (renderer as any).lib.createOptimizedBuffer(pixelWidth, pixelHeight, true)
-    const topBuffer = (renderer as any).lib.createOptimizedBuffer(pixelWidth, pixelHeight, true)
+    const bottomBuffer = renderer.lib.createOptimizedBuffer(pixelWidth, pixelHeight, false)
+    const spriteBuffer = renderer.lib.createOptimizedBuffer(pixelWidth, pixelHeight, true)
+    const topBuffer = renderer.lib.createOptimizedBuffer(pixelWidth, pixelHeight, true)
 
     // Create FrameBufferRenderables from the buffers
     this.bottomLayer = new FrameBufferRenderable("bottom-layer", bottomBuffer, {

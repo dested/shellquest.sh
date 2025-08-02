@@ -1,4 +1,5 @@
 import { RGBA } from "../../../types"
+import sharp from "sharp"
 
 // Constants for tile sizing
 export const TILE_SIZE = 4 // 4x4 pixels per tile
@@ -18,22 +19,18 @@ export class TileMap {
   private tileCache: Map<string, RGBA[]> = new Map() // Cache extracted tile pixel data
   
   constructor(
-    private width: number, // Width in tiles
-    private height: number  // Height in tiles
   ) {}
   
   /**
    * Load tilemap from PNG file
    */
   async loadFromFile(path: string): Promise<void> {
-    // Dynamic import of sharp for image processing
-    const sharp = await import('sharp')
-    
+
     // Load and convert image to raw pixel data
-    const { data, info } = await sharp.default(path)
+    const { data, info } = await sharp(path)
       .raw()
       .toBuffer({ resolveWithObject: true })
-    
+
     // Store image data
     this.imageData = {
       data: new Uint8ClampedArray(data),
@@ -41,6 +38,7 @@ export class TileMap {
       height: info.height,
       colorSpace: 'srgb'
     }
+
   }
   
   /**
@@ -99,16 +97,16 @@ export class TileMap {
     if (this.tileCache.has(tileName)) {
       return this.tileCache.get(tileName)!
     }
-    
     const tileDef = this.tileDefinitions.get(tileName)
     if (!tileDef) {
       return null
     }
-    
+
     // If we have image data, extract from it
     if (this.imageData) {
       const pixels: RGBA[] = []
-      
+      debugger;
+
       // Calculate pixel coordinates
       const startX = tileDef.x * TILE_SIZE
       const startY = tileDef.y * TILE_SIZE

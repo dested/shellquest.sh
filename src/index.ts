@@ -161,7 +161,7 @@ export enum CliRenderEvents {
 let animationFrameId = 0
 
 export class CliRenderer extends Renderable {
-  private lib: RenderLib
+  lib: RenderLib
   public rendererPtr: Pointer
   private stdin: NodeJS.ReadStream
   private stdout: NodeJS.WriteStream

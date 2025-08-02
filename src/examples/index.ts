@@ -38,6 +38,7 @@ import * as mouseInteractionExample from "./mouse-interaction-demo"
 import * as textSelectionExample from "./text-selection-demo"
 import { getKeyHandler } from "../ui/lib/KeyHandler"
 
+import * as crawlerExample from "./crawler"
 interface Example {
   name: string
   description: string
@@ -46,6 +47,12 @@ interface Example {
 }
 
 const examples: Example[] = [
+  {
+    name: "Dungeon Crawler",
+    description: "Explore a procedural cave with WASD/arrow controls",
+    run: crawlerExample.run,
+    destroy: crawlerExample.destroy,
+  },
   {
     name: "Mouse Interaction Demo",
     description: "Interactive mouse trails and clickable cells demonstration",
