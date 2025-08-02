@@ -24,6 +24,7 @@ export interface Entity {
   height: number // Height in tiles
   tileName: string
   layer: "sprite"
+  facingLeft?: boolean // Whether the sprite should be flipped horizontally
 }
 
 export class LayeredRenderer {
@@ -96,6 +97,7 @@ export class LayeredRenderer {
     gridY: number,
     offsetX: number = 0,
     offsetY: number = 0,
+    flipHorizontal: boolean = false,
   ): void {
     const pixels = this.tileMap.getTilePixels(tileName)
     if (!pixels) return
@@ -118,8 +120,11 @@ export class LayeredRenderer {
         const topPixelY = cy * 2 // Top pixel row (0, 2, 4, 6, 8, 10, 12, 14)
         const bottomPixelY = cy * 2 + 1 // Bottom pixel row (1, 3, 5, 7, 9, 11, 13, 15)
         
-        const topPixelIndex = topPixelY * TILE_SIZE + cx
-        const bottomPixelIndex = bottomPixelY * TILE_SIZE + cx
+        // Flip horizontally by reading from opposite side
+        const pixelX = flipHorizontal ? (TILE_SIZE - 1 - cx) : cx
+        
+        const topPixelIndex = topPixelY * TILE_SIZE + pixelX
+        const bottomPixelIndex = bottomPixelY * TILE_SIZE + pixelX
         
         const topColor = pixels[topPixelIndex]
         const bottomColor = pixels[bottomPixelIndex]
@@ -274,7 +279,7 @@ export class LayeredRenderer {
         screenY >= -entity.height - 1 &&
         screenY <= this.viewportHeight + 1
       ) {
-        // Render multi-tile entities
+        // Render multi-tile entities with optional horizontal flip
         for (let ty = 0; ty < entity.height; ty++) {
           for (let tx = 0; tx < entity.width; tx++) {
             this.renderTile(
@@ -283,7 +288,8 @@ export class LayeredRenderer {
               screenX + tx, 
               screenY + ty,
               entityPixelOffsetX,
-              entityPixelOffsetY
+              entityPixelOffsetY,
+              entity.facingLeft || false
             )
           }
         }
