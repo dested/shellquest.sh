@@ -12,7 +12,7 @@ import {
 import { parseColor } from "./utils.ts"
 import type { Pointer } from "bun:ffi"
 import { OptimizedBuffer } from "./buffer.ts"
-import { resolveRenderLib, type RenderLib } from "./zig.ts"
+import { resolveRenderLib, type RenderLib } from "./zig"
 import { TerminalConsole, type ConsoleOptions } from "./console.ts"
 import { parseMouseEvent, type MouseEventType, type RawMouseEvent } from "./parse.mouse.ts"
 import { Selection } from "./selection.ts"

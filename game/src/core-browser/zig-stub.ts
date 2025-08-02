@@ -1,6 +1,5 @@
 // Stub for Zig native library in browser
 import { OptimizedBuffer } from './browser-buffer'
-import { RGBA } from '../core/types.ts'
 
 export function resolveRenderLib() {
   return {

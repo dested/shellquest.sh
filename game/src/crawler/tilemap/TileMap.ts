@@ -20,8 +20,6 @@ export class TileMap {
   private tilemapName: string | null = null;
   private tileDefinitions: Map<string, TileDefinition> = new Map();
   private tileCache: Map<string, RGBA[]> = new Map(); // Cache extracted tile pixel data
-  onReady: () => void = () => {
-  };
 
   constructor() {}
 
@@ -44,7 +42,6 @@ export class TileMap {
 
     this.tilemapData = tilemapData[tilemapName];
     this.tilemapName = tilemapName;
-    this.onReady();
   }
 
   /**

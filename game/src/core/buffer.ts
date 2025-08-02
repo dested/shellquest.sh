@@ -1,7 +1,7 @@
 import type { Fragment, StyledText } from "./styled-text.ts"
 import { RGBA } from "./types.ts"
 import { createTextAttributes, parseColor } from "./utils.ts"
-import { resolveRenderLib, type RenderLib } from "./zig.ts"
+import { resolveRenderLib, type RenderLib } from "./zig"
 import { type Pointer } from "bun:ffi"
 
 let fbIdCounter = 0

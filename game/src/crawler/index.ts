@@ -13,8 +13,12 @@ import {
 import { getKeyHandler } from "../core/ui/lib/KeyHandler.ts";
 import { TileMap, TILE_SIZE } from "./tilemap/TileMap.ts";
 import { LayeredRenderer, type Entity } from "./tilemap/LayeredRenderer.ts";
+import { BrowserLayeredRenderer } from "./tilemap/BrowserLayeredRenderer.ts";
 import { Level } from "./level.ts";
 import { renderFontToFrameBuffer, measureText } from "../core/ui/ascii.font.ts";
+
+// Check if we're in a browser environment
+const isBrowser = typeof window !== "undefined";
 
 // Game constants
 const MAP_WIDTH = 200;
@@ -125,12 +129,12 @@ class Camera {
 }
 
 class DungeonCrawlerGame {
-  renderer: CliRenderer;
+  renderer: CliRenderer | any; // Support both CliRenderer and browser renderer
   private player: Player;
   private level: Level;
   private camera: Camera;
   private tileMap: TileMap;
-  private layeredRenderer: LayeredRenderer;
+  private layeredRenderer: LayeredRenderer | BrowserLayeredRenderer;
 
   // UI elements
   private gameContainer: GroupRenderable;
@@ -140,22 +144,34 @@ class DungeonCrawlerGame {
 
   // Movement state
   private moveDirection = { x: 0, y: 0 };
-  private moveInterval: NodeJS.Timeout | null = null;
+  private moveInterval: NodeJS.Timeout | number | null = null; // Support both Node and browser timers
   private moveSpeed = 30; // ms between moves when holding key (faster for smoother movement)
   private subTileSpeed = 1; // Move 1 sub-tile at a time (out of 4 per tile)
 
-  constructor(renderer: CliRenderer) {
+  constructor(renderer: CliRenderer | any) {
     this.renderer = renderer;
     this.player = new Player();
     this.level = new Level(MAP_WIDTH, MAP_HEIGHT);
     this.camera = new Camera(this);
 
-    // Initialize tile map (will be loaded from PNG later)
+    // Initialize tile map
     this.tileMap = new TileMap();
-    this.level.setupTileDefinitions(this.tileMap);
-
+    
     this.gameContainer = new GroupRenderable("game-container", { x: 0, y: 0, zIndex: 0, visible: true });
     this.renderer.add(this.gameContainer);
+
+    this.initializeSync();
+
+    renderer.on("resize", () => {
+      this.gameContainer.clear();
+      this.setupUI();
+      this.update();
+    });
+  }
+
+  private initializeSync(): void {
+    // CLI: Setup tile definitions synchronously
+    this.level.setupTileDefinitions(this.tileMap);
 
     this.setupUI();
     this.setupLayeredRenderer();
@@ -169,14 +185,7 @@ class DungeonCrawlerGame {
     this.camera.update(this.player.preciseX, this.player.preciseY);
 
     this.update();
-    this.tileMap.onReady = () => {
       this.update();
-    };
-    renderer.on("resize", () => {
-      this.gameContainer.clear();
-      this.setupUI();
-      this.update();
-    });
   }
 
   private setupLayeredRenderer(): void {
@@ -186,14 +195,26 @@ class DungeonCrawlerGame {
     // Each 16x16 tile is 16 chars wide
     const gameAreaX = Math.floor((width - (this.camera.viewportWidth * TILE_SIZE + 4)) / 2);
 
-    this.layeredRenderer = new LayeredRenderer(
-      this.renderer,
-      this.tileMap,
-      this.camera.viewportWidth,
-      this.camera.viewportHeight,
-      gameAreaX + 2,
-      gameAreaY + 0,
-    );
+    // Use BrowserLayeredRenderer for browser, LayeredRenderer for CLI
+    if (isBrowser) {
+      this.layeredRenderer = new BrowserLayeredRenderer(
+        this.renderer,
+        this.tileMap,
+        this.camera.viewportWidth,
+        this.camera.viewportHeight,
+        gameAreaX + 2,
+        gameAreaY + 0,
+      );
+    } else {
+      this.layeredRenderer = new LayeredRenderer(
+        this.renderer,
+        this.tileMap,
+        this.camera.viewportWidth,
+        this.camera.viewportHeight,
+        gameAreaX + 2,
+        gameAreaY + 0,
+      );
+    }
 
     this.gameContainer.add(this.layeredRenderer.getContainer());
   }
@@ -480,7 +501,11 @@ class DungeonCrawlerGame {
     keyHandler.on("keypress", (key: ParsedKey) => {
       switch (key.raw) {
         case "\u0003":
-          process.exit(0);
+          if (isBrowser) {
+            console.log("Ctrl+C pressed (exit disabled in browser)");
+          } else {
+            process.exit(0);
+          }
           break;
         case "`":
           this.renderer.console.toggle();
@@ -523,11 +548,18 @@ class DungeonCrawlerGame {
 
         // Start continuous movement if not already moving
         if (!this.moveInterval) {
-          this.moveInterval = setInterval(() => {
+          const intervalFn = () => {
             if (this.moveDirection.x !== 0 || this.moveDirection.y !== 0) {
               this.movePlayer(this.moveDirection.x, this.moveDirection.y);
             }
-          }, this.moveSpeed);
+          };
+          
+          // Use appropriate timer function for environment
+          if (isBrowser) {
+            this.moveInterval = window.setInterval(intervalFn, this.moveSpeed);
+          } else {
+            this.moveInterval = setInterval(intervalFn, this.moveSpeed);
+          }
         }
       }
     });
@@ -563,7 +595,11 @@ class DungeonCrawlerGame {
 
       // Stop movement if no direction is active
       if (this.moveDirection.x === 0 && this.moveDirection.y === 0 && this.moveInterval) {
-        clearInterval(this.moveInterval);
+        if (isBrowser) {
+          clearInterval(this.moveInterval as number);
+        } else {
+          clearInterval(this.moveInterval as NodeJS.Timeout);
+        }
         this.moveInterval = null;
       }
     });
@@ -646,7 +682,11 @@ class DungeonCrawlerGame {
 
   destroy(): void {
     if (this.moveInterval) {
-      clearInterval(this.moveInterval);
+      if (isBrowser) {
+        clearInterval(this.moveInterval as number);
+      } else {
+        clearInterval(this.moveInterval as NodeJS.Timeout);
+      }
       this.moveInterval = null;
     }
     this.layeredRenderer.destroy();
@@ -659,7 +699,7 @@ class DungeonCrawlerGame {
   }
 }
 
-export async function run(renderer: CliRenderer): Promise<void> {
+export async function run(renderer: CliRenderer | any): Promise<void> {
   renderer.setBackgroundColor("#000000");
   const game = new DungeonCrawlerGame(renderer);
 
@@ -667,7 +707,7 @@ export async function run(renderer: CliRenderer): Promise<void> {
   (renderer as any)._dungeonCrawlerGame = game;
 }
 
-export function destroy(renderer: CliRenderer): void {
+export function destroy(renderer: CliRenderer | any): void {
   const game = (renderer as any)._dungeonCrawlerGame as DungeonCrawlerGame | undefined;
   if (game) {
     game.destroy();
@@ -679,10 +719,13 @@ export function destroy(renderer: CliRenderer): void {
   renderer.clearTerminal();
 }
 
-const renderer = await createCliRenderer({
-  exitOnCtrlC: true,
-  targetFps: 30,
-});
+// Only run CLI initialization if not in browser
+if (!isBrowser) {
+  const renderer = await createCliRenderer({
+    exitOnCtrlC: true,
+    targetFps: 30,
+  });
 
-renderer.setBackgroundColor("#000000");
-await run(renderer);
+  renderer.setBackgroundColor("#000000");
+  await run(renderer);
+}

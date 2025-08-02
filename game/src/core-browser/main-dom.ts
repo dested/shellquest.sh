@@ -48,7 +48,7 @@ async function init() {
     renderer.setBackgroundColor('#000000')
 
     // Import and run the game
-    const { run } = await import('../crawler/browser-game')
+    const { run } = await import('../crawler')
     await run(renderer)
     
     renderer.start()
