@@ -47,7 +47,6 @@ export class Image extends Renderable {
   private charWidth: number;
   private charHeight: number;
   private animationState: AnimationState | null = null;
-  private originalPixels: Map<string, RGBA> = new Map();
   private animationFrame: number = 0;
 
   constructor(
@@ -122,7 +121,6 @@ export class Image extends Renderable {
 
   private renderImage(): void {
     if (!this.frameBuffer) return;
-
     // Clear the buffer
     this.frameBuffer.frameBuffer.clear(RGBA.fromValues(0, 0, 0, 0));
 

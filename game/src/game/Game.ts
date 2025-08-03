@@ -10,6 +10,7 @@ import {StateManager} from './states/StateManager';
 import {SplashState} from './states/SplashState';
 import {GAME_CONFIG} from './constants';
 import {FadeState} from '@states/FadeState.ts';
+import {TerminalSizeState} from './states/TerminalSizeState';
 
 export class Game {
   private renderer: CliRenderer | null = null;
@@ -29,7 +30,6 @@ export class Game {
   }
 
   async init(): Promise<void> {
-    this.checkTerminalSize();
     // Create renderer
     this.renderer = await createCliRenderer({
       targetFps: GAME_CONFIG.RENDER_FPS,
@@ -44,30 +44,18 @@ export class Game {
 
     this.setupInputHandling();
 
-    this.stateManager.push(new FadeState());
-
-    this.isRunning = true;
-    this.renderer.start();
-  }
-
-  private checkTerminalSize(): void {
+    // Check terminal size and show appropriate state
     const columns = process.stdout.columns || 80;
     const rows = process.stdout.rows || 24;
 
     if (columns < GAME_CONFIG.MIN_TERMINAL_WIDTH || rows < GAME_CONFIG.MIN_TERMINAL_HEIGHT) {
-      console.clear();
-      console.log('╔════════════════════════════════════════════════════════╗');
-      console.log('║                   TERMINAL TOO SMALL                    ║');
-      console.log('╠════════════════════════════════════════════════════════╣');
-      console.log(
-        `║  Required: ${GAME_CONFIG.MIN_TERMINAL_WIDTH}x${GAME_CONFIG.MIN_TERMINAL_HEIGHT} characters                           ║`,
-      );
-      console.log(`║  Current:  ${columns}x${rows} characters                            ║`);
-      console.log('║                                                          ║');
-      console.log('║  Please resize your terminal window and restart.        ║');
-      console.log('╚════════════════════════════════════════════════════════╝');
-      process.exit(1);
+      this.stateManager.push(new TerminalSizeState());
+    } else {
+      this.stateManager.push(new FadeState());
     }
+
+    this.isRunning = true;
+    this.renderer.start();
   }
 
   private setupInputHandling(): void {

@@ -32,6 +32,9 @@ async function main() {
 
 // Run the main function
 main().catch((error) => {
+  fs.writeFileSync('error.log', `Error running game:\n${error} ${error.stack}\n`, {
+    flag: 'a',
+  });
   console.error('Unhandled error:', error);
   process.exit(1);
 });

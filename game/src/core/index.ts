@@ -31,7 +31,7 @@ export * from './ui';
 export * from './parse.keypress.ts';
 export * from './styled-text.ts';
 export * from './selection.ts';
-export { Image } from './Image.ts';
+export {Image} from './Image.ts';
 
 export interface CliRendererConfig {
   stdin?: NodeJS.ReadStream;
@@ -287,13 +287,55 @@ export class CliRenderer extends Renderable {
     if (this.memorySnapshotInterval > 0) {
       this.startMemorySnapshotTimer();
     }
+    let doResize = (w: number, h: number) => {
+      this.handleResize(w, h);
+    };
 
-    // Handle terminal resize
-    process.on('SIGWINCH', () => {
-      const width = this.stdout.columns || 80;
-      const height = this.stdout.rows || 24;
-      this.handleResize(width, height);
-    });
+    watchTerminalSize(doResize, 200);
+    function watchTerminalSize(cb: (w: number, h: number) => void, pollMs = 200) {
+      let w = process.stdout.columns || 80;
+      let h = process.stdout.rows || 24;
+
+      const fire = () => cb(w, h);
+
+      // Bun ≤ 1.2 on Windows: force-refresh before every read
+      const refreshIfNeeded = () => {
+        if (process.versions.bun && process.platform === 'win32') {
+          // ⚠️ private API, may change without notice
+          (process.stdout as any)._refreshSize?.();
+        }
+      };
+
+      const poll = () => {
+        refreshIfNeeded();
+        const nw = process.stdout.columns || 80;
+        const nh = process.stdout.rows || 24;
+        if (nw !== w || nh !== h) {
+          w = nw;
+          h = nh;
+          fire();
+        }
+      };
+
+      // 1️⃣ TTY “resize” (Node & future Bun)
+      if (process.stdout.isTTY) {
+        process.stdout.on?.('resize', () => {
+          refreshIfNeeded();
+          poll();
+        });
+      }
+
+      // 2️⃣ POSIX signal (works in WSL/WSA/Unix)
+      try {
+        process.on('SIGWINCH', poll);
+      } catch {}
+
+      // 3️⃣ fallback polling – covers current Bun on Windows & CI
+      setInterval(poll, pollMs);
+
+      // initial
+      fire();
+    }
 
     const handleError = (error: Error) => {
       this.console.deactivate();
@@ -600,10 +642,12 @@ export class CliRenderer extends Renderable {
 
     this.width = width;
     this.height = height;
+    console.log(this.width, this.height);
     this._resolution = await getTerminalPixelResolution(this.stdin, this.stdout);
     this.lib.resizeRenderer(this.rendererPtr, this.width, this.height);
     this.nextRenderBuffer = this.lib.getNextBuffer(this.rendererPtr);
     this._console.resize(width, height);
+    console.log(this.rawListeners('resize').length);
     this.emit('resize', width, height);
     this.renderOnce();
   }

@@ -180,4 +180,4 @@ Based on `TASKS.md`, the critical path for MVP:
 
 
 ## Notes
-- Always run prettier after writing a file to clean it up/ 
+- Always run prettier after writing a file to clean it up. Make sure it doesnt emit anything in the console otherwise you're gonna chew up tokens unnecessarily. 

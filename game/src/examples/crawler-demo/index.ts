@@ -170,6 +170,8 @@ class DungeonCrawlerGame {
     renderer.on('resize', () => {
       this.gameContainer.clear();
       this.setupUI();
+      this.setupLayeredRenderer();
+      this.camera.update(this.player.preciseX, this.player.preciseY);
       this.update();
     });
   }

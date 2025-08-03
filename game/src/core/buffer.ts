@@ -19,7 +19,7 @@ function blendColors(overlay: RGBA, text: RGBA): RGBA {
   }
 
   const alpha = overlayA;
-
+  
   let perceptualAlpha: number;
 
   if (alpha > 0.8) {

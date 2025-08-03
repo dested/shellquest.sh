@@ -176,7 +176,7 @@ class DungeonCrawlerGame {
   constructor(
     public stateContainer: GroupRenderable,
     public renderer: CliRenderer,
-  ) { 
+  ) {
     this.player = new Player();
     this.level = new Level(MAP_WIDTH, MAP_HEIGHT);
     this.camera = new Camera(this);
@@ -194,11 +194,13 @@ class DungeonCrawlerGame {
 
     this.initializeSync();
 
-    /*   renderer.on('resize', () => {
+    renderer.on('resize', () => {
       this.gameContainer.clear();
       this.setupUI();
+      this.setupLayeredRenderer();
+      this.camera.update(this.player.preciseX, this.player.preciseY);
       this.update();
-    });*/
+    });
   }
 
   private initializeSync(): void {
@@ -217,7 +219,6 @@ class DungeonCrawlerGame {
     this.camera.update(this.player.preciseX, this.player.preciseY);
 
     this.update();
-    this.update();
   }
 
   private setupLayeredRenderer(): void {
@@ -226,7 +227,7 @@ class DungeonCrawlerGame {
     const gameAreaY = 16; // Updated to account for larger UI with block font
     // Each 16x16 tile is 16 chars wide
     const gameAreaX = Math.floor((width - (this.camera.viewportWidth * TILE_SIZE + 4)) / 2);
-
+    console.log('renderer');
     // Use BrowserLayeredRenderer for browser, LayeredRenderer for CLI
     if (isBrowser) {
       this.layeredRenderer = new BrowserLayeredRenderer(
@@ -246,6 +247,7 @@ class DungeonCrawlerGame {
         gameAreaX + 2,
         gameAreaY + 0,
       );
+      console.log('1renderer');
     }
 
     this.gameContainer.add(this.layeredRenderer.getContainer());
