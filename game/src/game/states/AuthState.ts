@@ -73,6 +73,8 @@ export class AuthState extends BaseState {
           scale: 1,
           zIndex: 100,
           visible: true,
+          animation:'shimmer',
+          animationDuration:1000,
         },
       );
 

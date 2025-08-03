@@ -4,7 +4,6 @@ import prettier from 'prettier';
 
 // grab all image paths from the /src/images folder, and print out a js file that exports  the imported images
 const files = await glob('./src/assets/**/*.{png,mp4,jpg,jpeg,gif,svg}');
-console.log('hi');
 const names = [];
 const images = files.map((file) => {
   file = file.replaceAll('\\', '/');

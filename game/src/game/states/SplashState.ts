@@ -54,6 +54,9 @@ export class SplashState extends BaseState {
         0, // x will be set below
         0, // y will be set below
         {
+          animation: 'wave',
+          waveAmplitude: 3,
+          animationDuration: 3000,
           scale: 1,
           zIndex: 100,
           visible: true,
@@ -72,7 +75,7 @@ export class SplashState extends BaseState {
     this.promptText = this.renderer.createStyledText('prompt', {
       fragment: t`${fg('#FFFF00')('Press any key to continue')}`,
       x: centerX - 13,
-      y: centerY + 10,
+      y: centerY + 14,
       width: 26,
       height: 1,
       zIndex: 101,

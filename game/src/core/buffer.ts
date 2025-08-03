@@ -144,7 +144,7 @@ export class OptimizedBuffer {
   public setCell(
     x: number,
     y: number,
-    char: string,
+    char: string | number,
     fg: RGBA,
     bg: RGBA,
     attributes: number = 0,
@@ -155,7 +155,8 @@ export class OptimizedBuffer {
     const colorIndex = index * 4;
 
     // Set character and attributes
-    this.buffer.char[index] = char.charCodeAt(0);
+    this.buffer.char[index] =
+      typeof char === 'string' ? char.charCodeAt(0) : char;
     this.buffer.attributes[index] = attributes;
 
     // Set foreground color
