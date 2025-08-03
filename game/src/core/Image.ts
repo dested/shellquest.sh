@@ -1,0 +1,279 @@
+import {Renderable, RenderableOptions} from './Renderable';
+import {FrameBufferRenderable} from './objects';
+import {CliRenderer} from './CliRenderer';
+import {RGBA} from './types';
+import {OptimizedBuffer} from './buffer';
+import {AssetData, getNormalizedPixelAt} from '../game/assets';
+
+// Block characters for rendering
+const BLOCK_CHARS = {
+  FULL: '█',
+  UPPER: '▀',
+  LOWER: '▄',
+  LEFT: '▌',
+  RIGHT: '▐',
+  SHADE_LIGHT: '░',
+  SHADE_MED: '▒',
+  SHADE_DARK: '▓',
+};
+
+export interface ImageOptions extends Partial<RenderableOptions> {
+  scale?: number; // Scale factor for the image (default: 1)
+  flipX?: boolean; // Flip horizontally
+  flipY?: boolean; // Flip vertically
+}
+
+export class Image extends Renderable {
+  private frameBuffer: FrameBufferRenderable | null = null;
+  private renderer: CliRenderer;
+  private imageData: AssetData;
+  private scale: number;
+  private flipX: boolean;
+  private flipY: boolean;
+  private charWidth: number;
+  private charHeight: number;
+
+  constructor(
+    id: string,
+    renderer: CliRenderer,
+    imageData: AssetData,
+    x: number = 0,
+    y: number = 0,
+    options?: ImageOptions,
+  ) {
+    // Calculate character dimensions (using half-block rendering)
+    // Each pixel is 1 char wide, 2 pixels are 1 char tall
+    const scale = options?.scale ?? 1;
+    const charWidth = Math.ceil(imageData.width * scale);
+    const charHeight = Math.ceil((imageData.height * scale) / 2);
+
+    super(id, {
+      x,
+      y,
+      width: charWidth,
+      height: charHeight,
+      zIndex: options?.zIndex ?? 0,
+      visible: options?.visible ?? true,
+    });
+
+    this.renderer = renderer;
+    this.imageData = imageData;
+    this.scale = scale;
+    this.flipX = options?.flipX ?? false;
+    this.flipY = options?.flipY ?? false;
+    this.charWidth = charWidth;
+    this.charHeight = charHeight;
+
+    // Create the frame buffer
+    this.createFrameBuffer();
+    // Render the image to the buffer
+    this.renderImage();
+  }
+
+  private createFrameBuffer(): void {
+    // Create an optimized buffer with transparency
+    const buffer = this.renderer.lib.createOptimizedBuffer(this.charWidth, this.charHeight, true);
+
+    // Create FrameBufferRenderable from the buffer
+    this.frameBuffer = new FrameBufferRenderable(`${this.id}-buffer`, buffer, {
+      x: 0,
+      y: 0,
+      width: this.charWidth,
+      height: this.charHeight,
+      zIndex: 0,
+    });
+
+    // Add to this renderable
+    this.add(this.frameBuffer);
+  }
+
+  private renderImage(): void {
+    if (!this.frameBuffer) return;
+
+    // Clear the buffer
+    this.frameBuffer.frameBuffer.clear(RGBA.fromValues(0, 0, 0, 0));
+
+    // Process the image pixel by pixel
+    for (let charY = 0; charY < this.charHeight; charY++) {
+      for (let charX = 0; charX < this.charWidth; charX++) {
+        // Calculate which pixels this character represents
+        const topPixelY = Math.floor((charY * 2) / this.scale);
+        const bottomPixelY = Math.floor((charY * 2 + 1) / this.scale);
+        const pixelX = Math.floor(charX / this.scale);
+
+        // Apply flipping
+        const srcX = this.flipX ? this.imageData.width - 1 - pixelX : pixelX;
+        const srcTopY = this.flipY ? this.imageData.height - 1 - topPixelY : topPixelY;
+        const srcBottomY = this.flipY ? this.imageData.height - 1 - bottomPixelY : bottomPixelY;
+
+        // Get the colors for top and bottom pixels
+        const topPixel = getNormalizedPixelAt(this.imageData, srcX, srcTopY);
+        const bottomPixel = getNormalizedPixelAt(this.imageData, srcX, srcBottomY);
+
+        if (!topPixel && !bottomPixel) continue;
+
+        const topColor = topPixel
+          ? RGBA.fromValues(topPixel.r, topPixel.g, topPixel.b, topPixel.a)
+          : RGBA.fromValues(0, 0, 0, 0);
+        const bottomColor = bottomPixel
+          ? RGBA.fromValues(bottomPixel.r, bottomPixel.g, bottomPixel.b, bottomPixel.a)
+          : RGBA.fromValues(0, 0, 0, 0);
+
+        const topAlpha = topColor.buffer[3];
+        const bottomAlpha = bottomColor.buffer[3];
+
+        // Rendering logic similar to LayeredRenderer
+        if (topAlpha > 0 && bottomAlpha > 0) {
+          // Both pixels visible
+          const topBrightness = (topColor.buffer[0] + topColor.buffer[1] + topColor.buffer[2]) / 3;
+          const bottomBrightness =
+            (bottomColor.buffer[0] + bottomColor.buffer[1] + bottomColor.buffer[2]) / 3;
+          const brightnessDiff = Math.abs(topBrightness - bottomBrightness);
+
+          const rDiff = Math.abs(topColor.buffer[0] - bottomColor.buffer[0]);
+          const gDiff = Math.abs(topColor.buffer[1] - bottomColor.buffer[1]);
+          const bDiff = Math.abs(topColor.buffer[2] - bottomColor.buffer[2]);
+          const colorDiff = (rDiff + gDiff + bDiff) / 3;
+
+          if (colorDiff < 0.05 && topAlpha > 0.95 && bottomAlpha > 0.95) {
+            // Very similar colors - use full block
+            const avgColor = RGBA.fromValues(
+              (topColor.buffer[0] + bottomColor.buffer[0]) / 2,
+              (topColor.buffer[1] + bottomColor.buffer[1]) / 2,
+              (topColor.buffer[2] + bottomColor.buffer[2]) / 2,
+              (topAlpha + bottomAlpha) / 2,
+            );
+            this.frameBuffer.frameBuffer.setCell(
+              charX,
+              charY,
+              BLOCK_CHARS.FULL,
+              avgColor,
+              RGBA.fromValues(0, 0, 0, 0),
+            );
+          } else {
+            // Use upper half block for two-color rendering
+            this.frameBuffer.frameBuffer.setCell(
+              charX,
+              charY,
+              BLOCK_CHARS.UPPER,
+              topColor,
+              bottomColor,
+            );
+          }
+        } else if (topAlpha > 0 && bottomAlpha === 0) {
+          // Only top pixel visible
+          if (topAlpha < 0.3) {
+            this.frameBuffer.frameBuffer.setCell(
+              charX,
+              charY,
+              BLOCK_CHARS.SHADE_LIGHT,
+              topColor,
+              RGBA.fromValues(0, 0, 0, 0),
+            );
+          } else {
+            this.frameBuffer.frameBuffer.setCell(
+              charX,
+              charY,
+              BLOCK_CHARS.UPPER,
+              topColor,
+              RGBA.fromValues(0, 0, 0, 0),
+            );
+          }
+        } else if (topAlpha === 0 && bottomAlpha > 0) {
+          // Only bottom pixel visible
+          if (bottomAlpha < 0.3) {
+            this.frameBuffer.frameBuffer.setCell(
+              charX,
+              charY,
+              BLOCK_CHARS.SHADE_LIGHT,
+              bottomColor,
+              RGBA.fromValues(0, 0, 0, 0),
+            );
+          } else {
+            this.frameBuffer.frameBuffer.setCell(
+              charX,
+              charY,
+              BLOCK_CHARS.LOWER,
+              bottomColor,
+              RGBA.fromValues(0, 0, 0, 0),
+            );
+          }
+        }
+      }
+    }
+
+    // Force update
+    this.frameBuffer.needsUpdate = true;
+  }
+
+  /**
+   * Update the image data and re-render
+   */
+  public setImageData(imageData: AssetData): void {
+    this.imageData = imageData;
+
+    // Recalculate dimensions
+    this.charWidth = Math.ceil(imageData.width * this.scale);
+    this.charHeight = Math.ceil((imageData.height * this.scale) / 2);
+    this.width = this.charWidth;
+    this.height = this.charHeight;
+
+    // Recreate frame buffer if dimensions changed
+    if (this.frameBuffer) {
+      this.remove(this.frameBuffer.id);
+      this.frameBuffer.destroy();
+    }
+    this.createFrameBuffer();
+    this.renderImage();
+  }
+
+  /**
+   * Set scale and re-render
+   */
+  public setScale(scale: number): void {
+    if (scale <= 0) return;
+    this.scale = scale;
+    this.setImageData(this.imageData);
+  }
+
+  /**
+   * Set flip options and re-render
+   */
+  public setFlip(flipX?: boolean, flipY?: boolean): void {
+    const changed =
+      (flipX !== undefined && flipX !== this.flipX) ||
+      (flipY !== undefined && flipY !== this.flipY);
+
+    if (changed) {
+      if (flipX !== undefined) this.flipX = flipX;
+      if (flipY !== undefined) this.flipY = flipY;
+      this.renderImage();
+    }
+  }
+
+  /**
+   * Get the current image dimensions in characters
+   */
+  public getCharDimensions(): {width: number; height: number} {
+    return {
+      width: this.charWidth,
+      height: this.charHeight,
+    };
+  }
+
+  /**
+   * Get the original pixel dimensions
+   */
+  public getPixelDimensions(): {width: number; height: number} {
+    return {
+      width: this.imageData.width,
+      height: this.imageData.height,
+    };
+  }
+
+  protected destroySelf(): void {
+    if (this.frameBuffer) {
+      this.frameBuffer.frameBuffer.destroy();
+    }
+  }
+}

@@ -16,8 +16,10 @@ import {
   fg,
   bg,
   type ParsedKey,
+  Image,
 } from '../../core';
 import {COLORS, GAME_CONFIG} from '../constants';
+import {Assets} from '@game/assets.ts';
 
 enum AuthMode {
   CHOICE,
@@ -35,10 +37,10 @@ export class AuthState extends BaseState {
   private successText: StyledTextRenderable | null = null;
   private titleText: StyledTextRenderable | null = null;
   private helpText: StyledTextRenderable | null = null;
-  private logoBuffer: FrameBufferRenderable | null = null;
   private activeInputIndex: number = 0;
   private inputs: InputElement[] = [];
   private isProcessing: boolean = false;
+  private logo: Image | null = null;
 
   onEnter(): void {
     this.createUI();
@@ -47,39 +49,45 @@ export class AuthState extends BaseState {
 
   onExit(): void {
     // Cleanup will be handled by BaseState
+    if (this.logo) {
+      this.stateContainer.remove(this.logo.id);
+    }
   }
 
   private createUI(): void {
+
     const termWidth = this.renderer.terminalWidth;
     const termHeight = this.renderer.terminalHeight;
     const centerX = Math.floor(termWidth / 2);
     const centerY = Math.floor(termHeight / 2);
 
-    // Create logo using FrameBufferRenderable with OptimizedBuffer
-    this.logoBuffer = new FrameBufferRenderable(
-      'auth-logo',
-      this.renderer.lib.createOptimizedBuffer(14, 8, true),
-      {
-        x: centerX - 7,
-        y: centerY - 18,
-        width: 14,
-        height: 8,
-        zIndex: 100,
-      },
-    );
-    this.stateContainer.add(this.logoBuffer);
-    this.drawLogo();
+    // Create logo image using the new Image class
+    if (Assets.logo) {
+      this.logo = new Image(
+        'logo',
+        this.renderer,
+        Assets.logo,
+        0, // x will be set below
+        0, // y will be set below
+        {
+          scale: 1,
+          zIndex: 100,
+          visible: true,
+        },
+      );
 
-    // Title
-    this.titleText = this.renderer.createStyledText('auth-title', {
-      fragment: t`${bold(fg('#00FFFF')('shellquest.sh'))}`,
-      x: centerX - 6,
-      y: centerY - 10,
-      width: 12,
-      height: 1,
-      zIndex: 101,
-    });
-    this.stateContainer.add(this.titleText);
+      // Center the logo
+      const logoDimensions = this.logo.getCharDimensions();
+      this.logo.x = centerX - Math.floor(logoDimensions.width / 2);
+      this.logo.y = centerY - Math.floor(logoDimensions.height / 2) - 5;
+
+      this.stateContainer.add(this.logo);
+    }
+
+
+
+
+ 
 
     // Mode selector
     const modeOptions: SelectOption[] = [
@@ -210,40 +218,6 @@ export class AuthState extends BaseState {
     this.setupEventHandlers();
   }
 
-  private drawLogo(): void {
-    if (!this.logoBuffer) return;
-
-    const logo = [
-      '▓▓▓▓▓▓▓▓▓▓▓▓▓▓',
-      '▓▓░░░░░░░░░░▓▓',
-      '▓▓░░██░░██░░▓▓',
-      '▓▓░░░░░░░░░░▓▓',
-      '▓▓░░░░██░░░░▓▓',
-      '▓▓░░██████░░▓▓',
-      '▓▓▓▓▓▓▓▓▓▓▓▓▓▓',
-    ];
-
-    const buffer = this.logoBuffer.frameBuffer;
-    buffer.clear();
-
-    for (let y = 0; y < logo.length; y++) {
-      const line = logo[y];
-      for (let x = 0; x < line.length; x++) {
-        const char = line[x];
-        let color: RGBA;
-
-        if (char === '▓') {
-          color = RGBA.fromHex(0x00ffff);
-        } else if (char === '░') {
-          color = RGBA.fromHex(0x006666);
-        } else {
-          color = RGBA.fromHex(0xffff00);
-        }
-
-        buffer.setCell(x, y, char, color, RGBA.fromHex(0x000000));
-      }
-    }
-  }
 
   private setupEventHandlers(): void {
     // Mode selector

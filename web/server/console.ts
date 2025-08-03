@@ -9,11 +9,13 @@ const prisma = new PrismaClient({
   },
 });
 
- 
+
+
+
 
 async function main() {
 
-  
+
   try {
     // await createCompaniesFromFolder('5992162', 'cmch4r0cc0000lnjce4xukw1b');
   } catch (error) {

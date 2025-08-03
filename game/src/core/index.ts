@@ -31,6 +31,7 @@ export * from './ui';
 export * from './parse.keypress.ts';
 export * from './styled-text.ts';
 export * from './selection.ts';
+export { Image } from './Image.ts';
 
 export interface CliRendererConfig {
   stdin?: NodeJS.ReadStream;
