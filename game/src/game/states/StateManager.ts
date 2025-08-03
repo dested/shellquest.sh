@@ -51,8 +51,9 @@ export class StateManager {
             easing: options?.easing,
           },
           () => {
-            previousState.onExit();
+            // Ensure new state is visible before cleaning up old state
             state.stateContainer.visible = true;
+            previousState.onExit();
             this.transitioning = false;
           },
         );
@@ -148,8 +149,9 @@ export class StateManager {
             easing: options?.easing,
           },
           () => {
-            currentState.cleanup();
+            // Ensure new state is visible before cleaning up old state
             state.stateContainer.visible = true;
+            currentState.cleanup();
             this.transitioning = false;
           },
         );

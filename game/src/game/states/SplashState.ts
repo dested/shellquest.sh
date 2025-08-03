@@ -12,16 +12,29 @@ export class SplashState extends BaseState {
   private promptText: StyledTextRenderable | null = null;
   private animationFrame: NodeJS.Timeout | null = null;
   private totalDisplayTime: number = 3;
+  private resizeHandler: (() => void) | null = null;
 
   onEnter(): void {
     this.createLogo();
     this.startAnimation();
+
+    // Setup resize handler
+    this.resizeHandler = () => {
+      this.updatePositions();
+    };
+    this.renderer.on('resize', this.resizeHandler);
   }
 
   onExit(): void {
     if (this.animationFrame) {
       clearInterval(this.animationFrame);
       this.animationFrame = null;
+    }
+
+    // Remove resize handler
+    if (this.resizeHandler) {
+      this.renderer.off('resize', this.resizeHandler);
+      this.resizeHandler = null;
     }
 
     // Clean up all renderables
@@ -106,6 +119,11 @@ export class SplashState extends BaseState {
   }
 
   private startAnimation(): void {
+    // Clear any existing interval first
+    if (this.animationFrame) {
+      clearInterval(this.animationFrame);
+    }
+
     this.animationFrame = setInterval(() => {
       this.animationTime += 0.05;
 
@@ -118,12 +136,50 @@ export class SplashState extends BaseState {
 
       // Auto-transition after display time
       if (this.animationTime >= this.totalDisplayTime) {
+        // Stop animation before transitioning
+        if (this.animationFrame) {
+          clearInterval(this.animationFrame);
+          this.animationFrame = null;
+        }
+
         this.stateManager.replace(new AuthState(), {
           type: 'pixelate',
           duration: 1000,
         });
       }
     }, 50);
+  }
+
+  private updatePositions(): void {
+    const termWidth = this.renderer.terminalWidth;
+    const termHeight = this.renderer.terminalHeight;
+    const centerX = Math.floor(termWidth / 2);
+    const centerY = Math.floor(termHeight / 2);
+
+    // Update logo position
+    if (this.logo) {
+      const logoDimensions = this.logo.getCharDimensions();
+      this.logo.x = centerX - Math.floor(logoDimensions.width / 2);
+      this.logo.y = centerY - Math.floor(logoDimensions.height / 2) - 5;
+    }
+
+    // Update prompt text position
+    if (this.promptText) {
+      this.promptText.x = centerX - 13;
+      this.promptText.y = centerY + 14;
+    }
+
+    // Update version text position
+    if (this.versionText) {
+      this.versionText.x = termWidth - 10;
+      this.versionText.y = termHeight - 2;
+    }
+
+    // Update copyright text position
+    if (this.copyrightText) {
+      this.copyrightText.x = 2;
+      this.copyrightText.y = termHeight - 2;
+    }
   }
 
   private interpolateColor(color1: string, color2: string, t: number): string {
@@ -147,6 +203,12 @@ export class SplashState extends BaseState {
 
   handleInput(key: ParsedKey): void {
     // Any key press skips to auth with fast transition
+    // Stop animation before transitioning
+    if (this.animationFrame) {
+      clearInterval(this.animationFrame);
+      this.animationFrame = null;
+    }
+
     this.stateManager.replace(new AuthState(), {
       type: 'pixelate',
       duration: 1000,

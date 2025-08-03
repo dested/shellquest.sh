@@ -1,5 +1,5 @@
 import {BaseState} from './BaseState';
-import {FadeState} from './FadeState';
+import {SplashState} from './SplashState';
 import {
   StyledTextRenderable,
   t,
@@ -187,6 +187,11 @@ export class TerminalSizeState extends BaseState {
   }
 
   private startAnimation(): void {
+    // Clear any existing interval first
+    if (this.animationInterval) {
+      clearInterval(this.animationInterval);
+    }
+
     this.animationInterval = setInterval(() => {
       this.animationTime += 0.05;
 
@@ -253,10 +258,23 @@ export class TerminalSizeState extends BaseState {
 
       if (columns >= GAME_CONFIG.MIN_TERMINAL_WIDTH && rows >= GAME_CONFIG.MIN_TERMINAL_HEIGHT) {
         // Terminal is now the right size, transition to FadeState
-        this.stateManager.replace(new FadeState(), {
-          type: 'fade',
-          duration: 500,
-        });
+        // Stop all timers before transitioning
+        if (this.checkInterval) {
+          clearInterval(this.checkInterval);
+          this.checkInterval = null;
+        }
+        if (this.animationInterval) {
+          clearInterval(this.animationInterval);
+          this.animationInterval = null;
+        }
+
+        // Small delay to ensure terminal dimensions are fully updated
+        setTimeout(() => {
+          this.stateManager.replace(new SplashState(), {
+            type: 'fade',
+            duration: 500,
+          });
+        }, 100);
       }
     }, 100);
   }

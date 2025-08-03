@@ -378,7 +378,13 @@ export class TransitionManager {
       cancelAnimationFrame(this.animationFrame);
     }
 
-    // Clean up
+    // Call completion callback BEFORE cleanup to ensure state visibility is set
+    if (this.onComplete) {
+      this.onComplete();
+      this.onComplete = null;
+    }
+
+    // Clean up after callback
     if (this.transitionBuffer) {
       this.renderer.remove(this.transitionBuffer.id);
       this.transitionBuffer = null;
@@ -395,12 +401,6 @@ export class TransitionManager {
     }
 
     this.isTransitioning = false;
-
-    // Call completion callback
-    if (this.onComplete) {
-      this.onComplete();
-      this.onComplete = null;
-    }
   }
 
   /**

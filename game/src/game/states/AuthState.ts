@@ -41,13 +41,26 @@ export class AuthState extends BaseState {
   private inputs: InputElement[] = [];
   private isProcessing: boolean = false;
   private logo: Image | null = null;
+  private resizeHandler: (() => void) | null = null;
 
   onEnter(): void {
     this.createUI();
     this.showChoiceMenu();
+
+    // Setup resize handler
+    this.resizeHandler = () => {
+      this.updatePositions();
+    };
+    this.renderer.on('resize', this.resizeHandler);
   }
 
   onExit(): void {
+    // Remove resize handler
+    if (this.resizeHandler) {
+      this.renderer.off('resize', this.resizeHandler);
+      this.resizeHandler = null;
+    }
+
     // Cleanup will be handled by BaseState
     if (this.logo) {
       this.stateContainer.remove(this.logo.id);
@@ -451,6 +464,58 @@ export class AuthState extends BaseState {
     this.clearMessages();
     if (this.successText) {
       this.successText.fragment = t`${fg('#00FF00')('✓ ' + message)}`;
+    }
+  }
+
+  private updatePositions(): void {
+    const termWidth = this.renderer.terminalWidth;
+    const termHeight = this.renderer.terminalHeight;
+    const centerX = Math.floor(termWidth / 2);
+    const centerY = Math.floor(termHeight / 2);
+
+    // Update logo position
+    if (this.logo) {
+      const logoDimensions = this.logo.getCharDimensions();
+      this.logo.x = centerX - Math.floor(logoDimensions.width / 2);
+      this.logo.y = centerY - Math.floor(logoDimensions.height / 2) - 5;
+    }
+
+    // Update mode selector position
+    if (this.modeSelect) {
+      this.modeSelect.x = centerX - 20;
+      this.modeSelect.y = centerY - 5;
+    }
+
+    // Update input positions
+    if (this.usernameInput) {
+      this.usernameInput.x = centerX - 20;
+      this.usernameInput.y = centerY - 2;
+    }
+
+    if (this.passwordInput) {
+      this.passwordInput.x = centerX - 20;
+      this.passwordInput.y = centerY + 2;
+    }
+
+    if (this.confirmPasswordInput) {
+      this.confirmPasswordInput.x = centerX - 20;
+      this.confirmPasswordInput.y = centerY + 6;
+    }
+
+    // Update text positions
+    if (this.errorText) {
+      this.errorText.x = centerX - 20;
+      this.errorText.y = centerY + 10;
+    }
+
+    if (this.successText) {
+      this.successText.x = centerX - 20;
+      this.successText.y = centerY + 10;
+    }
+
+    if (this.helpText) {
+      this.helpText.x = centerX - 22;
+      this.helpText.y = termHeight - 3;
     }
   }
 
