@@ -176,6 +176,9 @@ export abstract class Renderable extends EventEmitter {
     }
   }
 
+  // i added this because idk when stuff actually gets unloaded
+  protected unload(): void {}
+
   public getRenderable(id: string): Renderable | undefined {
     return this.renderableMap.get(id);
   }
@@ -189,6 +192,7 @@ export abstract class Renderable extends EventEmitter {
       if (obj) {
         obj.parent = null;
         obj.propagateContext(null);
+        obj.unload();
       }
       this.renderableMap.delete(id);
 

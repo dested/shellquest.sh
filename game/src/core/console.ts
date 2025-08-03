@@ -105,7 +105,6 @@ class TerminalConsoleCache extends EventEmitter {
   }
 
   private overrideConsoleMethods(): void {
-    return;
 /*    if (typeof window !== 'undefined') {
       return;
     }*/

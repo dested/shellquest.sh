@@ -55,7 +55,7 @@ export class SplashState extends BaseState {
         0, // y will be set below
         {
           animation: 'wave',
-          waveAmplitude: 12,
+          waveAmplitude: 3,
           animationDuration: 700,
           scale: 1,
           zIndex: 100,

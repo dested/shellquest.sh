@@ -2,21 +2,26 @@ import { EventEmitter } from "events"
 import { parseKeypress } from "../../parse.keypress"
 
 export class KeyHandler extends EventEmitter {
+  getMaxListeners(): number {
+    return Infinity;
+  }
   constructor() {
-    super()
+    super();
 
-    process.stdin.setRawMode(true)
-    process.stdin.resume()
-    process.stdin.setEncoding("utf8")
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    process.stdin.setEncoding('utf8');
 
-    process.stdin.on("data", (key: Buffer) => {
-      const parsedKey = parseKeypress(key)
-      this.emit("keypress", parsedKey)
-    })
+    process.stdin.on('data', (key: Buffer) => {
+      const parsedKey = parseKeypress(key);
+      this.emit('keypress', parsedKey);
+      this.emit('keydown', parsedKey);
+      this.emit('keyup', parsedKey);
+    });
   }
 
   public destroy(): void {
-    process.stdin.removeAllListeners("data")
+    process.stdin.removeAllListeners('data');
   }
 }
 

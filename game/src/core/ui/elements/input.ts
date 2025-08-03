@@ -42,6 +42,13 @@ export class InputElement extends BufferedElement {
     this.cursorColor = parseColor(options.cursorColor || '#FFFFFF');
   }
 
+  protected unload() {
+    super.unload();
+    if (this.focused) {
+      CliRenderer.setCursorPosition(0, 0, false);
+    }
+  }
+
   private updateCursorPosition(): void {
     if (!this.focused) return;
 
@@ -77,6 +84,7 @@ export class InputElement extends BufferedElement {
 
   public blur(): void {
     super.blur();
+    debugger;
     CliRenderer.setCursorPosition(0, 0, false); // Hide cursor
 
     if (this.value !== this.lastCommittedValue) {

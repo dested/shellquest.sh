@@ -16,6 +16,7 @@ import {
   type ParsedKey,
 } from '../../core';
 import {COLORS, GAME_CONFIG} from '../constants';
+import {GameplayState} from '@states/GameplayState.ts';
 
 export class MainMenuState extends BaseState {
   private tabSelect: TabSelectElement | null = null;
@@ -359,15 +360,25 @@ ${fg('#FFFF00')('GitHub:')} ${fg('#00AAFF')('github.com/dested/shellquest.sh')}`
     if (this.currentTab === 'play') {
       if (key.name === '1') {
         // Start 30 second dungeon
-        console.log('Starting 30 second dungeon...');
+        this.stateManager.replace(new GameplayState(),{
+          type: 'pixelate',
+          duration: 2000,
+        })
         // TODO: Start game with 30 second config
       } else if (key.name === '2') {
         // Start 60 second dungeon
-        console.log('Starting 60 second dungeon...');
+        this.stateManager.replace(new GameplayState(),{
+          type: 'pixelate',
+          duration: 2000,
+        })
+
         // TODO: Start game with 60 second config
       } else if (key.name === '3') {
         // Start 120 second dungeon
-        console.log('Starting 120 second dungeon...');
+        this.stateManager.replace(new GameplayState(),{
+          type: 'pixelate',
+          duration: 2000,
+        })
         // TODO: Start game with 120 second config
       }
     }

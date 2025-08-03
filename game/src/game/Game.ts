@@ -9,6 +9,7 @@ import {getKeyHandler} from '../core/ui/lib/KeyHandler';
 import {StateManager} from './states/StateManager';
 import {SplashState} from './states/SplashState';
 import {GAME_CONFIG} from './constants';
+import {FadeState} from '@states/FadeState.ts';
 
 export class Game {
   private renderer: CliRenderer | null = null;
@@ -43,7 +44,7 @@ export class Game {
 
     this.setupInputHandling();
 
-    this.stateManager.push(new SplashState());
+    this.stateManager.push(new FadeState());
 
     this.isRunning = true;
     this.renderer.start();

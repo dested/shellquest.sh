@@ -62,6 +62,7 @@ export class Level {
   }
 
   isSolid(x: number, y: number): boolean {
+    return false;
     const tile = this.getTile(x, y);
     return tile ? tile.solid : true;
   }
