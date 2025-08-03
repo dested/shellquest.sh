@@ -282,6 +282,10 @@ export class GroupRenderable extends Renderable {
   constructor(id: string, options: GroupRenderableOptions) {
     super(id, {...options, width: 0, height: 0});
   }
+
+  has(id: string) {
+    return this.renderableMap.has(id);
+  }
 }
 
 export interface StyledTextOptions {

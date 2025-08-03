@@ -41,7 +41,7 @@ export abstract class Renderable extends EventEmitter {
   public visible: boolean;
   public selectable: boolean = false;
 
-  private renderableMap: Map<string, Renderable> = new Map();
+  protected renderableMap: Map<string, Renderable> = new Map();
   private renderableArray: Renderable[] = [];
   private needsZIndexSort: boolean = false;
   public parent: Renderable | null = null;
