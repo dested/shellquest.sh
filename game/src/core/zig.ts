@@ -39,7 +39,8 @@ function findLibrary(): string {
   try {
     // Bun.main is preferred, fallback to Bun.argv[1]
     // @ts-ignore
-    entryDir = typeof Bun !== "undefined" && Bun.main ? require('path').dirname(Bun.main) : undefined;
+    entryDir =
+      typeof Bun !== 'undefined' && Bun.main ? require('path').dirname(Bun.main) : undefined;
   } catch {}
   if (!entryDir && process.argv[1]) {
     entryDir = require('path').dirname(process.argv[1]);

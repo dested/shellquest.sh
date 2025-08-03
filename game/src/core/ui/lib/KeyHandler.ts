@@ -1,5 +1,5 @@
-import { EventEmitter } from "events"
-import { parseKeypress } from "../../parse.keypress"
+import {EventEmitter} from 'events';
+import {parseKeypress} from '../../parse.keypress';
 
 export class KeyHandler extends EventEmitter {
   getMaxListeners(): number {
@@ -25,15 +25,14 @@ export class KeyHandler extends EventEmitter {
   }
 }
 
-let keyHandler: KeyHandler | null = null
+let keyHandler: KeyHandler | null = null;
 
 export function getKeyHandler(): KeyHandler {
   if (!keyHandler) {
-    keyHandler = new KeyHandler()
+    keyHandler = new KeyHandler();
   }
-  return keyHandler
+  return keyHandler;
 }
-
 
 /*
 import { EventEmitter } from "events"
@@ -205,7 +204,6 @@ export function getKeyHandler(): KeyHandler {
   }
   return keyHandler
 }*/
-
 
 /*import {EventEmitter} from 'events';
 import {uIOhook, UiohookKey} from 'uiohook-napi';

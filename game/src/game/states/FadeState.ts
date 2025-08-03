@@ -6,16 +6,14 @@ import {Assets} from '../assets';
 import {SplashState} from '@states/SplashState.ts';
 
 export class FadeState extends BaseState {
-  handleInput(key: ParsedKey): void {
-  }
+  handleInput(key: ParsedKey): void {}
   onEnter(): void {
-setTimeout(()=>{
-  this.stateManager.replace(new SplashState(), {
-    type: 'spiral',
-    duration: 1000,
-  });
-
-},100)
+    setTimeout(() => {
+      this.stateManager.replace(new SplashState(), {
+        type: 'spiral',
+        duration: 1000,
+      });
+    }, 100);
   }
 
   onExit(): void {}

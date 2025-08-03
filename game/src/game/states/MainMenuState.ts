@@ -582,7 +582,7 @@ ${fg('#00FFFF')('▸')} ${fg('#AAAAAA')('Season 2 starts next week')}`,
     const titleHeight = textSize.height; // Add padding
 
     this.leaderboardBuffer = this.renderer.createFrameBuffer('leaderboard-buffer', {
-      width: titleWidth+10,
+      width: titleWidth + 10,
       height: this.renderer.terminalHeight - 30,
       x: centerX - titleWidth / 2,
       y: centerY - 12,

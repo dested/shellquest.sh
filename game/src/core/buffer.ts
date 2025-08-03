@@ -19,7 +19,7 @@ function blendColors(overlay: RGBA, text: RGBA): RGBA {
   }
 
   const alpha = overlayA;
-  
+
   let perceptualAlpha: number;
 
   if (alpha > 0.8) {
@@ -155,8 +155,7 @@ export class OptimizedBuffer {
     const colorIndex = index * 4;
 
     // Set character and attributes
-    this.buffer.char[index] =
-      typeof char === 'string' ? char.charCodeAt(0) : char;
+    this.buffer.char[index] = typeof char === 'string' ? char.charCodeAt(0) : char;
     this.buffer.attributes[index] = attributes;
 
     // Set foreground color
@@ -172,7 +171,10 @@ export class OptimizedBuffer {
     this.buffer.bg[colorIndex + 3] = bg.a;
   }
 
-  public getCell(x: number, y: number): {char: number; fg: RGBA; bg: RGBA; attributes: number} | null {
+  public getCell(
+    x: number,
+    y: number,
+  ): {char: number; fg: RGBA; bg: RGBA; attributes: number} | null {
     return this.get(x, y);
   }
   public get(x: number, y: number): {char: number; fg: RGBA; bg: RGBA; attributes: number} | null {

@@ -520,8 +520,18 @@ export class Image extends Renderable {
         const srcBottomY = this.flipY ? this.imageData.height - 1 - bottomPixelY : bottomPixelY;
 
         // Get the colors for top and bottom pixels
-        const topPixel = getNormalizedPixelAt(this.imageData, srcX, srcTopY, this.currentFrameIndex);
-        const bottomPixel = getNormalizedPixelAt(this.imageData, srcX, srcBottomY, this.currentFrameIndex);
+        const topPixel = getNormalizedPixelAt(
+          this.imageData,
+          srcX,
+          srcTopY,
+          this.currentFrameIndex,
+        );
+        const bottomPixel = getNormalizedPixelAt(
+          this.imageData,
+          srcX,
+          srcBottomY,
+          this.currentFrameIndex,
+        );
 
         if (!topPixel && !bottomPixel) continue;
 

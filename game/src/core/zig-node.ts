@@ -90,17 +90,27 @@ function getOpenTUILib(libPath?: string) {
       createRenderer: lib.func('void* createRenderer(uint32_t width, uint32_t height)'),
       destroyRenderer: lib.func('void destroyRenderer(void* renderer)'),
       setUseThread: lib.func('void setUseThread(void* renderer, bool useThread)'),
-      setBackgroundColor: lib.func('void setBackgroundColor(void* renderer, RGBA* color)', {RGBA: RGBAStruct}),
-      updateStats: lib.func('void updateStats(void* renderer, double time, uint32_t fps, double frameCallbackTime)'),
-      updateMemoryStats: lib.func('void updateMemoryStats(void* renderer, uint32_t heapUsed, uint32_t heapTotal, uint32_t arrayBuffers)'),
+      setBackgroundColor: lib.func('void setBackgroundColor(void* renderer, RGBA* color)', {
+        RGBA: RGBAStruct,
+      }),
+      updateStats: lib.func(
+        'void updateStats(void* renderer, double time, uint32_t fps, double frameCallbackTime)',
+      ),
+      updateMemoryStats: lib.func(
+        'void updateMemoryStats(void* renderer, uint32_t heapUsed, uint32_t heapTotal, uint32_t arrayBuffers)',
+      ),
       render: lib.func('void render(void* renderer)'),
       getNextBuffer: lib.func('void* getNextBuffer(void* renderer)'),
       getCurrentBuffer: lib.func('void* getCurrentBuffer(void* renderer)'),
 
-      createOptimizedBuffer: lib.func('void* createOptimizedBuffer(uint32_t width, uint32_t height, bool respectAlpha)'),
+      createOptimizedBuffer: lib.func(
+        'void* createOptimizedBuffer(uint32_t width, uint32_t height, bool respectAlpha)',
+      ),
       destroyOptimizedBuffer: lib.func('void destroyOptimizedBuffer(void* buffer)'),
 
-      drawFrameBuffer: lib.func('void drawFrameBuffer(void* target, int32_t destX, int32_t destY, void* source, uint32_t srcX, uint32_t srcY, uint32_t srcWidth, uint32_t srcHeight)'),
+      drawFrameBuffer: lib.func(
+        'void drawFrameBuffer(void* target, int32_t destX, int32_t destY, void* source, uint32_t srcX, uint32_t srcY, uint32_t srcWidth, uint32_t srcHeight)',
+      ),
       getBufferWidth: lib.func('uint32_t getBufferWidth(void* buffer)'),
       getBufferHeight: lib.func('uint32_t getBufferHeight(void* buffer)'),
       bufferClear: lib.func('void bufferClear(void* buffer, RGBA* color)', {RGBA: RGBAStruct}),
@@ -109,14 +119,27 @@ function getOpenTUILib(libPath?: string) {
       bufferGetBgPtr: lib.func('void* bufferGetBgPtr(void* buffer)'),
       bufferGetAttributesPtr: lib.func('void* bufferGetAttributesPtr(void* buffer)'),
       bufferGetRespectAlpha: lib.func('bool bufferGetRespectAlpha(void* buffer)'),
-      bufferSetRespectAlpha: lib.func('void bufferSetRespectAlpha(void* buffer, bool respectAlpha)'),
+      bufferSetRespectAlpha: lib.func(
+        'void bufferSetRespectAlpha(void* buffer, bool respectAlpha)',
+      ),
 
-      bufferDrawText: lib.func('void bufferDrawText(void* buffer, uint8_t* text, uint32_t len, uint32_t x, uint32_t y, RGBA* fg, RGBA* bg, uint8_t attributes)', {RGBA: RGBAStruct}),
-      bufferSetCellWithAlphaBlending: lib.func('void bufferSetCellWithAlphaBlending(void* buffer, uint32_t x, uint32_t y, uint32_t char, RGBA* fg, RGBA* bg, uint8_t attributes)', {RGBA: RGBAStruct}),
-      bufferFillRect: lib.func('void bufferFillRect(void* buffer, uint32_t x, uint32_t y, uint32_t width, uint32_t height, RGBA* color)', {RGBA: RGBAStruct}),
+      bufferDrawText: lib.func(
+        'void bufferDrawText(void* buffer, uint8_t* text, uint32_t len, uint32_t x, uint32_t y, RGBA* fg, RGBA* bg, uint8_t attributes)',
+        {RGBA: RGBAStruct},
+      ),
+      bufferSetCellWithAlphaBlending: lib.func(
+        'void bufferSetCellWithAlphaBlending(void* buffer, uint32_t x, uint32_t y, uint32_t char, RGBA* fg, RGBA* bg, uint8_t attributes)',
+        {RGBA: RGBAStruct},
+      ),
+      bufferFillRect: lib.func(
+        'void bufferFillRect(void* buffer, uint32_t x, uint32_t y, uint32_t width, uint32_t height, RGBA* color)',
+        {RGBA: RGBAStruct},
+      ),
       bufferResize: lib.func('void bufferResize(void* buffer, uint32_t width, uint32_t height)'),
 
-      resizeRenderer: lib.func('void resizeRenderer(void* renderer, uint32_t width, uint32_t height)'),
+      resizeRenderer: lib.func(
+        'void resizeRenderer(void* renderer, uint32_t width, uint32_t height)',
+      ),
 
       // Global cursor functions
       setCursorPosition: lib.func('void setCursorPosition(int32_t x, int32_t y, bool visible)'),
@@ -124,18 +147,26 @@ function getOpenTUILib(libPath?: string) {
       setCursorColor: lib.func('void setCursorColor(RGBA* color)', {RGBA: RGBAStruct}),
 
       // Debug overlay
-      setDebugOverlay: lib.func('void setDebugOverlay(void* renderer, bool enabled, uint8_t corner)'),
+      setDebugOverlay: lib.func(
+        'void setDebugOverlay(void* renderer, bool enabled, uint8_t corner)',
+      ),
 
       // Terminal control
       clearTerminal: lib.func('void clearTerminal(void* renderer)'),
 
-      bufferDrawSuperSampleBuffer: lib.func('void bufferDrawSuperSampleBuffer(void* buffer, uint32_t x, uint32_t y, void* pixelData, size_t dataLen, uint8_t format, uint32_t alignedBytesPerRow)'),
-      bufferDrawPackedBuffer: lib.func('void bufferDrawPackedBuffer(void* buffer, void* data, size_t dataLen, uint32_t posX, uint32_t posY, uint32_t termWidth, uint32_t termHeight)'),
+      bufferDrawSuperSampleBuffer: lib.func(
+        'void bufferDrawSuperSampleBuffer(void* buffer, uint32_t x, uint32_t y, void* pixelData, size_t dataLen, uint8_t format, uint32_t alignedBytesPerRow)',
+      ),
+      bufferDrawPackedBuffer: lib.func(
+        'void bufferDrawPackedBuffer(void* buffer, void* data, size_t dataLen, uint32_t posX, uint32_t posY, uint32_t termWidth, uint32_t termHeight)',
+      ),
 
-      addToHitGrid: lib.func('void addToHitGrid(void* renderer, int32_t x, int32_t y, uint32_t width, uint32_t height, uint32_t id)'),
+      addToHitGrid: lib.func(
+        'void addToHitGrid(void* renderer, int32_t x, int32_t y, uint32_t width, uint32_t height, uint32_t id)',
+      ),
       checkHit: lib.func('uint32_t checkHit(void* renderer, uint32_t x, uint32_t y)'),
       clearHitGrid: lib.func('void clearHitGrid(void* renderer)'),
-    }
+    },
   };
 }
 

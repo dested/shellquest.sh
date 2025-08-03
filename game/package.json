@@ -2,7 +2,7 @@
   "name": "shellquest",
   "module": "src/core/index.ts",
   "main": "dist/index.js",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "type": "module",
   "bin": {
     "shellquest": "./dist/crawler/launcher.js"
@@ -34,7 +34,10 @@
     "test": "bun test",
     "prettier": "prettier --write \"src/**/*.{ts,tsx}\"",
     "dev": "vite",
-    "build:browser": "vite build"
+    "build:browser": "vite build",
+    "react-demo": "bun run src/react/test-react.tsx",
+    "react-input": "bun run src/react/demos/index.tsx",
+    "react-test": "bun run src/react/test-react.tsx"
   },
   "license": "UNLICENSED",
   "devDependencies": {
@@ -68,6 +71,10 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@types/react": "18",
+    "@types/react-reconciler": "0.28",
+    "react": "18",
+    "react-reconciler": "0.29",
     "rot-js": "^2.2.1"
   },
   "optionalDependencies": {
