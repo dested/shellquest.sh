@@ -393,7 +393,7 @@ export abstract class Element extends LayoutElement {
   protected border: boolean | BorderSides[];
   protected borderColor: RGBA;
   protected customBorderChars?: BorderCharacters;
-  protected focusedBorderColor: RGBA;
+  focusedBorderColor: RGBA;
   protected title?: string;
   protected titleAlignment: 'left' | 'center' | 'right';
 

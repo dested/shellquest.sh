@@ -25,9 +25,11 @@ export interface ImageOptions extends Partial<RenderableOptions> {
   waveAmplitude?: number;
   animationDuration?: number; // Duration in milliseconds
   animationDelay?: number; // Delay before animation starts
+  frameAnimation?: boolean; // Enable frame-based animation for multi-frame assets
+  frameSpeed?: number; // Frames per second for frame animations (default: 10)
 }
 
-export type AnimationType = 'shimmer' | 'pulse' | 'wave' | 'none';
+export type AnimationType = 'shimmer' | 'pulse' | 'wave' | 'frame' | 'none';
 
 interface AnimationState {
   type: AnimationType;
@@ -48,6 +50,9 @@ export class Image extends Renderable {
   private charHeight: number;
   private animationState: AnimationState | null = null;
   private animationFrame: number = 0;
+  private currentFrameIndex: number = 0;
+  private lastFrameTime: number = 0;
+  private frameSpeed: number = 10;
 
   constructor(
     id: string,
@@ -79,9 +84,19 @@ export class Image extends Renderable {
     this.flipY = options?.flipY ?? false;
     this.charWidth = charWidth;
     this.charHeight = charHeight;
+    this.frameSpeed = options?.frameSpeed ?? 10;
 
-    // Setup animation if specified
-    if (options?.animation && options.animation !== 'none') {
+    // Setup animation
+    // If it's an animated asset and frameAnimation is enabled, use frame animation
+    if (imageData.isAnimation && options?.frameAnimation !== false) {
+      this.animationState = {
+        type: 'frame',
+        startTime: Date.now(),
+        duration: options.animationDuration ?? 2000,
+        delay: options.animationDelay ?? 0,
+        lastUpdate: Date.now(),
+      };
+    } else if (options?.animation && options.animation !== 'none') {
       this.animationState = {
         type: options.animation,
         startTime: Date.now(),
@@ -119,7 +134,7 @@ export class Image extends Renderable {
     this.add(this.frameBuffer);
   }
 
-  private renderImage(): void {
+  private renderImage(frameIndex: number = 0): void {
     if (!this.frameBuffer) return;
     // Clear the buffer
     this.frameBuffer.frameBuffer.clear(RGBA.fromValues(0, 0, 0, 0));
@@ -138,8 +153,8 @@ export class Image extends Renderable {
         const srcBottomY = this.flipY ? this.imageData.height - 1 - bottomPixelY : bottomPixelY;
 
         // Get the colors for top and bottom pixels
-        const topPixel = getNormalizedPixelAt(this.imageData, srcX, srcTopY);
-        const bottomPixel = getNormalizedPixelAt(this.imageData, srcX, srcBottomY);
+        const topPixel = getNormalizedPixelAt(this.imageData, srcX, srcTopY, frameIndex);
+        const bottomPixel = getNormalizedPixelAt(this.imageData, srcX, srcBottomY, frameIndex);
 
         if (!topPixel && !bottomPixel) continue;
 
@@ -354,6 +369,9 @@ export class Image extends Renderable {
         case 'wave':
           this.applyWave(progress);
           break;
+        case 'frame':
+          this.applyFrameAnimation();
+          break;
       }
     } catch (ex) {
       console.error('Error applying animation:', ex);
@@ -502,8 +520,8 @@ export class Image extends Renderable {
         const srcBottomY = this.flipY ? this.imageData.height - 1 - bottomPixelY : bottomPixelY;
 
         // Get the colors for top and bottom pixels
-        const topPixel = getNormalizedPixelAt(this.imageData, srcX, srcTopY);
-        const bottomPixel = getNormalizedPixelAt(this.imageData, srcX, srcBottomY);
+        const topPixel = getNormalizedPixelAt(this.imageData, srcX, srcTopY, this.currentFrameIndex);
+        const bottomPixel = getNormalizedPixelAt(this.imageData, srcX, srcBottomY, this.currentFrameIndex);
 
         if (!topPixel && !bottomPixel) continue;
 
@@ -594,6 +612,23 @@ export class Image extends Renderable {
   }
 
   /**
+   * Apply frame-based animation
+   */
+  private applyFrameAnimation(): void {
+    if (!this.frameBuffer || !this.imageData.isAnimation || !this.imageData.frames) return;
+
+    const now = Date.now();
+    const frameDuration = 1000 / this.frameSpeed; // Duration of each frame in ms
+
+    if (now - this.lastFrameTime >= frameDuration) {
+      this.currentFrameIndex = (this.currentFrameIndex + 1) % this.imageData.frames.length;
+      this.lastFrameTime = now;
+      this.renderImage(this.currentFrameIndex);
+      this.frameBuffer.needsUpdate = true;
+    }
+  }
+
+  /**
    * Set or change animation
    */
   public setAnimation(type: AnimationType, duration?: number, delay?: number): void {
@@ -616,5 +651,31 @@ export class Image extends Renderable {
       };
       this.startAnimationLoop();
     }
+  }
+
+  /**
+   * Set the speed of frame animations (frames per second)
+   */
+  public setFrameSpeed(fps: number): void {
+    if (fps > 0) {
+      this.frameSpeed = fps;
+    }
+  }
+
+  /**
+   * Get the current frame index for animated images
+   */
+  public getCurrentFrameIndex(): number {
+    return this.currentFrameIndex;
+  }
+
+  /**
+   * Get the total number of frames (1 for static images)
+   */
+  public getFrameCount(): number {
+    if (this.imageData.isAnimation && this.imageData.frames) {
+      return this.imageData.frames.length;
+    }
+    return 1;
   }
 }
