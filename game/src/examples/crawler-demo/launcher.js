@@ -55,7 +55,7 @@ if (needsZigBuild()) {
 // Now run the actual game
 console.log("🚀 Launching the game...");
 
-import("./index.js")
+import("./main.js")
   .then(() => {})
   .catch((err) => {
     console.error("❌ Failed to launch the game:", err);

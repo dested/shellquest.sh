@@ -29,25 +29,50 @@ function getPlatformTarget(): string {
 
 function findLibrary(): string {
   const target = getPlatformTarget();
+  const [arch, os] = target.split('-');
+  const isWindows = os === 'windows';
+  const libraryName = isWindows ? 'opentui' : 'libopentui';
 
-  // Try multiple possible locations for the library
+  // Try to find the zig library in the same directory as the running entrypoint (Bun install cache)
+  // Use Bun.main or Bun.argv[1] to get the entrypoint, then walk up to find dist/zig/lib/...
+  let entryDir: string | undefined;
+  try {
+    // Bun.main is preferred, fallback to Bun.argv[1]
+    // @ts-ignore
+    entryDir = typeof Bun !== "undefined" && Bun.main ? require('path').dirname(Bun.main) : undefined;
+  } catch {}
+  if (!entryDir && process.argv[1]) {
+    entryDir = require('path').dirname(process.argv[1]);
+  }
+
+  if (entryDir) {
+    // Look for dist/zig/lib/<target>/<lib>
+    const candidate = join(entryDir, 'dist', 'zig', 'lib', target, `${libraryName}.${suffix}`);
+    if (existsSync(candidate)) {
+      return candidate;
+    }
+    // Also try walking up a few parent directories (in case entry is in dist/crawler or similar)
+    let dir = entryDir;
+    for (let i = 0; i < 4; ++i) {
+      dir = require('path').dirname(dir);
+      const candidate2 = join(dir, 'dist', 'zig', 'lib', target, `${libraryName}.${suffix}`);
+      if (existsSync(candidate2)) {
+        return candidate2;
+      }
+    }
+  }
+
+  // Fallback: try cwd and __dirname as before
   const possiblePaths = [
-    // In dist folder (npm package)
     join(process.cwd(), 'dist', 'zig', 'lib', target),
     join(process.cwd(), 'node_modules', 'shellquest.sh', 'dist', 'zig', 'lib', target),
     join(process.cwd(), 'node_modules', 'shellquest', 'dist', 'zig', 'lib', target),
     join(process.cwd(), 'node_modules', 'tui-crawler', 'dist', 'zig', 'lib', target),
-    // In src folder (development)
     join(process.cwd(), 'src', 'zig', 'lib', target),
-    // Relative to current file location (fallback)
     join(__dirname, 'zig', 'lib', target),
     join(__dirname, '..', 'zig', 'lib', target),
     join(__dirname, '..', '..', 'zig', 'lib', target),
   ];
-
-  const [arch, os] = target.split('-');
-  const isWindows = os === 'windows';
-  const libraryName = isWindows ? 'opentui' : 'libopentui';
 
   for (const basePath of possiblePaths) {
     const targetLibPath = join(basePath, `${libraryName}.${suffix}`);
@@ -58,7 +83,6 @@ function findLibrary(): string {
 
   throw new Error(`Could not find opentui library for platform: ${target}`);
 }
-
 function getOpenTUILib(libPath?: string) {
   const resolvedLibPath = libPath || findLibrary();
 

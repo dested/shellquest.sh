@@ -1,5 +1,5 @@
 // Auto-generated asset data - DO NOT EDIT
-// Generated at 2025-08-03T03:39:27.282Z
+// Generated at 2025-08-03T18:14:50.054Z
 
 export interface AssetData {
   width: number;

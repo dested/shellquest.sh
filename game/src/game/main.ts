@@ -23,7 +23,7 @@ async function main() {
     fs.writeFileSync('error.log', `Error initializing game:\n${error} ${error.stack}\n`, {
       flag: 'a',
     });
-    console.clear();
+    // console.clear();
     console.error('Failed to initialize game:', error);
     await game.cleanup();
     process.exit(1);
