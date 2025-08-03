@@ -172,6 +172,9 @@ export class OptimizedBuffer {
     this.buffer.bg[colorIndex + 3] = bg.a;
   }
 
+  public getCell(x: number, y: number): {char: number; fg: RGBA; bg: RGBA; attributes: number} | null {
+    return this.get(x, y);
+  }
   public get(x: number, y: number): {char: number; fg: RGBA; bg: RGBA; attributes: number} | null {
     if (x < 0 || x >= this.width || y < 0 || y >= this.height) return null;
 

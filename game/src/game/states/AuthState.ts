@@ -55,7 +55,6 @@ export class AuthState extends BaseState {
   }
 
   private createUI(): void {
-
     const termWidth = this.renderer.terminalWidth;
     const termHeight = this.renderer.terminalHeight;
     const centerX = Math.floor(termWidth / 2);
@@ -73,8 +72,8 @@ export class AuthState extends BaseState {
           scale: 1,
           zIndex: 100,
           visible: true,
-          animation:'shimmer',
-          animationDuration:1000,
+          animation: 'shimmer',
+          animationDuration: 1000,
         },
       );
 
@@ -85,11 +84,6 @@ export class AuthState extends BaseState {
 
       this.stateContainer.add(this.logo);
     }
-
-
-
-
- 
 
     // Mode selector
     const modeOptions: SelectOption[] = [
@@ -219,7 +213,6 @@ export class AuthState extends BaseState {
     // Setup event handlers
     this.setupEventHandlers();
   }
-
 
   private setupEventHandlers(): void {
     // Mode selector
@@ -396,7 +389,10 @@ export class AuthState extends BaseState {
 
     setTimeout(() => {
       this.isProcessing = false;
-      this.stateManager.replace(new MainMenuState());
+      this.stateManager.replace(new MainMenuState(), {
+        type: 'swipe-up',
+        duration: 600,
+      });
     }, 1000);
   }
 
@@ -427,14 +423,20 @@ export class AuthState extends BaseState {
 
     setTimeout(() => {
       this.isProcessing = false;
-      this.stateManager.replace(new MainMenuState());
+      this.stateManager.replace(new MainMenuState(), {
+        type: 'spiral',
+        duration: 700,
+      });
     }, 1000);
   }
 
   private playAsGuest(): void {
     this.showSuccess('Playing as guest...');
     setTimeout(() => {
-      this.stateManager.replace(new MainMenuState());
+      this.stateManager.replace(new MainMenuState(), {
+        type: 'swipe-left',
+        duration: 800,
+      });
     }, 500);
   }
 

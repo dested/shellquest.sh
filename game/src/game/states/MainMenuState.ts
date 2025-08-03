@@ -337,7 +337,10 @@ ${fg('#FFFF00')('GitHub:')} ${fg('#00AAFF')('github.com/dested/shellquest.sh')}`
         this.stateManager.push(new LeaderboardState());
         break;
       case 'logout':
-        this.stateManager.replace(new AuthState());
+        this.stateManager.replace(new AuthState(), {
+          type: 'pixelate',
+          duration: 1000,
+        });
         break;
     }
   }
@@ -345,7 +348,10 @@ ${fg('#FFFF00')('GitHub:')} ${fg('#00AAFF')('github.com/dested/shellquest.sh')}`
   handleInput(key: ParsedKey): void {
     // Handle escape
     if (key.name === 'escape') {
-      this.stateManager.replace(new AuthState());
+      this.stateManager.replace(new AuthState(),{
+        type: 'pixelate',
+        duration: 1000,
+      });
       return;
     }
 

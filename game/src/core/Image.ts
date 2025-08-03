@@ -329,7 +329,6 @@ export class Image extends Renderable {
         const animTime = (elapsed - this.animationState.delay) % this.animationState.duration;
         const progress = animTime / this.animationState.duration;
 
-        debugger;
         this.applyAnimation(progress);
         this.frameBuffer.needsUpdate = true;
       }

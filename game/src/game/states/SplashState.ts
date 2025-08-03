@@ -55,8 +55,8 @@ export class SplashState extends BaseState {
         0, // y will be set below
         {
           animation: 'wave',
-          waveAmplitude: 3,
-          animationDuration: 3000,
+          waveAmplitude: 12,
+          animationDuration: 700,
           scale: 1,
           zIndex: 100,
           visible: true,
@@ -118,7 +118,10 @@ export class SplashState extends BaseState {
 
       // Auto-transition after display time
       if (this.animationTime >= this.totalDisplayTime) {
-        this.stateManager.replace(new AuthState());
+        this.stateManager.replace(new AuthState(), {
+          type: 'pixelate',
+          duration: 1000,
+        });
       }
     }, 50);
   }
@@ -143,7 +146,10 @@ export class SplashState extends BaseState {
   }
 
   handleInput(key: ParsedKey): void {
-    // Any key press skips to auth
-    this.stateManager.replace(new AuthState());
+    // Any key press skips to auth with fast transition
+    this.stateManager.replace(new AuthState(), {
+      type: 'pixelate',
+      duration: 1000,
+    });
   }
 }

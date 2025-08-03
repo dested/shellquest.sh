@@ -1,14 +1,15 @@
 import {CliRenderer, GroupRenderable, type ParsedKey, type MouseEvent} from '../../core';
+import {StateManager} from '@states/StateManager.ts';
 
 export abstract class BaseState {
   protected renderer: CliRenderer;
   protected rootContainer: GroupRenderable;
-  protected stateContainer: GroupRenderable;
-  protected stateManager: any;
+  public stateContainer: GroupRenderable;
+  protected stateManager: StateManager;
 
   constructor() {}
 
-  init(renderer: CliRenderer, rootContainer: GroupRenderable, stateManager: any): void {
+  init(renderer: CliRenderer, rootContainer: GroupRenderable, stateManager: StateManager): void {
     this.renderer = renderer;
     this.rootContainer = rootContainer;
     this.stateManager = stateManager;

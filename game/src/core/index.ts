@@ -814,7 +814,6 @@ export class CliRenderer extends Renderable {
 
     const animationRequestStart = performance.now();
     frameRequests.forEach((callback) => {
-      debugger;
       callback(deltaTime);
     });
     const animationRequestEnd = performance.now();
