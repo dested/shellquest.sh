@@ -26,7 +26,7 @@
 - [x] 🔴 Implement `GameplayState` skeleton
 - [x] 🔴 Implement `GameOverState` with results
 - [x] 🔴 Implement `LeaderboardState` with pagination
-- [ ] 🟡 Add state transition animations
+- [x] 🟡 Add state transition animations
 
 ### 1.3 Database Setup
 - [ ] 🔴 Update Prisma schema with all models
@@ -35,11 +35,6 @@
 - [ ] 🔴 Configure database connection pooling
 - [ ] 🔴 Add database indexes for performance
 
-### 1.4 Input Management Enhancement
-- [ ] 🔴 Create `InputManager` singleton (check the existing KeyHandler.ts)
-- [ ] 🔴 Implement input recording system
-- [ ] 🔴 Add input replay functionality
-- [ ] 🔴 Create input configuration system
 
 ## Phase 2: Game Systems Implementation
 

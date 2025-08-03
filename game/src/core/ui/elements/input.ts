@@ -84,7 +84,6 @@ export class InputElement extends BufferedElement {
 
   public blur(): void {
     super.blur();
-    debugger;
     CliRenderer.setCursorPosition(0, 0, false); // Hide cursor
 
     if (this.value !== this.lastCommittedValue) {

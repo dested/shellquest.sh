@@ -276,8 +276,10 @@ export class FrameBufferRenderable extends Renderable {
   }
 }
 
+export type GroupRenderableOptions = Omit<RenderableOptions, 'width' | 'height'>;
+
 export class GroupRenderable extends Renderable {
-  constructor(id: string, options: Omit<RenderableOptions, 'width' | 'height'>) {
+  constructor(id: string, options: GroupRenderableOptions) {
     super(id, {...options, width: 0, height: 0});
   }
 }

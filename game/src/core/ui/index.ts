@@ -6,3 +6,5 @@ export * from './elements/select.ts';
 export * from './elements/input.ts';
 export * from './elements/tab-select.ts';
 export * from './elements/tab-controller.ts';
+export * from './ManagedContainer.ts';
+export * from './UIManager.ts';

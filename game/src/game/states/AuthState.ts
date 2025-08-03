@@ -61,6 +61,20 @@ export class AuthState extends BaseState {
       this.resizeHandler = null;
     }
 
+    // Blur all elements to ensure proper cleanup
+    if (this.modeSelect) {
+      this.modeSelect.blur();
+    }
+    if (this.usernameInput) {
+      this.usernameInput.blur();
+    }
+    if (this.passwordInput) {
+      this.passwordInput.blur();
+    }
+    if (this.confirmPasswordInput) {
+      this.confirmPasswordInput.blur();
+    }
+
     // Cleanup will be handled by BaseState
     if (this.logo) {
       this.stateContainer.remove(this.logo.id);
@@ -282,14 +296,17 @@ export class AuthState extends BaseState {
     this.mode = AuthMode.CHOICE;
     this.clearMessages();
 
-    // Hide inputs
+    // Hide inputs (blur first to ensure proper cleanup)
     if (this.usernameInput) {
+      this.usernameInput.blur();
       this.stateContainer.remove(this.usernameInput.id);
     }
     if (this.passwordInput) {
+      this.passwordInput.blur();
       this.stateContainer.remove(this.passwordInput.id);
     }
     if (this.confirmPasswordInput) {
+      this.confirmPasswordInput.blur();
       this.stateContainer.remove(this.confirmPasswordInput.id);
     }
 
@@ -313,6 +330,7 @@ export class AuthState extends BaseState {
 
     // Hide mode selector
     if (this.modeSelect) {
+      this.modeSelect.blur();
       this.stateContainer.remove(this.modeSelect.id);
     }
 
@@ -346,6 +364,7 @@ export class AuthState extends BaseState {
 
     // Hide mode selector
     if (this.modeSelect) {
+      this.modeSelect.blur();
       this.stateContainer.remove(this.modeSelect.id);
     }
 

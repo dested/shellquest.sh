@@ -149,9 +149,10 @@ export class StateManager {
             easing: options?.easing,
           },
           () => {
-            // Ensure new state is visible before cleaning up old state
-            state.stateContainer.visible = true;
+            // Clean up old state after transition
             currentState.cleanup();
+            // Ensure new state is visible
+            state.stateContainer.visible = true;
             this.transitioning = false;
           },
         );
